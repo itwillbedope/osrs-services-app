@@ -314,6 +314,7 @@ function assertNoPrivateText(entryName: string, data: Buffer) {
   const reviewPackBuilderSources = new Set([
     "scripts/build-task014-review-pack.ts",
     "scripts/build-task015-review-pack.ts",
+    "scripts/build-task016-review-pack.ts",
   ]);
   if (
     !reviewPackBuilderSources.has(entryName) &&
