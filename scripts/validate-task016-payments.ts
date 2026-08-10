@@ -4,14 +4,13 @@ import { createHash } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { createRuntimePrismaClient } from "../src/lib/db/runtime";
+import { prisma } from "../src/lib/db/prisma";
 import { sendTransactionalEmailNow } from "../src/lib/email/delivery";
 import { createTestHostedWebhookFixture } from "../src/lib/payments/adapters";
 import { signTestHostedPayload } from "../src/lib/payments/core";
 import { requestPaymentRefund } from "../src/lib/payments/refunds";
 import { processPaymentWebhook } from "../src/lib/payments/webhooks";
 
-const prisma = createRuntimePrismaClient();
 const outputDirectory = path.join(process.cwd(), "artifacts", "task-016");
 const guestId = "task016payguest";
 const orderId = "task016payorder";
