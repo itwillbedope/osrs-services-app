@@ -636,7 +636,12 @@ test.describe("Task 014 customer accounts", () => {
     await expect(
       customerRow.getByText("ACTIVE", { exact: true }),
     ).toBeVisible();
-    await customerRow.getByRole("link", { name: "Open" }).click();
+    await Promise.all([
+      page.waitForURL(
+        (url) => url.pathname === `/admin/customers/${customerId}`,
+      ),
+      customerRow.getByRole("link", { name: "Open" }).click(),
+    ]);
     await expect(
       page.getByRole("heading", { name: "Task 014 E2E Customer" }),
     ).toBeVisible();

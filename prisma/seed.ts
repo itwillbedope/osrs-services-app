@@ -10,6 +10,7 @@ import { seedCheckout } from "./checkout-seed";
 import { seedCustomerAccounts } from "./customer-seed";
 import { seedCustomBuild } from "./custom-build-seed";
 import { seedGold } from "./gold-seed";
+import { seedPaymentsLaunchReadiness } from "./payment-seed";
 import { seedPricing } from "./pricing-seed";
 import { seedProductMarketplace } from "./product-seed";
 import { seedDatabase, type SeedClient } from "./seed-core";
@@ -79,6 +80,7 @@ async function main() {
   await seedCheckout(prisma);
   await seedCustomerAccounts(prisma);
   await seedChat(prisma);
+  await seedPaymentsLaunchReadiness(prisma);
 }
 
 main()

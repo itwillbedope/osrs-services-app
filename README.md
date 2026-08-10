@@ -152,6 +152,16 @@ Guest chat tokens are raw only in the `osrs_chat_guest` HttpOnly cookie; MySQL s
 
 Seeds add `live_chat_enabled=false`, `guest_live_chat_enabled=false`, `customer_live_chat_enabled=false`, `chat_realtime_enabled=false`, one offline `ChatSettings` row marked for client review, and neutral quick replies marked for client review. Fresh seeds create zero chat sessions, conversations, messages, notes or order links.
 
+## Task 016 payments, email and launch readiness foundation
+
+Payments now have provider-neutral transactions, webhook event storage, refund records, payment eligibility rules and admin review pages at `/admin/payments`, `/admin/checkout/payment-eligibility` and `/admin/launch-readiness`.
+
+Manual review remains the safe default. The seeded `TEST_HOSTED` method is deterministic CI/local fixture mode only and is blocked in production. Real Stripe, PayPal, Apple Pay, Google Pay, Payoneer, cryptocurrency, OSRS GP automation, bank transfer and wallet/card capture are not activated.
+
+Transactional email now has templates, delivery rows and SMTP/TEST_EMAIL transport boundaries. Email delivery is disabled by default; database rows store recipient hashes, subject and safe metadata only, not raw verification/reset tokens or SMTP passwords.
+
+Task 016 also adds `/ready`, `pnpm production:check`, legal placeholder pages, security headers and GitHub Actions validation for migrations, seeds, webhooks, refunds, email fixture delivery, screenshots, client-review reports and review-pack generation.
+
 ### Requirements
 
 - Node.js 24 LTS
@@ -172,7 +182,7 @@ Normal seed runs preserve an existing administrator password. Set `ADMIN_SEED_RE
 
 `DATABASE_ALLOW_PUBLIC_KEY_RETRIEVAL=true` supports the non-TLS Docker MySQL account locally. Leave it disabled in production and use the database provider's TLS configuration.
 
-Local MySQL is optional for Task 007 through Task 015 handoff validation. Task-specific GitHub Actions workflows, including `.github/workflows/task015-validation.yml`, run migrations, seeds, unit tests, E2E tests, screenshots and review-pack generation against temporary GitHub-hosted MySQL 8.4 service containers. Those CI credentials are disposable validation-only values and are not production secrets.
+Local MySQL is optional for Task 007 through Task 016 handoff validation. Task-specific GitHub Actions workflows, including `.github/workflows/task016-validation.yml`, run migrations, seeds, unit tests, E2E tests, screenshots and review-pack generation against temporary GitHub-hosted MySQL 8.4 service containers. Those CI credentials are disposable validation-only values and are not production secrets.
 
 ```bash
 pnpm install --frozen-lockfile
@@ -215,14 +225,17 @@ pnpm screenshots:task012
 pnpm screenshots:task013
 pnpm screenshots:task014
 pnpm screenshots:task015
+pnpm screenshots:task016
 pnpm chat:check
+pnpm payments:check
+pnpm production:check -- --allow-missing-production-config
 pnpm format:check
 pnpm build
 ```
 
-Task 002 through Task 015 screenshot capture expects the app to be running at `http://127.0.0.1:3000`. Task 015 chat screenshots also require database feature flags and example fixtures prepared by `pnpm screenshots:task015`. `PLAYWRIGHT_BASE_URL` may override that address, and `PLAYWRIGHT_EXECUTABLE_PATH` may point to an existing Chromium installation when the pinned Playwright browser is not installed locally.
+Task 002 through Task 016 screenshot capture expects the app to be running at `http://127.0.0.1:3000`. Task 015 chat screenshots and Task 016 payment screenshots prepare deterministic database fixtures. `PLAYWRIGHT_BASE_URL` may override that address, and `PLAYWRIGHT_EXECUTABLE_PATH` may point to an existing Chromium installation when the pinned Playwright browser is not installed locally.
 
-For Task 015, the GitHub Actions workflow uploads Playwright results, chat screenshots, validation reports and the final review ZIP as workflow artifacts. Production deployment still requires a real persistent MySQL database and must not use the temporary CI service container.
+For Task 016, the GitHub Actions workflow uploads Playwright results, payment screenshots, validation reports, client-review report, production-readiness report and the final review ZIP as workflow artifacts. Production deployment still requires a real persistent MySQL database and must not use the temporary CI service container.
 
 ### Database commands
 

@@ -51,7 +51,11 @@ export const permissions = {
   chatArchive: "chat.archive",
   chatMonitorAll: "chat.monitor_all",
   checkoutConfigure: "checkout.configure",
+  paymentsView: "payments.view",
+  paymentsReview: "payments.review",
+  paymentsRefund: "payments.refund",
   paymentsConfigure: "payments.configure",
+  paymentsEligibilityManage: "payments.eligibility.manage",
   usersManage: "users.manage",
   auditView: "audit.view",
   exportsCustomerData: "exports.customer_data",
@@ -147,7 +151,15 @@ export const permissionDescriptions: Record<PermissionKey, string> = {
     "Monitor and transfer all support conversations.",
   [permissions.checkoutConfigure]:
     "Configure guest checkout settings and manual-review payment methods.",
+  [permissions.paymentsView]:
+    "View payment transactions, safe provider references and payment event history.",
+  [permissions.paymentsReview]:
+    "Review payment transactions and manual payment evidence.",
+  [permissions.paymentsRefund]:
+    "Request or record payment refunds after approval.",
   [permissions.paymentsConfigure]: "Configure payment providers and flags.",
+  [permissions.paymentsEligibilityManage]:
+    "Manage payment-provider eligibility after merchant approval.",
   [permissions.usersManage]: "Manage customers and staff access.",
   [permissions.auditView]: "View sensitive administrative audit records.",
   [permissions.exportsCustomerData]: "Export customer data.",

@@ -90,6 +90,7 @@ describe("custom build quote revisions", () => {
         expiresAt: new Date("2026-08-05T00:00:00.000Z"),
         revisionNumber: 1,
         currentRevisionNumber: 2,
+        now: new Date("2026-07-29T00:00:00.000Z"),
       }),
     ).toThrow(/superseded/);
   });

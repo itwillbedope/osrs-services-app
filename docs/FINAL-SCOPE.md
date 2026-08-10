@@ -11,6 +11,7 @@
 - Custom account-build quote tracking
 - Product marketplace for items, bonds and outfits
 - Secure guest cart, guest checkout and order tracking foundation
+- Provider-neutral payment transaction, webhook, refund and email delivery foundation
 - Gathering
 - Cart and guest checkout
 - Optional customer accounts and dashboard
@@ -28,6 +29,7 @@ Skilling, Quests, Achievement Diaries, Combat Achievements, Minigames, Bossing/P
 - Check public RSN statistics
 - View automatic, customer-confirmed, and support-verified requirements
 - Track orders and payment state
+- Use hosted-payment return pages only as status views; server webhooks remain authoritative
 - Use an optional customer dashboard for linked orders, in-app notifications, profile edits, password changes and session revocation
 - Use guest or account live chat and review completed orders
 
@@ -45,6 +47,7 @@ Skilling, Quests, Achievement Diaries, Combat Achievements, Minigames, Bossing/P
 - Order review, manual payment review, checkout settings, notification outbox and checkout resource allocations
 - Customer account settings, customer overview/detail, account disabling and customer-session revocation
 - Support chat queue, assignment, transcripts, internal notes, redaction, settings and customer-safe order linking
+- Payment transaction review, provider eligibility, email delivery status and launch-readiness dashboards
 - Orders, quotes, customers, reviews, and staff
 - Live-chat monitoring and single-node real-time gateway operation
 - Notifications, feature flags, audit logs, exports, and backup preparation
@@ -52,7 +55,8 @@ Skilling, Quests, Achievement Diaries, Combat Achievements, Minigames, Bossing/P
 ## Later activation
 
 - Real payment-provider credentials and live payment captures
-- Real email/notification provider delivery
+- Real provider-specific payment captures and live refund automation
+- Real SMTP/email provider activation after template and sender review
 - Social login, OAuth, passkeys and multi-factor authentication
 - Automatic subscription renewal
 - WhatsApp/n8n automation

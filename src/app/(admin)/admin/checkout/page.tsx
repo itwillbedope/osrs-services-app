@@ -45,18 +45,28 @@ export default async function AdminCheckoutPage({
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-12">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Badge variant="info">Task 013</Badge>
+          <Badge variant="info">Task 016</Badge>
           <h1 className="display-type mt-4 text-4xl font-black uppercase sm:text-5xl">
             Checkout configuration
           </h1>
           <p className="text-text-secondary mt-3 max-w-2xl text-sm leading-6">
-            Guest checkout settings for the secure cart and manual-review order
-            foundation.
+            Guest checkout settings for the secure cart, manual review and
+            provider-ready payment foundation.
           </p>
         </div>
-        <Button asChild variant="secondary">
-          <Link href="/admin/checkout/payment-methods">Payment methods</Link>
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button asChild variant="secondary">
+            <Link href="/admin/checkout/payment-methods">Payment methods</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/admin/checkout/payment-eligibility">
+              Payment eligibility
+            </Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link href="/admin/checkout/email">Email status</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="mt-6">{stateBadge(state, message)}</div>
@@ -175,8 +185,9 @@ export default async function AdminCheckoutPage({
           </div>
 
           <div className="border-warning/40 bg-warning/10 rounded-xl border p-4 text-sm">
-            Notification delivery remains outbox-only in Task 013. No email
-            provider or payment provider credentials are configured here.
+            Manual payment remains available. External hosted checkout and email
+            delivery stay disabled until feature flags, eligibility and
+            production configuration are reviewed.
           </div>
 
           <Button type="submit" className="w-fit">

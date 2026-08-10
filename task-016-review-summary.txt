@@ -1,0 +1,24 @@
+Task 016 review summary
+
+Worktree: E:\Codex\osrs-services-task-016
+Branch: codex/task-016-payments-launch-readiness
+Start SHA: 8433e1ec30ad06cdd5f28e14203a653b26051a8a
+Migration: 20260810150000_task016_payments_launch_readiness
+
+Delivered:
+- Provider-neutral payment transactions, webhook events, refunds and eligibility rules.
+- Manual-review payment preservation.
+- TEST_HOSTED CI/local fixture mode, blocked in production.
+- Email template and delivery foundation with disabled-by-default SMTP.
+- /ready and production readiness validation.
+- Admin payment, eligibility, email and launch-readiness pages.
+- Task 016 CI workflow, E2E coverage, screenshot capture and review-pack builder.
+
+Not activated:
+- Stripe, PayPal, Apple Pay, Google Pay, Payoneer, cryptocurrency, OSRS GP automation, card capture, bank transfer, live SMTP, deployment, PR creation, Task 017, Membership, Loyalty or Reviews.
+
+Review required:
+- Payment provider eligibility and merchant approvals.
+- SMTP sender and email template wording.
+- Terms, privacy and refund-policy legal copy.
+- Production environment, backups, domain/SSL and rollback plan.

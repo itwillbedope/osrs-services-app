@@ -45,6 +45,9 @@
     "product_marketplace_enabled": false,
     "cart_enabled": false,
     "guest_checkout_enabled": false,
+    "external_payments_enabled": false,
+    "payment_webhooks_enabled": false,
+    "payment_refunds_enabled": false,
     "customer_accounts_enabled": false,
     "customer_registration_enabled": false,
     "customer_dashboard_enabled": false,
@@ -73,12 +76,56 @@
     },
     "guest_checkout": {
       "publicRoutes": ["/cart", "/checkout", "/orders/track/[token]"],
-      "adminRoutes": ["/admin/orders", "/admin/checkout"],
-      "featureFlags": ["cart_enabled", "guest_checkout_enabled"],
-      "paymentMode": "MANUAL_REVIEW",
-      "notificationDelivery": "OUTBOX_ONLY",
+      "adminRoutes": [
+        "/admin/orders",
+        "/admin/checkout",
+        "/admin/checkout/payment-methods"
+      ],
+      "featureFlags": [
+        "cart_enabled",
+        "guest_checkout_enabled",
+        "external_payments_enabled"
+      ],
+      "paymentMode": "MANUAL_REVIEW_DEFAULT_WITH_HOSTED_ADAPTER_BOUNDARY",
+      "notificationDelivery": "EMAIL_DELIVERY_FOUNDATION_DISABLED_DEFAULT",
       "storesRawCartToken": false,
       "storesRawTrackingToken": false
+    },
+    "payments_email_launch_readiness": {
+      "publicRoutes": [
+        "/checkout/payment/[transactionId]/pending",
+        "/checkout/payment/[transactionId]/success",
+        "/checkout/payment/[transactionId]/failure",
+        "/terms",
+        "/privacy",
+        "/refund-policy",
+        "/ready"
+      ],
+      "adminRoutes": [
+        "/admin/payments",
+        "/admin/payments/[transactionId]",
+        "/admin/checkout/payment-eligibility",
+        "/admin/checkout/email",
+        "/admin/launch-readiness"
+      ],
+      "apiRoutes": [
+        "/api/payments/webhooks/[provider]",
+        "/api/payments/test-hosted/fixtures"
+      ],
+      "featureFlags": [
+        "external_payments_enabled",
+        "payment_webhooks_enabled",
+        "payment_refunds_enabled"
+      ],
+      "providers": ["MANUAL_REVIEW", "TEST_HOSTED", "EXTERNAL_HOSTED_CHECKOUT"],
+      "defaultProvider": "MANUAL_REVIEW",
+      "testProviderProductionBlocked": true,
+      "realProviderConfigured": false,
+      "storesRawCardData": false,
+      "storesRawWebhookPayloads": false,
+      "emailDeliveryDefault": "DISABLED",
+      "storesRawEmailTokens": false,
+      "requiresClientReview": true
     },
     "customer_accounts": {
       "publicRoutes": ["/account/login", "/account/register", "/account"],

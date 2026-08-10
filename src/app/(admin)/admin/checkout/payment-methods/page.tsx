@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { requireCapability } from "@/lib/auth/guards";
 import { getAdminCheckoutConfiguration } from "@/lib/checkout/admin";
+import { paymentProviderLabels } from "@/lib/payments/constants";
 import { updateCheckoutPaymentMethodAction } from "../actions";
 
 export const metadata: Metadata = { title: "Admin checkout payment methods" };
@@ -48,13 +49,13 @@ export default async function AdminCheckoutPaymentMethodsPage({
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-12">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <Badge variant="info">Manual review</Badge>
+          <Badge variant="info">Provider neutral</Badge>
           <h1 className="display-type mt-4 text-4xl font-black uppercase sm:text-5xl">
             Payment methods
           </h1>
           <p className="text-text-secondary mt-3 max-w-2xl text-sm leading-6">
-            Task 013 supports only manual payment review placeholders. No live
-            payment providers are connected.
+            Manual payment review remains supported. Hosted checkout methods are
+            blocked until flags, eligibility and provider approval are complete.
           </p>
         </div>
         <Button asChild variant="secondary">
@@ -80,10 +81,20 @@ export default async function AdminCheckoutPaymentMethodsPage({
               />
               <div className="flex flex-wrap items-center gap-3">
                 <Badge variant="warning">{method.methodType}</Badge>
+                <Badge variant="neutral">
+                  {paymentProviderLabels[method.providerType]}
+                </Badge>
                 <Badge variant={method.enabled ? "success" : "neutral"}>
                   {method.enabled ? "Enabled" : "Disabled"}
                 </Badge>
               </div>
+              {method.providerType === "TEST_HOSTED" && (
+                <div className="border-warning/40 bg-warning/10 rounded-xl border p-4 text-sm">
+                  TEST_HOSTED is for CI and local lifecycle testing only. It
+                  never calls the internet and must not be enabled in
+                  production.
+                </div>
+              )}
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="grid gap-2 text-sm font-semibold">
                   Public name

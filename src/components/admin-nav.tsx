@@ -11,6 +11,7 @@ import {
   MessageSquare,
   ReceiptText,
   PackageSearch,
+  Rocket,
   Store,
   UsersRound,
 } from "lucide-react";
@@ -70,9 +71,21 @@ const navigation = [
     exact: false,
   },
   {
+    href: "/admin/payments",
+    label: "Payments",
+    icon: CreditCard,
+    exact: false,
+  },
+  {
     href: "/admin/checkout",
     label: "Checkout",
     icon: CreditCard,
+    exact: false,
+  },
+  {
+    href: "/admin/launch-readiness",
+    label: "Launch",
+    icon: Rocket,
     exact: false,
   },
   {

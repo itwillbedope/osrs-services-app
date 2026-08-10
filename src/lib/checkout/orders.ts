@@ -21,6 +21,7 @@ import {
   emailNotConfiguredMessage,
   paymentReviewMessage,
 } from "@/lib/checkout/constants";
+import { EXTERNAL_PAYMENTS_FEATURE_FLAG } from "@/lib/payments/constants";
 import {
   linkAuthenticatedCheckoutOrder,
   notifyLinkedOrderCustomer,
@@ -41,6 +42,16 @@ import {
   resolveCartByRawToken,
 } from "@/lib/checkout/cart";
 import { prisma } from "@/lib/db/prisma";
+import { queueOrderEmailDelivery } from "@/lib/email/delivery";
+import {
+  assertProviderEligibilityForCartItems,
+  PaymentError,
+} from "@/lib/payments/eligibility";
+import {
+  createHostedCheckoutForTransaction,
+  createPaymentTransactionForCheckout,
+  getCheckoutPaymentResume,
+} from "@/lib/payments/transactions";
 
 export class CheckoutError extends Error {
   status = 400;
@@ -634,8 +645,14 @@ export async function submitGuestCheckout(input: CheckoutInput) {
     include: orderPublicInclude(),
   });
   if (previousOrder) {
+    const resumedPayment = await getCheckoutPaymentResume(previousOrder.id);
     return {
       order: publicOrderPayload(previousOrder as OrderWithPublicRelations),
+      payment: {
+        provider: resumedPayment.payment?.provider ?? "MANUAL_REVIEW",
+        status: resumedPayment.payment?.status ?? "PENDING",
+        hostedCheckoutUrl: resumedPayment.redirectUrl,
+      },
       idempotent: true,
       cookie: null,
     };
@@ -670,8 +687,19 @@ export async function submitGuestCheckout(input: CheckoutInput) {
     settings.paymentMethods.find(
       (method) => method.stableKey === input.paymentMethodStableKey,
     ) ?? settings.paymentMethods[0];
-  if (!paymentMethod || paymentMethod.methodType !== "MANUAL_REVIEW") {
-    throw new CheckoutError("Choose an available payment review method.");
+  if (!paymentMethod) {
+    throw new CheckoutError("Choose an available payment method.");
+  }
+  const hostedCheckoutSelected =
+    paymentMethod.methodType === "EXTERNAL_HOSTED_CHECKOUT";
+  if (hostedCheckoutSelected) {
+    if (!(await featureEnabled(EXTERNAL_PAYMENTS_FEATURE_FLAG))) {
+      throw new CheckoutError("External hosted checkout is not enabled.", 403);
+    }
+    await assertProviderEligibilityForCartItems(cart.items);
+  }
+  if (!hostedCheckoutSelected && paymentMethod.methodType !== "MANUAL_REVIEW") {
+    throw new CheckoutError("Choose an available payment method.");
   }
   const trackingToken = createSecureToken();
   const orderNumber = generateOrderNumber(settings.orderNumberPrefix);
@@ -680,12 +708,15 @@ export async function submitGuestCheckout(input: CheckoutInput) {
     now.getTime() + settings.checkoutReservationMinutes * 60 * 1000,
   );
 
-  const orderId = await prisma.$transaction(async (transaction) => {
+  const result = await prisma.$transaction(async (transaction) => {
     const locked = await transaction.cart.findUniqueOrThrow({
       where: { id: cart.id },
       include: { items: { orderBy: { createdAt: "asc" } } },
     });
     requireCheckoutCart(locked);
+    if (hostedCheckoutSelected) {
+      await assertProviderEligibilityForCartItems(locked.items, transaction);
+    }
     await transaction.checkoutAttempt.upsert({
       where: {
         cartId_idempotencyKeyHash: {
@@ -744,8 +775,11 @@ export async function submitGuestCheckout(input: CheckoutInput) {
         trackingTokenHash: hashToken(trackingToken),
         checkoutIdempotencyKeyHash: idempotencyKeyHash,
         status: "AWAITING_PAYMENT",
-        paymentStatus: "AWAITING_INSTRUCTIONS",
-        paymentMethodType: "MANUAL_REVIEW",
+        paymentStatus: hostedCheckoutSelected
+          ? "AWAITING_PAYMENT"
+          : "AWAITING_INSTRUCTIONS",
+        paymentMethodType: paymentMethod.methodType,
+        paymentProvider: paymentMethod.providerType,
         currencyCode: locked.currencyCode ?? settings.currencyCode,
         subtotalCents: locked.subtotalCents,
         adjustmentTotalCents: locked.adjustmentTotalCents,
@@ -789,15 +823,37 @@ export async function submitGuestCheckout(input: CheckoutInput) {
       data: {
         orderId: order.id,
         previousPaymentStatus: null,
-        newPaymentStatus: "AWAITING_INSTRUCTIONS",
-        paymentMethodType: "MANUAL_REVIEW",
-        publicNote: paymentReviewMessage,
-        reasonCode: "MANUAL_REVIEW_SELECTED",
+        newPaymentStatus: hostedCheckoutSelected
+          ? "AWAITING_PAYMENT"
+          : "AWAITING_INSTRUCTIONS",
+        paymentMethodType: paymentMethod.methodType,
+        publicNote: hostedCheckoutSelected
+          ? "Payment is pending provider verification."
+          : paymentReviewMessage,
+        reasonCode: hostedCheckoutSelected
+          ? "HOSTED_CHECKOUT_SELECTED"
+          : "MANUAL_REVIEW_SELECTED",
         sequence: 1,
-        safeMetadata: auditMetadata({ paymentMethodType: "MANUAL_REVIEW" }),
+        safeMetadata: auditMetadata({
+          paymentMethodType: paymentMethod.methodType,
+          paymentProvider: paymentMethod.providerType,
+        }),
       },
     });
-    await transaction.orderNotificationOutbox.create({
+    const paymentTransaction = await createPaymentTransactionForCheckout({
+      transaction,
+      orderId: order.id,
+      provider: paymentMethod.providerType,
+      amountMinor: locked.finalTotalCents,
+      currencyCode: locked.currencyCode ?? settings.currencyCode,
+      idempotencyKey: `checkout-payment:${input.idempotencyKey}`,
+      status: hostedCheckoutSelected ? "CREATED" : "PENDING",
+      safeMetadata: {
+        orderNumber: order.orderNumber,
+        paymentMethodStableKey: paymentMethod.stableKey,
+      },
+    });
+    const orderOutbox = await transaction.orderNotificationOutbox.create({
       data: {
         orderId: order.id,
         notificationType: "ORDER_CONFIRMATION",
@@ -811,7 +867,23 @@ export async function submitGuestCheckout(input: CheckoutInput) {
           itemCount: locked.items.length,
           totalCents: locked.finalTotalCents,
           providerConfigured: settings.notificationProviderConfigured,
+          paymentProvider: paymentMethod.providerType,
         }),
+      },
+    });
+    await queueOrderEmailDelivery({
+      transaction,
+      templateType: "ORDER_CONFIRMATION",
+      orderId: order.id,
+      recipientEmail: contact.email,
+      orderNumber: order.orderNumber,
+      subject: `Order ${order.orderNumber} received`,
+      dedupeKey: `order-confirmation:${order.id}`,
+      orderOutboxId: orderOutbox.id,
+      safeMetadata: {
+        orderOutboxId: orderOutbox.id,
+        itemCount: locked.items.length,
+        totalMinor: locked.finalTotalCents,
       },
     });
     await transaction.checkoutAttempt.update({
@@ -869,19 +941,36 @@ export async function submitGuestCheckout(input: CheckoutInput) {
         metadata: auditMetadata({
           orderNumber: order.orderNumber,
           itemCount: locked.items.length,
-          paymentMethodType: "MANUAL_REVIEW",
+          paymentMethodType: paymentMethod.methodType,
+          paymentProvider: paymentMethod.providerType,
         }),
       },
     });
-    return order.id;
+    return { orderId: order.id, paymentTransactionId: paymentTransaction.id };
   });
 
+  const hostedCheckout = hostedCheckoutSelected
+    ? await createHostedCheckoutForTransaction({
+        transactionId: result.paymentTransactionId,
+        idempotencyKey: `hosted-checkout:${input.idempotencyKey}`,
+      })
+    : { redirectUrl: null };
+
   const order = await prisma.order.findUniqueOrThrow({
-    where: { id: orderId },
+    where: { id: result.orderId },
     include: orderPublicInclude(),
   });
+  const paymentResume = await getCheckoutPaymentResume(order.id);
   return {
     order: publicOrderPayload(order as OrderWithPublicRelations, trackingToken),
+    payment: {
+      provider: paymentResume.payment?.provider ?? paymentMethod.providerType,
+      status:
+        paymentResume.payment?.status ??
+        (hostedCheckoutSelected ? "CREATED" : "PENDING"),
+      hostedCheckoutUrl:
+        hostedCheckout.redirectUrl ?? paymentResume.redirectUrl,
+    },
     idempotent: false,
     cookie: {
       name: CART_COOKIE_NAME,
@@ -900,7 +989,7 @@ async function consumeProductAllocation({
   allocation: Prisma.OrderResourceAllocationGetPayload<{
     include: { productReservation: true };
   }>;
-  actorId: string;
+  actorId?: string | null;
 }) {
   const reservation = allocation.productReservation;
   if (!reservation || reservation.status !== "ACTIVE") {
@@ -941,7 +1030,7 @@ async function consumeProductAllocation({
         quantity: -reservation.quantity,
         resultingOnHandQuantity: updatedVariant.onHandQuantity,
         reason: "Order marked paid",
-        actorId,
+        actorId: actorId ?? null,
         reservationId: reservation.id,
         referenceKey,
       },
@@ -959,7 +1048,7 @@ async function consumeProductAllocation({
       id: stableId(),
       reservationId: reservation.id,
       eventType: "CONSUMED",
-      actorId,
+      actorId: actorId ?? null,
       safeMetadata: auditMetadata({ orderId: allocation.orderId }),
     },
   });
@@ -1001,7 +1090,7 @@ async function consumeGoldAllocation({
   allocation: Prisma.OrderResourceAllocationGetPayload<{
     include: { goldReservation: true };
   }>;
-  actorId: string;
+  actorId?: string | null;
 }) {
   const reservation = allocation.goldReservation;
   if (!reservation || reservation.status !== "ACTIVE") {
@@ -1040,7 +1129,7 @@ async function consumeGoldAllocation({
         resultingStockQuantityGp: updatedMarket.stockQuantityGp,
         resultingBuyingCapacityGp: updatedMarket.buyingCapacityGp,
         reason: "Order marked paid",
-        actorId,
+        actorId: actorId ?? null,
         referenceKey,
       },
     });
@@ -1071,6 +1160,7 @@ export async function markOrderPaymentUnderReview({
   return prisma.$transaction(async (transaction) => {
     const order = await transaction.order.findUniqueOrThrow({
       where: { id: orderId },
+      include: { guestContact: { select: { email: true } } },
     });
     if (order.concurrencyVersion !== expectedVersion) {
       throw new CheckoutError("Order changed before payment review.");
@@ -1134,6 +1224,149 @@ export async function markOrderPaymentUnderReview({
   });
 }
 
+export async function markOrderPaidInTransaction({
+  transaction,
+  orderId,
+  actorId,
+  expectedVersion,
+  idempotencyKeyHash,
+  publicNote,
+  internalNote,
+  reasonCode = "PAYMENT_CONFIRMED",
+}: {
+  transaction: Prisma.TransactionClient;
+  orderId: string;
+  actorId?: string | null;
+  expectedVersion?: number | null;
+  idempotencyKeyHash?: string | null;
+  publicNote?: string | null;
+  internalNote?: string | null;
+  reasonCode?: string;
+}) {
+  const order = await transaction.order.findUniqueOrThrow({
+    where: { id: orderId },
+    include: {
+      guestContact: { select: { email: true } },
+      resourceAllocations: {
+        include: {
+          productReservation: true,
+          accountHold: true,
+          goldReservation: true,
+        },
+      },
+    },
+  });
+  if (order.paymentStatus === "PAID") return { idempotent: true };
+  if (idempotencyKeyHash) {
+    const existingEvent = await transaction.orderPaymentEvent.findFirst({
+      where: { orderId: order.id, idempotencyKeyHash },
+    });
+    if (existingEvent) return { idempotent: true };
+  }
+  if (expectedVersion && order.concurrencyVersion !== expectedVersion) {
+    throw new CheckoutError("Order changed before payment confirmation.");
+  }
+  for (const allocation of order.resourceAllocations) {
+    if (allocation.state !== "ACTIVE") continue;
+    if (allocation.productReservationId) {
+      await consumeProductAllocation({
+        transaction,
+        allocation,
+        actorId,
+      });
+    }
+    if (allocation.accountHoldId) {
+      await consumeAccountAllocation({ transaction, allocation });
+    }
+    if (allocation.goldReservationId) {
+      await consumeGoldAllocation({ transaction, allocation, actorId });
+    }
+    await transaction.orderResourceAllocation.update({
+      where: { id: allocation.id },
+      data: {
+        state: "CONSUMED",
+        consumedAt: new Date(),
+        concurrencyVersion: { increment: 1 },
+      },
+    });
+  }
+  const paymentSequence = await nextPaymentSequence(transaction, order.id);
+  const statusSequence = await nextStatusSequence(transaction, order.id);
+  await transaction.order.update({
+    where: { id: order.id },
+    data: {
+      status: "PAID",
+      paymentStatus: "PAID",
+      paidAt: new Date(),
+      concurrencyVersion: { increment: 1 },
+    },
+  });
+  await transaction.orderPaymentEvent.create({
+    data: {
+      orderId: order.id,
+      previousPaymentStatus: order.paymentStatus,
+      newPaymentStatus: "PAID",
+      paymentMethodType: order.paymentMethodType,
+      actorId: actorId ?? null,
+      publicNote: publicNote?.slice(0, 500) ?? "Payment was confirmed.",
+      privateInternalNote: internalNote?.slice(0, 2000) ?? null,
+      reasonCode,
+      sequence: paymentSequence,
+      idempotencyKeyHash: idempotencyKeyHash ?? null,
+      safeMetadata: auditMetadata({
+        paymentProvider: order.paymentProvider,
+      }),
+    },
+  });
+  await transaction.orderStatusEvent.create({
+    data: {
+      orderId: order.id,
+      eventType: "PAYMENT_CONFIRMED",
+      previousStatus: order.status,
+      newStatus: "PAID",
+      actorId: actorId ?? null,
+      publicNote: "Payment confirmed. Staff will prepare the next step.",
+      reasonCode,
+      sequence: statusSequence,
+    },
+  });
+  await notifyLinkedOrderCustomer({
+    transaction,
+    orderId: order.id,
+    type: "ORDER_PAYMENT_CHANGED",
+    title: "Payment confirmed",
+    body: "Payment was confirmed. Staff will prepare the next step.",
+    dedupeKey: `payment-paid:${order.id}`,
+    safeMetadata: { paymentStatus: "PAID" },
+  });
+  await queueOrderEmailDelivery({
+    transaction,
+    templateType: "PAYMENT_RECEIVED",
+    orderId: order.id,
+    recipientEmail: order.guestContact.email,
+    orderNumber: order.orderNumber,
+    subject: `Payment received for order ${order.orderNumber}`,
+    dedupeKey: `payment-received:${order.id}`,
+    safeMetadata: {
+      paymentProvider: order.paymentProvider,
+      paymentStatus: "PAID",
+    },
+  });
+  await transaction.auditLog.create({
+    data: {
+      actorId: actorId ?? null,
+      action: "orders.payment.marked_paid",
+      targetType: "Order",
+      targetId: order.id,
+      metadata: auditMetadata({
+        orderNumber: order.orderNumber,
+        paymentProvider: order.paymentProvider,
+      }),
+    },
+  });
+  return { idempotent: false };
+}
+
 export async function markOrderPaid({
   orderId,
   actorId,
@@ -1151,106 +1384,16 @@ export async function markOrderPaid({
 }) {
   const idempotencyKeyHash = hashIdempotencyKey(idempotencyKey);
   return prisma.$transaction(async (transaction) => {
-    const order = await transaction.order.findUniqueOrThrow({
-      where: { id: orderId },
-      include: {
-        resourceAllocations: {
-          include: {
-            productReservation: true,
-            accountHold: true,
-            goldReservation: true,
-          },
-        },
-      },
-    });
-    if (order.paymentStatus === "PAID") return { idempotent: true };
-    const existingEvent = await transaction.orderPaymentEvent.findFirst({
-      where: { orderId: order.id, idempotencyKeyHash },
-    });
-    if (existingEvent) return { idempotent: true };
-    if (order.concurrencyVersion !== expectedVersion) {
-      throw new CheckoutError("Order changed before payment confirmation.");
-    }
-    for (const allocation of order.resourceAllocations) {
-      if (allocation.state !== "ACTIVE") continue;
-      if (allocation.productReservationId) {
-        await consumeProductAllocation({
-          transaction,
-          allocation,
-          actorId,
-        });
-      }
-      if (allocation.accountHoldId) {
-        await consumeAccountAllocation({ transaction, allocation });
-      }
-      if (allocation.goldReservationId) {
-        await consumeGoldAllocation({ transaction, allocation, actorId });
-      }
-      await transaction.orderResourceAllocation.update({
-        where: { id: allocation.id },
-        data: {
-          state: "CONSUMED",
-          consumedAt: new Date(),
-          concurrencyVersion: { increment: 1 },
-        },
-      });
-    }
-    const paymentSequence = await nextPaymentSequence(transaction, order.id);
-    const statusSequence = await nextStatusSequence(transaction, order.id);
-    await transaction.order.update({
-      where: { id: order.id },
-      data: {
-        status: "PAID",
-        paymentStatus: "PAID",
-        paidAt: new Date(),
-        concurrencyVersion: { increment: 1 },
-      },
-    });
-    await transaction.orderPaymentEvent.create({
-      data: {
-        orderId: order.id,
-        previousPaymentStatus: order.paymentStatus,
-        newPaymentStatus: "PAID",
-        actorId,
-        publicNote:
-          publicNote?.slice(0, 500) ?? "Payment was confirmed by staff.",
-        privateInternalNote: internalNote?.slice(0, 2000) ?? null,
-        reasonCode: "PAYMENT_CONFIRMED",
-        sequence: paymentSequence,
-        idempotencyKeyHash,
-      },
-    });
-    await transaction.orderStatusEvent.create({
-      data: {
-        orderId: order.id,
-        eventType: "PAYMENT_CONFIRMED",
-        previousStatus: order.status,
-        newStatus: "PAID",
-        actorId,
-        publicNote: "Payment confirmed. Staff will prepare the next step.",
-        reasonCode: "PAYMENT_CONFIRMED",
-        sequence: statusSequence,
-      },
-    });
-    await notifyLinkedOrderCustomer({
+    return markOrderPaidInTransaction({
       transaction,
-      orderId: order.id,
-      type: "ORDER_PAYMENT_CHANGED",
-      title: "Payment confirmed",
-      body: "Payment was confirmed. Staff will prepare the next step.",
-      dedupeKey: `payment-paid:${order.id}`,
-      safeMetadata: { paymentStatus: "PAID" },
+      orderId,
+      actorId,
+      expectedVersion,
+      idempotencyKeyHash,
+      publicNote:
+        publicNote?.slice(0, 500) ?? "Payment was confirmed by staff.",
+      internalNote,
     });
-    await transaction.auditLog.create({
-      data: {
-        actorId,
-        action: "orders.payment.marked_paid",
-        targetType: "Order",
-        targetId: order.id,
-        metadata: auditMetadata({ orderNumber: order.orderNumber }),
-      },
-    });
-    return { idempotent: false };
   });
 }
 
@@ -1274,6 +1417,7 @@ export async function cancelOrder({
     const order = await transaction.order.findUniqueOrThrow({
       where: { id: orderId },
       include: {
+        guestContact: { select: { email: true } },
         resourceAllocations: {
           include: {
             productReservation: true,
@@ -1399,6 +1543,16 @@ export async function cancelOrder({
       dedupeKey: `order-cancelled:${order.id}`,
       safeMetadata: { status: "CANCELLED" },
     });
+    await queueOrderEmailDelivery({
+      transaction,
+      templateType: "ORDER_STATUS_UPDATE",
+      orderId: order.id,
+      recipientEmail: order.guestContact.email,
+      orderNumber: order.orderNumber,
+      subject: `Order ${order.orderNumber} cancelled`,
+      dedupeKey: `order-cancelled-email:${order.id}`,
+      safeMetadata: { status: "CANCELLED" },
+    });
     await transaction.auditLog.create({
       data: {
         actorId,
@@ -1443,6 +1597,7 @@ export async function updateOrderFulfillmentStatus({
   return prisma.$transaction(async (transaction) => {
     const order = await transaction.order.findUniqueOrThrow({
       where: { id: orderId },
+      include: { guestContact: { select: { email: true } } },
     });
     if (["CANCELLED", "REFUNDED"].includes(order.status)) {
       throw new CheckoutError("Closed orders cannot be updated.");
@@ -1479,6 +1634,16 @@ export async function updateOrderFulfillmentStatus({
       title: "Order status updated",
       body: publicNote?.slice(0, 500) ?? "Order status was updated.",
       dedupeKey: `order-status:${order.id}:${nextStatus}:${statusSequence}`,
+      safeMetadata: { status: nextStatus },
+    });
+    await queueOrderEmailDelivery({
+      transaction,
+      templateType: "ORDER_STATUS_UPDATE",
+      orderId: order.id,
+      recipientEmail: order.guestContact.email,
+      orderNumber: order.orderNumber,
+      subject: `Order ${order.orderNumber} status updated`,
+      dedupeKey: `order-status-email:${order.id}:${nextStatus}:${statusSequence}`,
       safeMetadata: { status: nextStatus },
     });
     await transaction.auditLog.create({
@@ -1555,12 +1720,15 @@ export function sanitizeCheckoutError(error: unknown) {
   if (
     error instanceof CheckoutError ||
     error instanceof CartError ||
-    error instanceof CheckoutSecurityError
+    error instanceof CheckoutSecurityError ||
+    error instanceof PaymentError
   ) {
     return {
       message: error.message,
       status:
-        error instanceof CheckoutError || error instanceof CartError
+        error instanceof CheckoutError ||
+        error instanceof CartError ||
+        error instanceof PaymentError
           ? error.status
           : 400,
     };
