@@ -30,6 +30,15 @@ const pendingOrderItemId = "task016shotpenditem";
 const paidTransactionId = "task016shotpaidtxn";
 const pendingTransactionId = "task016shotpendtxn";
 const paidWebhookId = "task016shotwebhook";
+const paidCreatedStatusEventId = "task016shotstatus1";
+const paidProgressStatusEventId = "task016shotstatus2";
+const pendingCreatedStatusEventId = "task016shotstatus3";
+const paidAwaitingPaymentEventId = "task016shotpayevent1";
+const paidVerifiedPaymentEventId = "task016shotpayevent2";
+const pendingAwaitingPaymentEventId = "task016shotpayevent3";
+const paidCreatedTransactionEventId = "task016shottxnevent1";
+const paidVerifiedTransactionEventId = "task016shottxnevent2";
+const pendingCreatedTransactionEventId = "task016shottxnevent3";
 const customerOrderLinkId = "task016shotlink";
 const emailDeliveryId = "task016shotemail";
 const cartId = "task016shotcart";
@@ -396,31 +405,45 @@ async function prepareRows(connection: Connection) {
   );
   await connection.query(
     `INSERT INTO OrderStatusEvent
-      (orderId, eventType, previousStatus, newStatus, publicNote,
+      (id, orderId, eventType, previousStatus, newStatus, publicNote,
        reasonCode, sequence, createdAt)
-     VALUES (?, 'CREATED', NULL, 'AWAITING_PAYMENT',
+     VALUES (?, ?, 'CREATED', NULL, 'AWAITING_PAYMENT',
        'Order received for hosted payment verification.',
        'TASK016_SCREENSHOT', 1, NOW(3)),
-       (?, 'STATUS_CHANGED', 'AWAITING_PAYMENT', 'IN_PROGRESS',
+       (?, ?, 'STATUS_CHANGED', 'AWAITING_PAYMENT', 'IN_PROGRESS',
        'Payment is verified and fulfillment review has started.',
        'TASK016_SCREENSHOT', 2, NOW(3)),
-       (?, 'CREATED', NULL, 'AWAITING_PAYMENT',
+       (?, ?, 'CREATED', NULL, 'AWAITING_PAYMENT',
        'Order is waiting for hosted payment verification.',
        'TASK016_SCREENSHOT', 1, NOW(3))`,
-    [paidOrderId, paidOrderId, pendingOrderId],
+    [
+      paidCreatedStatusEventId,
+      paidOrderId,
+      paidProgressStatusEventId,
+      paidOrderId,
+      pendingCreatedStatusEventId,
+      pendingOrderId,
+    ],
   );
   await connection.query(
     `INSERT INTO OrderPaymentEvent
-      (orderId, previousPaymentStatus, newPaymentStatus, paymentMethodType,
+      (id, orderId, previousPaymentStatus, newPaymentStatus, paymentMethodType,
        publicNote, reasonCode, sequence, createdAt)
-     VALUES (?, NULL, 'AWAITING_PAYMENT', 'EXTERNAL_HOSTED_CHECKOUT',
+     VALUES (?, ?, NULL, 'AWAITING_PAYMENT', 'EXTERNAL_HOSTED_CHECKOUT',
        'Hosted checkout was selected.', 'TASK016_SCREENSHOT', 1, NOW(3)),
-       (?, 'AWAITING_PAYMENT', 'PAID', 'EXTERNAL_HOSTED_CHECKOUT',
+       (?, ?, 'AWAITING_PAYMENT', 'PAID', 'EXTERNAL_HOSTED_CHECKOUT',
        'Payment was verified by the provider.', 'TASK016_SCREENSHOT', 2, NOW(3)),
-       (?, NULL, 'AWAITING_PAYMENT', 'EXTERNAL_HOSTED_CHECKOUT',
+       (?, ?, NULL, 'AWAITING_PAYMENT', 'EXTERNAL_HOSTED_CHECKOUT',
        'Hosted checkout is pending provider verification.',
        'TASK016_SCREENSHOT', 1, NOW(3))`,
-    [paidOrderId, paidOrderId, pendingOrderId],
+    [
+      paidAwaitingPaymentEventId,
+      paidOrderId,
+      paidVerifiedPaymentEventId,
+      paidOrderId,
+      pendingAwaitingPaymentEventId,
+      pendingOrderId,
+    ],
   );
   await connection.query(
     `INSERT INTO PaymentTransaction
@@ -446,17 +469,24 @@ async function prepareRows(connection: Connection) {
   );
   await connection.query(
     `INSERT INTO PaymentTransactionEvent
-      (transactionId, previousStatus, newStatus, eventType, sequence,
+      (id, transactionId, previousStatus, newStatus, eventType, sequence,
        source, safeMetadata, createdAt)
-     VALUES (?, NULL, 'REQUIRES_CUSTOMER_ACTION',
+     VALUES (?, ?, NULL, 'REQUIRES_CUSTOMER_ACTION',
        'HOSTED_CHECKOUT_SESSION_CREATED', 1, 'TASK016_SCREENSHOT',
        JSON_OBJECT('safe', true), NOW(3)),
-       (?, 'REQUIRES_CUSTOMER_ACTION', 'PAID', 'PAYMENT_SUCCEEDED',
+       (?, ?, 'REQUIRES_CUSTOMER_ACTION', 'PAID', 'PAYMENT_SUCCEEDED',
        2, 'WEBHOOK', JSON_OBJECT('safe', true), NOW(3)),
-       (?, NULL, 'REQUIRES_CUSTOMER_ACTION',
+       (?, ?, NULL, 'REQUIRES_CUSTOMER_ACTION',
        'HOSTED_CHECKOUT_SESSION_CREATED', 1, 'TASK016_SCREENSHOT',
        JSON_OBJECT('safe', true), NOW(3))`,
-    [paidTransactionId, paidTransactionId, pendingTransactionId],
+    [
+      paidCreatedTransactionEventId,
+      paidTransactionId,
+      paidVerifiedTransactionEventId,
+      paidTransactionId,
+      pendingCreatedTransactionEventId,
+      pendingTransactionId,
+    ],
   );
   await connection.query(
     `INSERT INTO PaymentWebhookEvent

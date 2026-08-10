@@ -113,6 +113,8 @@ async function preparePaymentFixture(tag: string) {
   const orderId = `t016e2e${tag}order`;
   const itemId = `t016e2e${tag}orderitem`;
   const transactionId = `t016e2e${tag}txn`;
+  const orderPaymentEventId = `t016e2e${tag}payevent`;
+  const transactionEventId = `t016e2e${tag}txnevent`;
   await databaseRows(
     "DELETE FROM PaymentWebhookEvent WHERE transactionId = ? OR orderId = ?",
     [transactionId, orderId],
@@ -193,12 +195,12 @@ async function preparePaymentFixture(tag: string) {
   );
   await databaseRows(
     `INSERT INTO OrderPaymentEvent
-      (orderId, previousPaymentStatus, newPaymentStatus, paymentMethodType,
+      (id, orderId, previousPaymentStatus, newPaymentStatus, paymentMethodType,
        publicNote, reasonCode, sequence, createdAt)
-     VALUES (?, NULL, 'AWAITING_PAYMENT', 'EXTERNAL_HOSTED_CHECKOUT',
+     VALUES (?, ?, NULL, 'AWAITING_PAYMENT', 'EXTERNAL_HOSTED_CHECKOUT',
        'Hosted checkout is pending provider verification.',
        'TASK016_E2E', 1, NOW(3))`,
-    [orderId],
+    [orderPaymentEventId, orderId],
   );
   await databaseRows(
     `INSERT INTO PaymentTransaction
@@ -216,12 +218,12 @@ async function preparePaymentFixture(tag: string) {
   );
   await databaseRows(
     `INSERT INTO PaymentTransactionEvent
-      (transactionId, previousStatus, newStatus, eventType, sequence,
+      (id, transactionId, previousStatus, newStatus, eventType, sequence,
        source, safeMetadata, createdAt)
-     VALUES (?, NULL, 'REQUIRES_CUSTOMER_ACTION',
+     VALUES (?, ?, NULL, 'REQUIRES_CUSTOMER_ACTION',
        'HOSTED_CHECKOUT_SESSION_CREATED', 1, 'TASK016_E2E',
        JSON_OBJECT('safe', true), NOW(3))`,
-    [transactionId],
+    [transactionEventId, transactionId],
   );
   return { transactionId, orderId };
 }
@@ -240,7 +242,7 @@ test.describe("Task 016 payment launch readiness", () => {
     await expect(
       page.getByRole("heading", { name: "Guest checkout" }),
     ).toBeVisible();
-    await expect(page.getByText("Manual review")).toBeVisible();
+    await expect(page.getByText("Manual payment review")).toBeVisible();
     await expect(page.getByText("Hosted checkout test mode")).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Terms of Service" }),
