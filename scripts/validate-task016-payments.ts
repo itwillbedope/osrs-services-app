@@ -286,6 +286,7 @@ async function main() {
     );
     console.log(lines.join("\n"));
   } finally {
+    await cleanup();
     for (const [key, enabled] of originalFlags) {
       await setFlag(key, enabled);
     }
