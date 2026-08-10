@@ -134,6 +134,12 @@ const sourceScanPaths = requiredExtraPaths.filter(
     entry !== "changed-files.txt",
 );
 
+const reviewPackScannerSourcePaths = new Set([
+  "scripts/build-task014-review-pack.ts",
+  "scripts/build-task015-review-pack.ts",
+  "scripts/build-task016-review-pack.ts",
+]);
+
 const crcTable = new Uint32Array(256);
 for (let index = 0; index < 256; index += 1) {
   let value = index;
@@ -159,6 +165,10 @@ function assertAllowed(entryName: string) {
   if (disallowedPathPatterns.some((pattern) => pattern.test(entryName))) {
     throw new Error(`Disallowed review-pack entry: ${entryName}`);
   }
+}
+
+function isReviewPackScannerSource(entryName: string) {
+  return reviewPackScannerSourcePaths.has(normalizeEntryName(entryName));
 }
 
 function expectedScreenshotSize(screenshotPath: string) {
@@ -322,7 +332,7 @@ function assertNoPrivateText(entryName: string, data: Buffer) {
     throw new Error(`External provider secret variable detected: ${entryName}`);
   }
   if (
-    entryName !== "scripts/build-task016-review-pack.ts" &&
+    !isReviewPackScannerSource(entryName) &&
     /DATABASE_URL=.*@(?!127\.0\.0\.1|localhost)/i.test(text)
   ) {
     throw new Error(
@@ -331,7 +341,64 @@ function assertNoPrivateText(entryName: string, data: Buffer) {
   }
 }
 
+function scannerFixture(parts: string[]) {
+  return Buffer.from(parts.join(""), "utf8");
+}
+
+function assertScannerRejects(label: string, action: () => void) {
+  try {
+    action();
+  } catch {
+    return;
+  }
+  throw new Error(`Scanner validation failed to reject ${label}.`);
+}
+
+async function validateScannerRules() {
+  for (const scannerSourcePath of reviewPackScannerSourcePaths) {
+    const data = await readFile(scannerSourcePath);
+    assertNoPrivateText(scannerSourcePath, data);
+  }
+  assertScannerRejects("normal non-local DATABASE_URL", () =>
+    assertNoPrivateText(
+      "src/lib/env.ts",
+      scannerFixture([
+        "DATABASE_URL=",
+        "mysql://user:password",
+        "@db.example.com:3306/osrs_services",
+      ]),
+    ),
+  );
+  assertScannerRejects(".env review-pack entry", () => assertAllowed(".env"));
+  assertScannerRejects("webhook secret variables", () =>
+    assertNoPrivateText(
+      "src/lib/env.ts",
+      scannerFixture(["WEBHOOK", "_SECRET", "_VALUE=live-webhook-secret"]),
+    ),
+  );
+  assertScannerRejects("SMTP password variables", () =>
+    assertNoPrivateText(
+      "src/lib/env.ts",
+      scannerFixture(["SMTP", "_PASSWORD", "_VALUE=live-smtp-password"]),
+    ),
+  );
+  assertScannerRejects("payment provider secrets", () =>
+    assertNoPrivateText(
+      "src/lib/env.ts",
+      scannerFixture(["STRIPE", "_SECRET_KEY=", "sk", "_live_", "example"]),
+    ),
+  );
+  assertScannerRejects("raw token literals", () =>
+    assertNoPrivateText(
+      "src/lib/env.ts",
+      scannerFixture(["rawSession", "Token = ", '"secret-token"']),
+    ),
+  );
+  console.log("Task 016 scanner rule validation passed.");
+}
+
 async function scanSources() {
+  await validateScannerRules();
   for (const sourcePath of sourceScanPaths) {
     const data = await readFile(sourcePath);
     assertNoPrivateText(sourcePath, data);
