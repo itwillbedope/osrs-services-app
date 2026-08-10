@@ -157,8 +157,7 @@ export const permissionDescriptions: Record<PermissionKey, string> = {
     "Review payment transactions and manual payment evidence.",
   [permissions.paymentsRefund]:
     "Request or record payment refunds after approval.",
-  [permissions.paymentsConfigure]:
-    "Configure payment provider availability and health metadata.",
+  [permissions.paymentsConfigure]: "Configure payment providers and flags.",
   [permissions.paymentsEligibilityManage]:
     "Manage payment-provider eligibility after merchant approval.",
   [permissions.usersManage]: "Manage customers and staff access.",
