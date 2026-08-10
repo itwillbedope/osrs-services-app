@@ -26,4 +26,4 @@ Customer dashboard, tracking, progress, Membership, Reviews, custom Socket.IO ch
 
 ## Week 7 - Operations, migration, QA, and staging
 
-Reports, audit logs, feature flags, exports, integration status, catalogue migration, content review, full permission and browser QA, staging deployment, fixes, and handover.
+Reports, audit logs, feature flags, exports, integration status, catalogue migration, content review, full permission and browser QA, staging deployment, fixes, and handover. Task 016 adds the payment, email and production-readiness foundation with real providers disabled pending client approval.

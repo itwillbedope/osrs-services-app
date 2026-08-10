@@ -19,11 +19,13 @@ import {
   orderPaymentStatusLabels,
   orderStatusLabels,
 } from "@/lib/checkout/constants";
+import { sendTransactionalEmailNow } from "@/lib/email/delivery";
 import {
   hashToken as hashCheckoutToken,
   isValidSecureToken,
 } from "@/lib/checkout/security";
 import { prisma } from "@/lib/db/prisma";
+import { env } from "@/lib/env";
 import {
   CUSTOMER_ACCOUNTS_FLAG,
   CUSTOMER_AUTH_TEMPLATE_VERSION,
@@ -458,6 +460,20 @@ export async function registerCustomer(
     result.user.id,
     settings.maximumActiveCustomerSessions,
   );
+  await sendTransactionalEmailNow({
+    templateType: "VERIFY_EMAIL",
+    recipientEmail: result.user.email,
+    variables: {
+      displayName: result.user.name ?? "there",
+      verificationUrl: `${env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")}/account/register?verify=${result.verificationToken}`,
+    },
+    dedupeKey: `email-verification-delivery:${result.user.id}`,
+    userId: result.user.id,
+    safeMetadata: {
+      tokenStoredAsDigestOnly: true,
+      purpose: "EMAIL_VERIFICATION",
+    },
+  }).catch(() => undefined);
 
   return {
     user: result.user,
@@ -733,11 +749,18 @@ export async function requestPasswordRecovery(
   if (email.success) {
     const user = await prisma.user.findUnique({
       where: { email: email.data },
-      select: { id: true, accountType: true, status: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        accountType: true,
+        status: true,
+      },
     });
     if (user?.accountType === "CUSTOMER" && user.status === "ACTIVE") {
+      let resetToken: string | null = null;
       await prisma.$transaction(async (transaction) => {
-        await createCustomerAuthToken(transaction, {
+        resetToken = await createCustomerAuthToken(transaction, {
           userId: user.id,
           purpose: "PASSWORD_RESET",
           expiresInMinutes: 60,
@@ -767,6 +790,22 @@ export async function requestPasswordRecovery(
           },
         });
       });
+      if (resetToken) {
+        await sendTransactionalEmailNow({
+          templateType: "PASSWORD_RESET",
+          recipientEmail: user.email,
+          variables: {
+            displayName: user.name ?? "there",
+            resetUrl: `${env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")}/account/reset/${resetToken}`,
+          },
+          dedupeKey: `password-reset-delivery:${user.id}:${Date.now()}`,
+          userId: user.id,
+          safeMetadata: {
+            tokenStoredAsDigestOnly: true,
+            purpose: "PASSWORD_RESET",
+          },
+        }).catch(() => undefined);
+      }
     }
   }
   return {

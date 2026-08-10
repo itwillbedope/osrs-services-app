@@ -20,6 +20,11 @@ type CheckoutResult =
         trackingUrl: string | null;
         paymentReviewMessage: string;
       };
+      payment?: {
+        provider: string;
+        status: string;
+        hostedCheckoutUrl: string | null;
+      };
       idempotent: boolean;
     }
   | {
@@ -84,6 +89,13 @@ export function CheckoutForm({
           payload.cart.warnings[0] ??
             "Review the updated cart total before checkout.",
         );
+        return;
+      }
+      if (payload.payment?.hostedCheckoutUrl) {
+        setMessage(
+          `${payload.order.orderNumber} created. Opening hosted checkout.`,
+        );
+        window.location.assign(payload.payment.hostedCheckoutUrl);
         return;
       }
       setMessage(
@@ -181,7 +193,13 @@ export function CheckoutForm({
             required
             disabled={disabled}
           />
-          <span>I accept the current terms version.</span>
+          <span>
+            I accept the current{" "}
+            <a className="text-primary font-bold" href="/terms">
+              Terms of Service
+            </a>
+            .
+          </span>
         </label>
         <label className="flex gap-3 text-sm">
           <input
@@ -190,7 +208,17 @@ export function CheckoutForm({
             required
             disabled={disabled}
           />
-          <span>I consent to the privacy policy for this guest order.</span>
+          <span>
+            I consent to the{" "}
+            <a className="text-primary font-bold" href="/privacy">
+              Privacy Policy
+            </a>{" "}
+            and reviewed the{" "}
+            <a className="text-primary font-bold" href="/refund-policy">
+              Refund Policy
+            </a>
+            .
+          </span>
         </label>
       </div>
 

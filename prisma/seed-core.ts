@@ -106,6 +106,8 @@ export const defaultRoles: Array<{
       permissions.designSystemView,
       permissions.ordersView,
       permissions.ordersStatusManage,
+      permissions.paymentsView,
+      permissions.paymentsReview,
       permissions.customersView,
       permissions.chatView,
       permissions.chatRespond,
@@ -168,6 +170,17 @@ export const defaultFeatureFlags = [
   ],
   ["cart_enabled", "Secure guest cart foundation", false],
   ["guest_checkout_enabled", "Guest checkout order submission", false],
+  ["external_payments_enabled", "External hosted checkout payment flow", false],
+  [
+    "payment_webhooks_enabled",
+    "Provider webhook processing for payment mutations",
+    false,
+  ],
+  [
+    "payment_refunds_enabled",
+    "Administrative payment refund foundation",
+    false,
+  ],
   [
     "customer_accounts_enabled",
     "Customer account authentication foundation",

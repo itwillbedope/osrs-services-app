@@ -11,9 +11,13 @@
 - Validate upload type, MIME, size, and filename.
 - Use private file URLs for sensitive attachments.
 - Never store raw payment-card data.
+- Keep real payment provider credentials and SMTP passwords outside source control.
+- Store payment provider event identifiers, safe references and hashes, not raw webhook payloads.
+- Keep TEST_HOSTED and TEST_EMAIL blocked from production activation.
 - Never request a RuneScape password for eligibility checking.
 - Record sensitive administrative changes in audit logs.
 - Authenticate payment webhooks and make them idempotent.
+- Verify provider amount and currency against the server-side order total before marking paid.
 - Use database transactions for order and stock updates.
 - Never commit production secrets.
 - Avoid sensitive values in production logs.

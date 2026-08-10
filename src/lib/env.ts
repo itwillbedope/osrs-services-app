@@ -23,6 +23,26 @@ export const environmentSchema = z
       .positive()
       .max(24 * 30)
       .default(168),
+    NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+    PAYMENT_PROVIDER: z
+      .enum(["MANUAL_REVIEW", "TEST_HOSTED", "EXTERNAL_HOSTED_CHECKOUT"])
+      .default("MANUAL_REVIEW"),
+    EXTERNAL_PAYMENTS_ENABLED: z.stringbool().default(false),
+    PAYMENT_WEBHOOKS_ENABLED: z.stringbool().default(false),
+    PAYMENT_REFUNDS_ENABLED: z.stringbool().default(false),
+    TEST_HOSTED_PAYMENT_SECRET: z.string().min(32).optional().or(z.literal("")),
+    EMAIL_DELIVERY_ENABLED: z.stringbool().default(false),
+    EMAIL_TRANSPORT: z.enum(["SMTP", "TEST_EMAIL"]).default("SMTP"),
+    SMTP_HOST: z.string().default(""),
+    SMTP_PORT: z.coerce.number().int().positive().default(587),
+    SMTP_SECURE: z.stringbool().default(false),
+    SMTP_USERNAME: z.string().default(""),
+    SMTP_PASSWORD: z.string().default(""),
+    SMTP_FROM_EMAIL: z.string().email().optional().or(z.literal("")),
+    SMTP_FROM_NAME: z.string().min(1).default("OSRS Services"),
+    CUSTOM_BUILD_PRIVATE_ATTACHMENT_ROOT: z
+      .string()
+      .default("storage/private/custom-build-attachments"),
     CHAT_SOCKET_PORT: z.coerce.number().int().positive().default(3001),
     CHAT_SOCKET_PATH: z.string().min(1).startsWith("/").default("/socket.io"),
     CHAT_ALLOWED_ORIGINS: z.string().min(1).default("http://127.0.0.1:3000"),
@@ -79,6 +99,55 @@ export const environmentSchema = z
         path: ["CHAT_ALLOWED_ORIGINS"],
         message: "Credentialed chat CORS cannot use wildcard origins.",
       });
+    }
+    if (
+      value.NODE_ENV === "production" &&
+      value.PAYMENT_PROVIDER === "TEST_HOSTED"
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["PAYMENT_PROVIDER"],
+        message: "TEST_HOSTED payments cannot be selected in production.",
+      });
+    }
+    if (
+      value.NODE_ENV === "production" &&
+      value.EXTERNAL_PAYMENTS_ENABLED &&
+      value.PAYMENT_PROVIDER === "TEST_HOSTED"
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["EXTERNAL_PAYMENTS_ENABLED"],
+        message: "TEST_HOSTED payments cannot be enabled in production.",
+      });
+    }
+    if (
+      value.NODE_ENV === "production" &&
+      value.EMAIL_DELIVERY_ENABLED &&
+      value.EMAIL_TRANSPORT === "TEST_EMAIL"
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["EMAIL_TRANSPORT"],
+        message: "TEST_EMAIL transport cannot be enabled in production.",
+      });
+    }
+    if (value.EMAIL_DELIVERY_ENABLED && value.EMAIL_TRANSPORT === "SMTP") {
+      if (!value.SMTP_HOST) {
+        context.addIssue({
+          code: "custom",
+          path: ["SMTP_HOST"],
+          message: "SMTP_HOST is required when email delivery is enabled.",
+        });
+      }
+      if (!value.SMTP_FROM_EMAIL) {
+        context.addIssue({
+          code: "custom",
+          path: ["SMTP_FROM_EMAIL"],
+          message:
+            "SMTP_FROM_EMAIL is required when email delivery is enabled.",
+        });
+      }
     }
   });
 

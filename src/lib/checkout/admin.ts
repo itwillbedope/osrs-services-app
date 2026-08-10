@@ -121,7 +121,6 @@ export async function updateCheckoutPaymentMethod({
   const updated = await prisma.checkoutPaymentMethod.updateMany({
     where: {
       id: input.id,
-      methodType: "MANUAL_REVIEW",
       concurrencyVersion: expectedVersion,
     },
     data: {
@@ -143,7 +142,6 @@ export async function updateCheckoutPaymentMethod({
       targetId: input.id,
       metadata: {
         enabled: input.enabled,
-        methodType: "MANUAL_REVIEW",
         needsClientReview: input.needsClientReview,
       },
     },

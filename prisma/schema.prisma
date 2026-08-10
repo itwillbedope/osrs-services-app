@@ -604,6 +604,89 @@ enum CheckoutNotificationStatus {
 
 enum CheckoutPaymentMethodType {
   MANUAL_REVIEW
+  EXTERNAL_HOSTED_CHECKOUT
+}
+
+enum PaymentProviderType {
+  MANUAL_REVIEW
+  TEST_HOSTED
+  EXTERNAL_HOSTED_CHECKOUT
+}
+
+enum PaymentTransactionStatus {
+  CREATED
+  PENDING
+  REQUIRES_CUSTOMER_ACTION
+  AUTHORIZED
+  PAID
+  FAILED
+  CANCELLED
+  PARTIALLY_REFUNDED
+  REFUNDED
+  EXPIRED
+}
+
+enum PaymentTransactionType {
+  PAYMENT
+  AUTHORIZATION
+  REFUND
+  MANUAL_CONFIRMATION
+}
+
+enum PaymentEligibilityMode {
+  MANUAL_ONLY
+  PROVIDER_ALLOWED
+  PROVIDER_REVIEW_REQUIRED
+  DISABLED
+}
+
+enum PaymentWebhookStatus {
+  RECEIVED
+  VERIFIED
+  PROCESSED
+  DUPLICATE
+  REJECTED
+  FAILED
+  IGNORED
+}
+
+enum PaymentRefundStatus {
+  REQUESTED
+  PENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum EmailDeliveryStatus {
+  PENDING
+  SUPPRESSED_DISABLED
+  SUPPRESSED_NOT_CONFIGURED
+  SENT
+  FAILED
+  RETRY_SCHEDULED
+}
+
+enum EmailTemplateType {
+  VERIFY_EMAIL
+  PASSWORD_RESET
+  ORDER_CONFIRMATION
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  ORDER_STATUS_UPDATE
+  SUPPORT_NOTIFICATION
+}
+
+enum EmailTransportType {
+  SMTP
+  TEST_EMAIL
+}
+
+enum ProductionReadinessStatus {
+  READY
+  NOT_READY
+  DISABLED
+  NEEDS_CLIENT_REVIEW
 }
 
 enum GoldInventoryReservationStatus {
@@ -741,7 +824,12 @@ model User {
   productReservationEvents     ProductReservationEvent[]        @relation("ProductReservationEventActor")
   orderStatusEvents            OrderStatusEvent[]               @relation("OrderStatusEventActor")
   orderPaymentEvents           OrderPaymentEvent[]              @relation("OrderPaymentEventActor")
+  paymentProviderReviews       PaymentProviderConfiguration[]   @relation("PaymentProviderConfigurationReviewedBy")
+  paymentEligibilityReviews    PaymentEligibilityRule[]         @relation("PaymentEligibilityReviewedBy")
+  paymentTransactionEvents     PaymentTransactionEvent[]        @relation("PaymentTransactionEventActor")
+  paymentRefundRequests        PaymentRefund[]                  @relation("PaymentRefundRequestedBy")
   goldReservations             GoldInventoryReservation[]       @relation("GoldReservationActor")
+  emailDeliveries              EmailDelivery[]
   chatCustomerConversations    ChatConversation[]               @relation("ChatConversationCustomer")
   chatAssignedConversations    ChatConversation[]               @relation("ChatConversationAssignedStaff")
 
@@ -2650,24 +2738,29 @@ model CheckoutSettings {
 }
 
 model CheckoutPaymentMethod {
-  id                 String                    @id @default(cuid()) @db.VarChar(30)
-  stableKey          String                    @unique @db.VarChar(120)
-  settingsId         String                    @db.VarChar(30)
-  methodType         CheckoutPaymentMethodType @default(MANUAL_REVIEW)
-  publicName         String                    @db.VarChar(120)
-  publicDescription  String                    @db.VarChar(500)
-  publicInstructions String                    @db.Text
-  enabled            Boolean                   @default(true)
-  sortOrder          Int                       @default(0)
-  needsClientReview  Boolean                   @default(true)
-  concurrencyVersion Int                       @default(1)
-  createdAt          DateTime                  @default(now())
-  updatedAt          DateTime                  @updatedAt
-  settings           CheckoutSettings          @relation(fields: [settingsId], references: [id], onDelete: Restrict)
+  id                 String                        @id @default(cuid()) @db.VarChar(30)
+  stableKey          String                        @unique @db.VarChar(120)
+  settingsId         String                        @db.VarChar(30)
+  methodType         CheckoutPaymentMethodType     @default(MANUAL_REVIEW)
+  providerType       PaymentProviderType           @default(MANUAL_REVIEW)
+  providerConfigId   String?                       @db.VarChar(30)
+  publicName         String                        @db.VarChar(120)
+  publicDescription  String                        @db.VarChar(500)
+  publicInstructions String                        @db.Text
+  enabled            Boolean                       @default(true)
+  sortOrder          Int                           @default(0)
+  needsClientReview  Boolean                       @default(true)
+  concurrencyVersion Int                           @default(1)
+  createdAt          DateTime                      @default(now())
+  updatedAt          DateTime                      @updatedAt
+  settings           CheckoutSettings              @relation(fields: [settingsId], references: [id], onDelete: Restrict)
+  providerConfig     PaymentProviderConfiguration? @relation(fields: [providerConfigId], references: [id], onDelete: SetNull)
   orders             Order[]
 
   @@index([settingsId, enabled, sortOrder])
   @@index([methodType, enabled])
+  @@index([providerType, enabled])
+  @@index([providerConfigId])
 }
 
 model Cart {
@@ -2803,6 +2896,7 @@ model Order {
   status                     OrderStatus                 @default(AWAITING_PAYMENT)
   paymentStatus              OrderPaymentStatus          @default(AWAITING_INSTRUCTIONS)
   paymentMethodType          CheckoutPaymentMethodType   @default(MANUAL_REVIEW)
+  paymentProvider            PaymentProviderType         @default(MANUAL_REVIEW)
   currencyCode               String                      @db.Char(3)
   subtotalCents              Int                         @default(0)
   adjustmentTotalCents       Int                         @default(0)
@@ -2820,8 +2914,12 @@ model Order {
   items                      OrderItem[]
   statusEvents               OrderStatusEvent[]
   paymentEvents              OrderPaymentEvent[]
+  paymentTransactions        PaymentTransaction[]
+  paymentRefunds             PaymentRefund[]
+  paymentWebhookEvents       PaymentWebhookEvent[]
   resourceAllocations        OrderResourceAllocation[]
   notifications              OrderNotificationOutbox[]
+  emailDeliveries            EmailDelivery[]
   customerOrderLink          CustomerOrderLink?
   customerOrderClaimEvents   CustomerOrderClaimEvent[]
   customerNotifications      CustomerNotification[]
@@ -2834,6 +2932,7 @@ model Order {
   @@index([paymentMethodId])
   @@index([status, createdAt])
   @@index([paymentStatus, createdAt])
+  @@index([paymentProvider, createdAt])
 }
 
 model CustomerOrderLink {
@@ -2877,20 +2976,21 @@ model CustomerOrderClaimEvent {
 }
 
 model CustomerNotification {
-  id           String                     @id @default(cuid()) @db.VarChar(30)
-  userId       String                     @db.VarChar(30)
-  orderId      String?                    @db.VarChar(30)
-  type         CustomerNotificationType
-  status       CustomerNotificationStatus @default(UNREAD)
-  title        String                     @db.VarChar(160)
-  body         String                     @db.VarChar(500)
-  dedupeKey    String?                    @db.VarChar(160)
-  safeMetadata Json?
-  readAt       DateTime?
-  createdAt    DateTime                   @default(now())
-  updatedAt    DateTime                   @updatedAt
-  customer     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  order        Order?                     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id              String                     @id @default(cuid()) @db.VarChar(30)
+  userId          String                     @db.VarChar(30)
+  orderId         String?                    @db.VarChar(30)
+  type            CustomerNotificationType
+  status          CustomerNotificationStatus @default(UNREAD)
+  title           String                     @db.VarChar(160)
+  body            String                     @db.VarChar(500)
+  dedupeKey       String?                    @db.VarChar(160)
+  safeMetadata    Json?
+  readAt          DateTime?
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+  customer        User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order           Order?                     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  emailDeliveries EmailDelivery[]
 
   @@unique([userId, dedupeKey])
   @@index([userId, status, createdAt])
@@ -3064,10 +3164,249 @@ model OrderNotificationOutbox {
   createdAt            DateTime                   @default(now())
   updatedAt            DateTime                   @updatedAt
   order                Order                      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  emailDeliveries      EmailDelivery[]
 
   @@index([orderId, createdAt])
   @@index([notificationType, status])
   @@index([nextAttemptAt])
+}
+
+model PaymentProviderConfiguration {
+  id                 String                    @id @default(cuid()) @db.VarChar(30)
+  stableKey          String                    @unique @db.VarChar(120)
+  provider           PaymentProviderType
+  displayName        String                    @db.VarChar(120)
+  enabled            Boolean                   @default(false)
+  productionAllowed  Boolean                   @default(false)
+  webhookEnabled     Boolean                   @default(false)
+  publicMode         String                    @default("needs-client-review") @db.VarChar(80)
+  safeConfiguration  Json?
+  healthStatus       ProductionReadinessStatus @default(NEEDS_CLIENT_REVIEW)
+  lastValidatedAt    DateTime?
+  needsClientReview  Boolean                   @default(true)
+  reviewedById       String?                   @db.VarChar(30)
+  reviewedAt         DateTime?
+  concurrencyVersion Int                       @default(1)
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  reviewedBy         User?                     @relation("PaymentProviderConfigurationReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+  checkoutMethods    CheckoutPaymentMethod[]
+
+  @@index([provider, enabled])
+  @@index([healthStatus])
+  @@index([needsClientReview])
+  @@index([reviewedById])
+}
+
+model PaymentEligibilityRule {
+  id                 String                 @id @default(cuid()) @db.VarChar(30)
+  stableKey          String                 @unique @db.VarChar(191)
+  sourceType         String                 @db.VarChar(80)
+  sourceKey          String                 @db.VarChar(191)
+  sourceLabel        String                 @db.VarChar(191)
+  mode               PaymentEligibilityMode @default(PROVIDER_REVIEW_REQUIRED)
+  safeReason         String                 @db.VarChar(500)
+  merchantConfirmed  Boolean                @default(false)
+  confirmedAt        DateTime?
+  reviewedById       String?                @db.VarChar(30)
+  reviewedAt         DateTime?
+  needsClientReview  Boolean                @default(true)
+  concurrencyVersion Int                    @default(1)
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  reviewedBy         User?                  @relation("PaymentEligibilityReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([sourceType, sourceKey])
+  @@index([mode, needsClientReview])
+  @@index([reviewedById])
+}
+
+model PaymentTransaction {
+  id                 String                    @id @default(cuid()) @db.VarChar(30)
+  orderId            String                    @db.VarChar(30)
+  provider           PaymentProviderType
+  providerPaymentId  String?                   @db.VarChar(191)
+  providerCheckoutId String?                   @db.VarChar(191)
+  transactionType    PaymentTransactionType    @default(PAYMENT)
+  status             PaymentTransactionStatus  @default(CREATED)
+  currencyCode       String                    @db.Char(3)
+  amountMinor        Int
+  idempotencyKeyHash String?                   @db.Char(64)
+  failureCategory    String?                   @db.VarChar(80)
+  failureReasonCode  String?                   @db.VarChar(120)
+  safeMetadata       Json?
+  authorizedAt       DateTime?
+  paidAt             DateTime?
+  cancelledAt        DateTime?
+  refundedAt         DateTime?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  concurrencyVersion Int                       @default(1)
+  order              Order                     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  events             PaymentTransactionEvent[]
+  webhookEvents      PaymentWebhookEvent[]
+  refunds            PaymentRefund[]
+
+  @@unique([orderId, idempotencyKeyHash])
+  @@unique([provider, providerPaymentId])
+  @@unique([provider, providerCheckoutId])
+  @@index([orderId, createdAt])
+  @@index([provider, status, createdAt])
+  @@index([status, createdAt])
+}
+
+model PaymentTransactionEvent {
+  id             String                    @id @default(cuid()) @db.VarChar(30)
+  transactionId  String                    @db.VarChar(30)
+  previousStatus PaymentTransactionStatus?
+  newStatus      PaymentTransactionStatus
+  eventType      String                    @db.VarChar(80)
+  sequence       Int
+  source         String                    @db.VarChar(80)
+  actorId        String?                   @db.VarChar(30)
+  webhookEventId String?                   @db.VarChar(30)
+  refundId       String?                   @db.VarChar(30)
+  safeMetadata   Json?
+  createdAt      DateTime                  @default(now())
+  transaction    PaymentTransaction        @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  actor          User?                     @relation("PaymentTransactionEventActor", fields: [actorId], references: [id], onDelete: SetNull)
+  webhookEvent   PaymentWebhookEvent?      @relation(fields: [webhookEventId], references: [id], onDelete: SetNull)
+  refund         PaymentRefund?            @relation(fields: [refundId], references: [id], onDelete: SetNull)
+
+  @@unique([transactionId, sequence])
+  @@index([transactionId, createdAt])
+  @@index([newStatus, createdAt])
+  @@index([actorId, createdAt])
+  @@index([webhookEventId])
+  @@index([refundId])
+}
+
+model PaymentWebhookEvent {
+  id                String                    @id @default(cuid()) @db.VarChar(30)
+  provider          PaymentProviderType
+  eventIdHash       String                    @db.Char(64)
+  eventType         String                    @db.VarChar(120)
+  status            PaymentWebhookStatus      @default(RECEIVED)
+  signatureHash     String?                   @db.Char(64)
+  transactionId     String?                   @db.VarChar(30)
+  orderId           String?                   @db.VarChar(30)
+  failureCode       String?                   @db.VarChar(120)
+  safePayload       Json?
+  receivedAt        DateTime                  @default(now())
+  processedAt       DateTime?
+  createdAt         DateTime                  @default(now())
+  updatedAt         DateTime                  @updatedAt
+  transaction       PaymentTransaction?       @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  order             Order?                    @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  transactionEvents PaymentTransactionEvent[]
+
+  @@unique([provider, eventIdHash])
+  @@index([provider, status, receivedAt])
+  @@index([transactionId])
+  @@index([orderId])
+}
+
+model PaymentRefund {
+  id                 String                    @id @default(cuid()) @db.VarChar(30)
+  transactionId      String                    @db.VarChar(30)
+  orderId            String                    @db.VarChar(30)
+  amountMinor        Int
+  currencyCode       String                    @db.Char(3)
+  status             PaymentRefundStatus       @default(REQUESTED)
+  providerRefundId   String?                   @db.VarChar(191)
+  idempotencyKeyHash String?                   @db.Char(64)
+  reasonCode         String                    @db.VarChar(80)
+  safeNote           String?                   @db.VarChar(500)
+  requestedById      String?                   @db.VarChar(30)
+  requestedAt        DateTime                  @default(now())
+  processedAt        DateTime?
+  failedAt           DateTime?
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  concurrencyVersion Int                       @default(1)
+  transaction        PaymentTransaction        @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  order              Order                     @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  requestedBy        User?                     @relation("PaymentRefundRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  events             PaymentTransactionEvent[]
+
+  @@unique([transactionId, idempotencyKeyHash])
+  @@unique([transactionId, providerRefundId])
+  @@index([orderId, createdAt])
+  @@index([status, createdAt])
+  @@index([requestedById, createdAt])
+}
+
+model EmailTemplate {
+  id                 String            @id @default(cuid()) @db.VarChar(30)
+  stableKey          String            @unique @db.VarChar(120)
+  templateType       EmailTemplateType
+  version            String            @db.VarChar(80)
+  subject            String            @db.VarChar(240)
+  htmlBody           String            @db.Text
+  textBody           String            @db.Text
+  enabled            Boolean           @default(true)
+  needsClientReview  Boolean           @default(true)
+  concurrencyVersion Int               @default(1)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  deliveries         EmailDelivery[]
+
+  @@unique([templateType, version])
+  @@index([templateType, enabled])
+  @@index([needsClientReview])
+}
+
+model EmailDelivery {
+  id                     String                   @id @default(cuid()) @db.VarChar(30)
+  templateId             String?                  @db.VarChar(30)
+  templateType           EmailTemplateType
+  transport              EmailTransportType       @default(SMTP)
+  status                 EmailDeliveryStatus      @default(PENDING)
+  dedupeKey              String                   @unique @db.VarChar(191)
+  recipientHash          String                   @db.Char(64)
+  orderId                String?                  @db.VarChar(30)
+  userId                 String?                  @db.VarChar(30)
+  customerNotificationId String?                  @db.VarChar(30)
+  orderOutboxId          String?                  @db.VarChar(30)
+  subject                String                   @db.VarChar(240)
+  safeMetadata           Json?
+  externalMessageId      String?                  @db.VarChar(191)
+  deliveryAttemptCount   Int                      @default(0)
+  lastAttemptAt          DateTime?
+  nextAttemptAt          DateTime?
+  sentAt                 DateTime?
+  failedAt               DateTime?
+  lastFailureCode        String?                  @db.VarChar(120)
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  template               EmailTemplate?           @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  order                  Order?                   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  user                   User?                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customerNotification   CustomerNotification?    @relation(fields: [customerNotificationId], references: [id], onDelete: SetNull)
+  orderOutbox            OrderNotificationOutbox? @relation(fields: [orderOutboxId], references: [id], onDelete: SetNull)
+
+  @@index([templateType, status])
+  @@index([orderId, createdAt])
+  @@index([userId, createdAt])
+  @@index([customerNotificationId])
+  @@index([orderOutboxId])
+  @@index([nextAttemptAt])
+}
+
+model ProductionReadinessSetting {
+  id                 String                    @id @default(cuid()) @db.VarChar(30)
+  stableKey          String                    @unique @db.VarChar(120)
+  category           String                    @db.VarChar(80)
+  label              String                    @db.VarChar(160)
+  status             ProductionReadinessStatus @default(NEEDS_CLIENT_REVIEW)
+  safeSummary        String                    @db.VarChar(500)
+  needsClientReview  Boolean                   @default(true)
+  concurrencyVersion Int                       @default(1)
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+
+  @@index([category, status])
+  @@index([needsClientReview])
 }
 
 model GoldInventoryReservation {

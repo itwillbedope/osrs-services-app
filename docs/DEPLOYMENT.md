@@ -16,7 +16,7 @@ Local MySQL is also optional for Task 008 handoff validation. `.github/workflows
 
 Local MySQL remains optional for Task 009 handoff validation. `.github/workflows/task009-validation.yml` runs fresh MySQL validation, Task 008-to-Task 009 upgrade validation, tests, screenshots and review-pack generation on GitHub-hosted MySQL 8.4 service containers.
 
-Local MySQL remains optional for Task 010, Task 011, Task 012, Task 013, Task 014 and Task 015 handoff validation. `.github/workflows/task010-validation.yml`, `.github/workflows/task011-validation.yml`, `.github/workflows/task012-validation.yml`, `.github/workflows/task013-validation.yml`, `.github/workflows/task014-validation.yml` and `.github/workflows/task015-validation.yml` run their database-backed checks on GitHub-hosted MySQL 8.4 service containers with disposable CI credentials.
+Local MySQL remains optional for Task 010, Task 011, Task 012, Task 013, Task 014, Task 015 and Task 016 handoff validation. `.github/workflows/task010-validation.yml`, `.github/workflows/task011-validation.yml`, `.github/workflows/task012-validation.yml`, `.github/workflows/task013-validation.yml`, `.github/workflows/task014-validation.yml`, `.github/workflows/task015-validation.yml` and `.github/workflows/task016-validation.yml` run their database-backed checks on GitHub-hosted MySQL 8.4 service containers with disposable CI credentials.
 
 ## Staging
 
@@ -24,9 +24,35 @@ Create a staging environment before production. Test Hostinger's Node.js applica
 
 ## Production gate
 
-Before switching the domain, verify migration, media, redirects, SSL, administrator access, backups, chat, email, correctly enabled features, rollback, tests, and client approval.
+Before switching the domain, verify migration, media, redirects, SSL, administrator access, backups, chat, payment provider approval, email, correctly enabled features, rollback, tests, and client approval. Run `pnpm production:check` against production-like values and inspect `/ready`.
 
 The domain and email may remain at Hostinger even if the application later moves to a VPS or split deployment.
+
+## Task 016 payment, email and launch-readiness notes
+
+Task 016 adds migration `20260810150000_task016_payments_launch_readiness`. It is additive and creates payment provider configuration, eligibility, transactions, transaction events, webhook events, refunds, email templates, email delivery rows and launch-readiness settings.
+
+Normal seed creates:
+
+- `external_payments_enabled` disabled
+- `payment_webhooks_enabled` disabled
+- `payment_refunds_enabled` disabled
+- manual review provider enabled
+- TEST_HOSTED provider disabled and production blocked
+- email templates marked `Needs client review`
+- payment eligibility rules marked for merchant/client review
+
+Before enabling payment or email features outside validation:
+
+- run `pnpm db:migrate` without reset
+- run `pnpm db:seed` twice and confirm edited flags and review rows are preserved
+- review `/admin/payments`, `/admin/checkout/payment-eligibility`, `/admin/checkout/email` and `/admin/launch-readiness`
+- review `docs/PAYMENT-PROVIDER-APPROVAL.md`
+- confirm `PAYMENT_PROVIDER` is not `TEST_HOSTED` in production
+- confirm `EMAIL_TRANSPORT` is not `TEST_EMAIL` when production email delivery is enabled
+- confirm terms, privacy and refund-policy pages have client-approved legal copy
+
+Rollback is manual. First disable `external_payments_enabled`, `payment_webhooks_enabled`, `payment_refunds_enabled` and email delivery. Preserve orders, payment transactions, webhook events, refund rows, email delivery rows and audit rows before any schema rollback. Do not use `prisma migrate reset` against shared or production data.
 
 ## Eligibility configuration
 

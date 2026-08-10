@@ -4,7 +4,7 @@
 
 Guests may order with email, display name, RSN/game ID, optional Discord username, and service-specific details. After checkout, provide an order number, secure tracking link, email confirmation, and optional account creation.
 
-Task 013 implements the foundation with manual payment review only. It stores guest contact consent, order totals, order items, order status/payment timelines, resource allocations, checkout attempt/idempotency rows, secure tracking-token hashes and notification outbox rows. It does not collect card data, provider credentials, account passwords, bank PINs, recovery data or raw tracking tokens, and it does not send email.
+Task 013 implements the foundation with manual payment review only. It stores guest contact consent, order totals, order items, order status/payment timelines, resource allocations, checkout attempt/idempotency rows, secure tracking-token hashes and notification outbox rows. It does not collect card data, provider credentials, account passwords, bank PINs, recovery data or raw tracking tokens.
 
 Task 014 adds optional customer ownership without changing guest snapshots. Logged-in customer checkout creates one `CustomerOrderLink` inside the checkout transaction only after the checkout email matches the authenticated customer email. Post-checkout account creation and guest-order claiming require a valid secure tracking token; order number alone is never enough. `GuestOrderContact` and `OrderItem` rows remain immutable historical records.
 
@@ -59,6 +59,16 @@ Task 013 admin actions are guarded separately: `orders.status.manage` for fulfil
 Task 014 customer order views expose customer-safe status/payment timelines and public notes only. They exclude staff actors, internal notes, audit metadata, reservation reasons, raw tracking tokens and guest contact records.
 
 Task 015 live chat can link a conversation to an order only through scoped proof: authenticated customers must own the order through `CustomerOrderLink`, guests must provide the secure tracking token, and staff must have both chat order-link permission and order view access. Chat order links expose customer-safe order number/status context to support staff and do not mutate guest contacts, order items, payment records or tracking-token hashes.
+
+## Task 016 payment and email foundation
+
+Task 016 adds provider-neutral `PaymentTransaction`, `PaymentWebhookEvent`, `PaymentRefund`, `EmailTemplate` and `EmailDelivery` records. Checkout can create a hosted-payment transaction only when external payments are deliberately enabled and payment eligibility rules allow the exact cart contents.
+
+Hosted payment return pages are status views only. They never mark an order paid. A verified server-side webhook must match the stored transaction, provider, amount and currency before an order can move to paid.
+
+Email delivery rows are created for order confirmation, payment received, payment failure and order status updates. When delivery is disabled or SMTP is not configured, rows are suppressed honestly rather than pretending to send. Recipient email is stored as an HMAC hash in `EmailDelivery`; raw verification/reset tokens are not stored.
+
+Manual review remains available and seeded on. Real payment providers and live SMTP delivery stay disabled pending client review.
 
 ## Quotes
 
