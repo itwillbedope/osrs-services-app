@@ -316,7 +316,7 @@ async function main() {
     const livePaymentProviderConfigurationCount = await count(
       connection,
       "CheckoutPaymentMethod",
-      "WHERE methodType <> 'MANUAL_REVIEW'",
+      "WHERE methodType <> 'MANUAL_REVIEW' AND enabled = 1",
     );
     const cardDataColumnCount = await task013ColumnRiskCount(
       connection,
