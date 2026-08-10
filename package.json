@@ -23,7 +23,7 @@
     "chat:start": "node --import tsx realtime/chat-server.ts",
     "chat:check": "tsx scripts/check-task015-chat.ts",
     "production:check": "tsx scripts/validate-production-readiness.ts",
-    "payments:check": "tsx scripts/validate-task016-payments.ts",
+    "payments:check": "tsx --conditions react-server scripts/validate-task016-payments.ts",
     "screenshots:task001": "tsx scripts/capture-task-001.ts",
     "screenshots:task002": "tsx scripts/capture-task-002.ts",
     "screenshots:task003": "tsx scripts/capture-task-003.ts",
