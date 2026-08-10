@@ -242,8 +242,12 @@ test.describe("Task 016 payment launch readiness", () => {
     await expect(
       page.getByRole("heading", { name: "Guest checkout" }),
     ).toBeVisible();
-    await expect(page.getByText("Manual payment review")).toBeVisible();
-    await expect(page.getByText("Hosted checkout test mode")).toBeVisible();
+    await expect(
+      page.getByRole("radio", { name: /Manual payment review/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("radio", { name: /Hosted checkout test mode/i }),
+    ).toBeVisible();
     await expect(
       page.getByRole("link", { name: "Terms of Service" }),
     ).toHaveAttribute("href", "/terms");
