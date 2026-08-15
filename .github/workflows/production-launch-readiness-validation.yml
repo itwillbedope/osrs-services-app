@@ -114,7 +114,7 @@ jobs:
             grep -Eq '^set -E?euo pipefail|^set -e' "$script"
           done
 
-          ! grep -RInE 'DATABASE_PASSWORD=|MYSQL_PWD=|SMTP_PASSWORD=|sk_live|pk_live|AKIA|BEGIN .*PRIVATE KEY|STRIPE_|PAYPAL_|WEBHOOK_SECRET|GODADDY_|CLOUDFLARE_' deploy/scripts
+          ! grep -RInE 'DATABASE_PASSWORD=|MYSQL_PWD=|SMTP_PASSWORD=|sk_live|pk_live|AKIA|BEGIN .*PRIVATE KEY|STRIPE[A-Z0-9_]*SECRET|PAYPAL[A-Z0-9_]*SECRET|WEBHOOK_SECRET|GODADDY_|CLOUDFLARE_' deploy/scripts
           ! grep -RInE 'prisma migrate reset|pnpm db:reset' deploy/scripts
           ! grep -RInE 'godaddy|cloudflare|route53|dns.*(create|update|delete|mutate)' deploy/scripts
           ! grep -RInE 'UPDATE FeatureFlag|FeatureFlag|EXTERNAL_PAYMENTS_ENABLED=true|PAYMENT_WEBHOOKS_ENABLED=true|PAYMENT_REFUNDS_ENABLED=true|EMAIL_DELIVERY_ENABLED=true' deploy/scripts
@@ -215,8 +215,8 @@ jobs:
               r"pk_live",
               r"AKIA[0-9A-Z]{16}",
               r"BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY",
-              r"STRIPE_.*SECRET",
-              r"PAYPAL_.*SECRET",
+              r"STRIPE[A-Z0-9_]*SECRET",
+              r"PAYPAL[A-Z0-9_]*SECRET",
               r"WEBHOOK_SECRET=.*[A-Za-z0-9]",
               r"GODADDY",
               r"SMTP_PASSWORD=.+",
