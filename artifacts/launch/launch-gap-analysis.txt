@@ -1,0 +1,142 @@
+OSRS Services launch gap analysis
+Generated from branch: codex/production-launch-readiness
+Base production merge: c8331fc9688f6d306edb702bc4ae785c95e4348f
+
+Classification key:
+- READY: implementation or launch artifact is present and does not require real credentials or business approval.
+- NEEDS_CONFIGURATION: safe code/templates exist, but server-specific values or infrastructure must be configured privately.
+- NEEDS_CLIENT_INPUT: business/legal/provider/staffing approval is required before launch or activation.
+- OPTIONAL_POST_LAUNCH: explicitly outside initial launch scope.
+
+Repository and baseline
+- READY: Worktree created at E:\Codex\osrs-services-launch from latest origin/main.
+- READY: origin/main equals c8331fc9688f6d306edb702bc4ae785c95e4348f at launch prep start.
+- READY: Remote is https://github.com/Faizan279/osrs-services-app.git.
+- READY: Branch is codex/production-launch-readiness.
+
+Existing documentation and manifests
+- READY: README.md documents Task 001-016 scope, manual-review payment boundary, email-disabled default, chat gateway and production readiness checks.
+- READY: project-manifest.json lists production-impacting feature flags and service engine routes.
+- READY: docs/FINAL-SCOPE.md distinguishes current launch scope from later activation.
+- READY: docs/DEPLOYMENT.md documents additive migrations, no reset, feature-flag rollback and Task 005-016 activation requirements.
+- READY: docs/PRODUCTION-DEPLOYMENT.md documents required checks, /health, /ready and launch notes.
+- READY: docs/PRODUCTION-FEATURE-ACTIVATION.md keeps payment/email activation gated.
+- READY: docs/VPS-BOOTSTRAP.md now gives Ubuntu, Node 24, pnpm 11.7.0, MySQL 8, Nginx and PM2 setup.
+- READY: docs/PRODUCTION-DATABASE.md now documents database creation, restricted user, backup, restore, migration and seed.
+- READY: docs/PRODUCTION-ROLLBACK.md now documents feature, app, Nginx, DNS and last-resort DB rollback.
+- READY: docs/STAGING-LAUNCH.md now documents staging.osrsservices.com sequence and approval gates.
+- READY: docs/PRODUCTION-OPERATIONS.md now documents day-two commands and no-secret logging rules.
+- READY: docs/CLIENT-LAUNCH-INPUTS.md now separates required launch inputs from post-launch work.
+- READY: docs/LAUNCH-FEATURE-MATRIX.md now summarizes every production-impacting feature flag.
+- READY: docs/PAYMENT-LAUNCH-BOUNDARY.md now states external provider activation requirements.
+- READY: docs/SMTP-LAUNCH.md now documents SMTP activation and test flow.
+- READY: docs/GODADDY-DNS-CUTOVER.md now documents staging-first DNS and record preservation.
+- READY: docs/GO-LIVE-RUNBOOK.md now provides final pass/fail operator sequence.
+
+Environment and secrets
+- READY: .env.example remains local-development oriented and contains no real production secrets.
+- READY: deploy/.env.production.example now exists with safe placeholders only.
+- READY: deploy/.env.production.example sets NODE_ENV=production.
+- READY: deploy/.env.production.example sets NEXT_PUBLIC_APP_URL=https://example.com.
+- READY: deploy/.env.production.example sets RSN_DEVELOPMENT_FIXTURE=false.
+- READY: deploy/.env.production.example sets PAYMENT_PROVIDER=MANUAL_REVIEW.
+- READY: deploy/.env.production.example sets EXTERNAL_PAYMENTS_ENABLED=false.
+- READY: deploy/.env.production.example sets PAYMENT_WEBHOOKS_ENABLED=false.
+- READY: deploy/.env.production.example sets PAYMENT_REFUNDS_ENABLED=false.
+- READY: deploy/.env.production.example sets EMAIL_DELIVERY_ENABLED=false.
+- READY: .gitignore now ignores .env.production, .env.production.*, .env.staging, .env.staging.* and key material while allowing deploy/.env.production.example.
+- NEEDS_CONFIGURATION: Production server must receive private DATABASE_URL/DATABASE_PASSWORD.
+- NEEDS_CONFIGURATION: Production server must receive private AUTH_SECRET and ELIGIBILITY_HMAC_SECRET.
+- NEEDS_CONFIGURATION: Production server must configure CUSTOM_BUILD_PRIVATE_ATTACHMENT_ROOT outside public/.
+- NEEDS_CONFIGURATION: Production server must set explicit CHAT_ALLOWED_ORIGINS and public chat socket URL for its HTTPS host.
+- NEEDS_CLIENT_INPUT: Business/support SMTP account and sender identity are not approved yet.
+- NEEDS_CLIENT_INPUT: Production admin seed email, if used, must be supplied privately by the client/operator.
+
+Package scripts and validation
+- READY: package.json uses Node 24.x and pnpm >=11.7.0.
+- READY: pnpm db:migrate maps to prisma migrate deploy.
+- READY: pnpm db:reset remains present for disposable local databases only; docs now explicitly forbid it for staging/production.
+- READY: pnpm production:check runs scripts/validate-production-readiness.ts.
+- READY: pnpm production:smoke now runs scripts/production-smoke-test.ts.
+- READY: scripts/production-smoke-test.ts supports base URL argument/environment, per-request timeouts and no destructive calls.
+- READY: Smoke test covers /, /health, /ready, /products, /accounts, /custom-account-build, /cart, /checkout, /account/login, /account/register and discovered staff route /login.
+- READY: Smoke test also reports /support and requested /support/chat. The repo's actual public support route is /support, so /support/chat is a warning path unless the route is later added.
+
+Runtime process management
+- READY: deploy/ecosystem.config.cjs defines osrs-web using pnpm start.
+- READY: deploy/ecosystem.config.cjs defines osrs-chat using pnpm chat:start.
+- READY: PM2 config sets NODE_ENV=production, restart delay, restart limits, timestamps and safe log paths.
+- READY: PM2 config keeps chat single-node; no cluster-mode chat scaling was added.
+- NEEDS_CONFIGURATION: Server must create /var/log/osrs-services or set OSRS_LOG_DIR.
+- NEEDS_CONFIGURATION: Server must set OSRS_APP_DIR or deploy to /var/www/osrs-services/current.
+
+Nginx and network
+- READY: deploy/nginx/osrs-services.conf.example routes / to 127.0.0.1:3000.
+- READY: deploy/nginx/osrs-services.conf.example routes /socket.io to 127.0.0.1:3001.
+- READY: Nginx template includes WebSocket upgrade headers, Host and X-Forwarded headers, X-Forwarded-Proto, request-size limit and Socket.IO timeouts.
+- READY: Nginx template includes HTTP to HTTPS redirect and no wildcard CORS.
+- NEEDS_CONFIGURATION: Real staging/production hostnames must replace placeholders.
+- NEEDS_CONFIGURATION: Real certificate paths must be configured only after certificates are issued.
+- NEEDS_CONFIGURATION: Nginx syntax must be tested on the server with sudo nginx -t.
+
+Database and Prisma
+- READY: prisma/schema.prisma is MySQL-based and includes additive Task 001-016 schema.
+- READY: prisma/migrations includes migrations through 20260810150000_task016_payments_launch_readiness.
+- READY: Production procedure uses pnpm db:generate, pnpm db:migrate and pnpm db:seed.
+- READY: Backup and restore templates avoid embedded database passwords.
+- NEEDS_CONFIGURATION: MySQL 8 database and restricted osrs_app user must be created on staging/production.
+- NEEDS_CONFIGURATION: Backup location must be sized and secured.
+- NEEDS_CLIENT_INPUT: Any production seed admin account must use client-approved private credentials.
+
+Health and readiness
+- READY: /health returns no-store liveness payload.
+- READY: /ready checks database reachability, Task 016 migration presence, private storage writability and safe configuration booleans.
+- NEEDS_CONFIGURATION: /ready requires a real database and writable private attachment directory to pass in staging/production.
+
+Security review
+- READY: next.config.ts disables x-powered-by and sets X-Content-Type-Options, Referrer-Policy, X-Frame-Options, Permissions-Policy and a minimal CSP with frame-ancestors none.
+- READY: Staff and customer sessions use separate cookies.
+- READY: Session cookies are HttpOnly, SameSite=Lax and secure in production.
+- READY: Guest cart, RSN rate-limit and chat guest cookies use HttpOnly/SameSite and production secure behavior.
+- READY: RSN_DEVELOPMENT_FIXTURE is rejected in production environment parsing.
+- READY: TEST_HOSTED payment provider is rejected in production environment parsing and adapter logic.
+- READY: TEST_EMAIL delivery is rejected for production email delivery.
+- READY: Chat CORS requires explicit HTTP(S) origins and rejects wildcard origins.
+- READY: Private attachment storage is checked to remain outside public/.
+- READY: Checkout and chat text validation reject credential-like data.
+- OPTIONAL_POST_LAUNCH: A broader route-specific CSP can be designed later if required by a security review.
+- OPTIONAL_POST_LAUNCH: Persistent distributed rate limiting can be added later if traffic exceeds single-node assumptions.
+
+Checkout, payment and email
+- READY: Manual-review checkout foundation exists.
+- READY: Payment provider-neutral tables and admin review pages exist.
+- READY: External hosted payment provider is not implemented or activated by this task.
+- READY: TEST_HOSTED remains local/CI fixture only and blocked in production.
+- READY: Email templates and delivery rows exist with delivery disabled by default.
+- NEEDS_CLIENT_INPUT: Manual payment method and customer-facing instructions require final client approval.
+- NEEDS_CLIENT_INPUT: Terms, Privacy Policy and Refund Policy require client-approved legal copy.
+- NEEDS_CONFIGURATION: SMTP server values must be configured privately before email activation.
+- OPTIONAL_POST_LAUNCH: Stripe, PayPal or any other real provider integration is a separate approved task.
+- OPTIONAL_POST_LAUNCH: Live refund automation is a separate approved task.
+
+Chat
+- READY: realtime/chat-server.ts runs as separate Socket.IO gateway with /health and /chat/health.
+- READY: Chat gateway authenticates from cookies only and rejects auth/query token payloads.
+- READY: Chat gateway is intentionally single-node for Task 015.
+- NEEDS_CONFIGURATION: PM2/Nginx/WebSocket path must be validated on staging.
+- NEEDS_CLIENT_INPUT: Chat operating hours, offline copy and staffing model require approval.
+- OPTIONAL_POST_LAUNCH: Multi-node Socket.IO scaling is outside initial launch.
+
+Feature flags and business data
+- READY: Production-impacting feature flags default to off except catalogue_card_engine_enabled.
+- READY: Feature flags are not changed automatically by release scripts or docs.
+- NEEDS_CLIENT_INPUT: Final prices, delivery estimates, gold rates, gold stock, product stock, account listings and feature launch state require approval.
+- NEEDS_CLIENT_INPUT: Customer accounts, registration, dashboard, cart, checkout and chat activation require deliberate launch decision.
+- OPTIONAL_POST_LAUNCH: Membership, loyalty, reviews, referrals, recurring subscriptions, new calculators, new marketplaces and AI/chatbot features remain outside launch scope.
+
+DNS and deployment
+- READY: GoDaddy DNS cutover doc preserves MX, SPF, DKIM, DMARC and TXT verification records.
+- READY: Release script does not alter DNS, feature flags, payment provider settings or SMTP activation.
+- READY: No deployment was performed by this launch-prep task.
+- NEEDS_CONFIGURATION: Staging DNS and SSL must be configured first.
+- NEEDS_CLIENT_INPUT: Production DNS cutover requires explicit client approval and approved server IP.
