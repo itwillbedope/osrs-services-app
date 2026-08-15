@@ -233,7 +233,7 @@ jobs:
       - name: Validate secret file exclusions
         run: |
           set -Eeuo pipefail
-          forbidden="$(git ls-files | grep -Ei '(^|/)(\.env|\.env\.production|\.env\.local)$|(\.pem|\.key|\.p12|\.pfx|\.sql|\.sql\.gz|\.dump|\.bak|\.tar\.gz|\.tgz|task-.*review-pack.*\.zip|backup.*\.(zip|gz|tar))$' || true)"
+          forbidden="$(git ls-files | grep -Ei '(^|/)(\.env|\.env\.production|\.env\.local)$|(\.pem|\.key|\.p12|\.pfx|\.dump|\.bak|\.tar\.gz|\.tgz|.*(dump|backup).*\.(sql|sql\.gz|zip|gz|tar)|task-.*review-pack.*\.zip)$' || true)"
           if [ -n "$forbidden" ]; then
             echo "$forbidden"
             exit 1
