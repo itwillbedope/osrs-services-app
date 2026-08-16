@@ -52,6 +52,8 @@ type Offering = {
   quantityUnit: string | null;
   minimumQuantity: number | null;
   maximumQuantity: number | null;
+  basePriceCents: number | null;
+  pricingUnit: string | null;
   effectiveGameModes: Array<{ gameMode: keyof typeof gameModeLabels }>;
   facets: Array<{ id: string; label: string }>;
   requirements: Requirement[];
@@ -94,6 +96,15 @@ function isReachableRecommendation(
     (!publishAt || publishAt <= now) &&
     (!unpublishAt || unpublishAt > now)
   );
+}
+
+const usdFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+});
+
+function formatCents(cents: number) {
+  return usdFormatter.format(cents / 100);
 }
 
 export function CatalogueCardEngine({
@@ -155,8 +166,8 @@ export function CatalogueCardEngine({
             Request a tailored quote
           </h2>
           <p className="text-text-secondary mt-3 text-sm leading-6">
-            Pricing and expected timing are confirmed only after requirements
-            are reviewed.
+            Reference prices are starting points. Final pricing and timing are
+            confirmed after requirements are reviewed.
           </p>
           <Button asChild className="mt-6 w-full">
             <a href={requestHref}>Request a quote</a>
@@ -273,6 +284,24 @@ export function CatalogueCardEngine({
               <p className="text-text-secondary mt-3 flex-1 text-sm leading-6">
                 {offering.shortSummary}
               </p>
+              {offering.basePriceCents != null && (
+                <div className="border-border bg-background/55 mt-5 rounded-xl border p-4">
+                  <p className="text-text-muted text-xs font-bold">
+                    Reference starting price
+                  </p>
+                  <p className="mt-1 text-xl font-bold">
+                    {formatCents(offering.basePriceCents)}
+                    {offering.pricingUnit ? (
+                      <span className="text-text-muted ml-2 text-xs font-semibold">
+                        {offering.pricingUnit}
+                      </span>
+                    ) : null}
+                  </p>
+                  <p className="text-text-muted mt-2 text-xs">
+                    Support confirms the final quote after review.
+                  </p>
+                </div>
+              )}
               <div className="mt-5 flex flex-wrap gap-2">
                 {offering.effectiveGameModes.map(({ gameMode }) => (
                   <span

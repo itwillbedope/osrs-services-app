@@ -87,6 +87,8 @@ export const publicOfferingSelect = {
   quantityUnit: true,
   minimumQuantity: true,
   maximumQuantity: true,
+  basePriceCents: true,
+  pricingUnit: true,
   gameModes: { orderBy: { gameMode: "asc" as const } },
   facets: {
     orderBy: [{ displayOrder: "asc" as const }, { label: "asc" as const }],

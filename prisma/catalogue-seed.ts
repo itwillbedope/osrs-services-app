@@ -1,3 +1,14 @@
+import {
+  loadReferenceSnapshot,
+  referenceRecords,
+  requireReferenceRecord,
+  slugify,
+  stableKey,
+  stableReferenceKey,
+  type FirstSellerReferenceSnapshot,
+  type ReferenceRecord,
+} from "./reference-snapshot";
+
 export type CatalogueSeedClient = {
   catalogueCategory: {
     upsert(args: {
@@ -96,6 +107,9 @@ export type CatalogueSeedClient = {
         quantityUnit?: string;
         minimumQuantity?: number;
         maximumQuantity?: number;
+        basePriceCents?: number;
+        pricingUnit?: string;
+        referenceSourceKey?: string;
       };
       update: Record<string, never>;
       select: { id: true };
@@ -719,6 +733,31 @@ const catalogueServiceSeeds = [
       },
     ],
   },
+  {
+    key: "ironman-gathering-support",
+    categoryKey: "ironman-gathering",
+    name: "Ironman gathering support",
+    slug: "ironman-gathering-support",
+    summary:
+      "Browse Ironman gathering and supply-support requests with quantity and requirement review.",
+    content:
+      "Ironman gathering requests are scoped around account mode, current unlocks, quantity and collection restrictions. Staff confirms availability and final timing before any order step.",
+    engineType: "CATALOGUE_CARD" as const,
+    featured: false,
+    order: 70,
+    modes: ["IRONMAN", "HARDCORE_IRONMAN", "ULTIMATE_IRONMAN"] as const,
+    requirements: [
+      {
+        key: "ironman-gathering-context",
+        title: "Gathering context",
+        description:
+          "Confirm current unlocks, area access, restrictions and the requested quantity.",
+        type: "ACTIVITY" as const,
+        required: true,
+        verification: "SUPPORT_VERIFIED" as const,
+      },
+    ],
+  },
 ] as const;
 
 const catalogueOfferingSeeds = [
@@ -735,6 +774,7 @@ const catalogueOfferingSeeds = [
     featured: true,
     group: "Quest package",
     tier: "Long-form",
+    reference: ["quests", "quest", "recipe-for-disaster"] as const,
     modes: ["NORMAL", "IRONMAN"] as const,
     facets: [
       ["difficulty", "advanced", "Advanced"],
@@ -760,6 +800,7 @@ const catalogueOfferingSeeds = [
     featured: false,
     group: "Individual quest",
     tier: "Grandmaster",
+    reference: ["quests", "quest", "dragon-slayer-ii"] as const,
     modes: ["NORMAL", "IRONMAN"] as const,
     facets: [
       ["difficulty", "grandmaster", "Grandmaster"],
@@ -785,6 +826,7 @@ const catalogueOfferingSeeds = [
     featured: false,
     group: "Ardougne",
     tier: "Easy",
+    reference: ["diaries", "achievement-diary", "ardougne-easy"] as const,
     modes: [] as const,
     facets: [
       ["region", "ardougne", "Ardougne"],
@@ -810,6 +852,7 @@ const catalogueOfferingSeeds = [
     featured: true,
     group: "Kandarin",
     tier: "Hard",
+    reference: ["diaries", "achievement-diary", "kandarin-hard"] as const,
     modes: [] as const,
     facets: [
       ["region", "kandarin", "Kandarin"],
@@ -835,6 +878,11 @@ const catalogueOfferingSeeds = [
     featured: true,
     group: "Tier package",
     tier: "Easy",
+    reference: [
+      "combat-achievements",
+      "combat-achievement-tier",
+      "easy",
+    ] as const,
     modes: ["NORMAL", "IRONMAN"] as const,
     facets: [
       ["tier", "easy", "Easy"],
@@ -860,6 +908,11 @@ const catalogueOfferingSeeds = [
     featured: false,
     group: "Tier package",
     tier: "Medium",
+    reference: [
+      "combat-achievements",
+      "combat-achievement-tier",
+      "medium",
+    ] as const,
     modes: ["NORMAL", "IRONMAN", "HARDCORE_IRONMAN"] as const,
     facets: [
       ["tier", "medium", "Medium"],
@@ -885,6 +938,7 @@ const catalogueOfferingSeeds = [
     featured: true,
     group: "Team minigame",
     tier: "Role package",
+    reference: ["minigames", "minigame", "barbarian-assault"] as const,
     modes: [] as const,
     facets: [
       ["activity-type", "team", "Team activity"],
@@ -910,6 +964,7 @@ const catalogueOfferingSeeds = [
     featured: false,
     group: "Combat minigame",
     tier: "Points package",
+    reference: ["minigames", "minigame", "pest-control"] as const,
     modes: ["NORMAL", "IRONMAN"] as const,
     facets: [
       ["activity-type", "combat", "Combat"],
@@ -932,28 +987,28 @@ const skillingSkillSeeds: Array<{
   enabled: boolean;
 }> = [
   { key: "ATTACK", name: "Attack", icon: "sword", enabled: true },
-  { key: "STRENGTH", name: "Strength", icon: "strength", enabled: false },
-  { key: "DEFENCE", name: "Defence", icon: "shield", enabled: false },
-  { key: "RANGED", name: "Ranged", icon: "bow", enabled: false },
-  { key: "PRAYER", name: "Prayer", icon: "prayer", enabled: false },
-  { key: "MAGIC", name: "Magic", icon: "magic", enabled: false },
-  { key: "RUNECRAFT", name: "Runecraft", icon: "rune", enabled: false },
-  { key: "CONSTRUCTION", name: "Construction", icon: "house", enabled: false },
-  { key: "HITPOINTS", name: "Hitpoints", icon: "heart", enabled: false },
+  { key: "STRENGTH", name: "Strength", icon: "strength", enabled: true },
+  { key: "DEFENCE", name: "Defence", icon: "shield", enabled: true },
+  { key: "RANGED", name: "Ranged", icon: "bow", enabled: true },
+  { key: "PRAYER", name: "Prayer", icon: "prayer", enabled: true },
+  { key: "MAGIC", name: "Magic", icon: "magic", enabled: true },
+  { key: "RUNECRAFT", name: "Runecraft", icon: "rune", enabled: true },
+  { key: "CONSTRUCTION", name: "Construction", icon: "house", enabled: true },
+  { key: "HITPOINTS", name: "Hitpoints", icon: "heart", enabled: true },
   { key: "AGILITY", name: "Agility", icon: "footprints", enabled: true },
-  { key: "HERBLORE", name: "Herblore", icon: "flask", enabled: false },
-  { key: "THIEVING", name: "Thieving", icon: "mask", enabled: false },
-  { key: "CRAFTING", name: "Crafting", icon: "gem", enabled: false },
-  { key: "FLETCHING", name: "Fletching", icon: "arrow", enabled: false },
-  { key: "SLAYER", name: "Slayer", icon: "skull", enabled: false },
-  { key: "HUNTER", name: "Hunter", icon: "trap", enabled: false },
+  { key: "HERBLORE", name: "Herblore", icon: "flask", enabled: true },
+  { key: "THIEVING", name: "Thieving", icon: "mask", enabled: true },
+  { key: "CRAFTING", name: "Crafting", icon: "gem", enabled: true },
+  { key: "FLETCHING", name: "Fletching", icon: "arrow", enabled: true },
+  { key: "SLAYER", name: "Slayer", icon: "skull", enabled: true },
+  { key: "HUNTER", name: "Hunter", icon: "trap", enabled: true },
   { key: "MINING", name: "Mining", icon: "pickaxe", enabled: true },
-  { key: "SMITHING", name: "Smithing", icon: "anvil", enabled: false },
-  { key: "FISHING", name: "Fishing", icon: "fish", enabled: false },
+  { key: "SMITHING", name: "Smithing", icon: "anvil", enabled: true },
+  { key: "FISHING", name: "Fishing", icon: "fish", enabled: true },
   { key: "COOKING", name: "Cooking", icon: "flame", enabled: true },
-  { key: "FIREMAKING", name: "Firemaking", icon: "campfire", enabled: false },
-  { key: "WOODCUTTING", name: "Woodcutting", icon: "axe", enabled: false },
-  { key: "FARMING", name: "Farming", icon: "sprout", enabled: false },
+  { key: "FIREMAKING", name: "Firemaking", icon: "campfire", enabled: true },
+  { key: "WOODCUTTING", name: "Woodcutting", icon: "axe", enabled: true },
+  { key: "FARMING", name: "Farming", icon: "sprout", enabled: true },
 ];
 
 const skillingMethodSeeds = [
@@ -1042,10 +1097,10 @@ const bossingBossSeeds = [
         priceMode: "PER_KILL" as const,
         minKills: 1,
         maxKills: 250,
-        centsPerKill: 65,
+        centsPerKill: 20,
         packageCents: 0,
-        minimumCents: 500,
-        setupCents: 150,
+        minimumCents: 20,
+        setupCents: 0,
         tier: "Entry",
         requirements:
           "Public combat stats can be checked. Gear and Falador access remain customer/support confirmed.",
@@ -1096,12 +1151,12 @@ const bossingBossSeeds = [
         summary:
           "A package-style PvM request with configured bounds and manual unlock review.",
         order: 10,
-        priceMode: "FIXED_PACKAGE" as const,
-        minKills: 10,
-        maxKills: 100,
-        centsPerKill: 0,
-        packageCents: 1800,
-        minimumCents: 1800,
+        priceMode: "PER_KILL" as const,
+        minKills: 1,
+        maxKills: 1000,
+        centsPerKill: 30,
+        packageCents: 0,
+        minimumCents: 30,
         setupCents: 0,
         tier: "Classic",
         requirements:
@@ -1141,7 +1196,7 @@ const bossingBossSeeds = [
     group: "Advanced PvM",
     icon: "target",
     description:
-      "Representative advanced PvM configuration. Rates are placeholders that require client review.",
+      "Advanced PvM configuration with staff-reviewed access, gear and unlock requirements.",
     enabled: true,
     order: 30,
     methods: [
@@ -1153,12 +1208,12 @@ const bossingBossSeeds = [
           "An advanced kill-count request with higher stat checks and explicit support-verified unlocks.",
         order: 10,
         priceMode: "PER_KILL" as const,
-        minKills: 5,
-        maxKills: 200,
-        centsPerKill: 220,
+        minKills: 1,
+        maxKills: 1000,
+        centsPerKill: 40,
         packageCents: 0,
-        minimumCents: 1400,
-        setupCents: 300,
+        minimumCents: 40,
+        setupCents: 0,
         tier: "Advanced",
         requirements:
           "Public Ranged, Magic and Hitpoints levels can be checked. Quest completion and gear ownership are not inferred.",
@@ -1201,8 +1256,8 @@ const premiumPackageSeeds = [
     summary:
       "Representative Jad completion package using reviewed combat stats and customer-confirmed gear.",
     order: 10,
-    baseCents: 2499,
-    minimumCents: 2499,
+    baseCents: 1000,
+    minimumCents: 1000,
     setupCents: 0,
     hours: 2,
     tier: "Standard",
@@ -1286,8 +1341,8 @@ const premiumPackageSeeds = [
     summary:
       "Representative package for accounts that already confirm stronger stats, unlocks and supplies.",
     order: 20,
-    baseCents: 1999,
-    minimumCents: 1999,
+    baseCents: 1000,
+    minimumCents: 1000,
     setupCents: 0,
     hours: 1,
     tier: "Prepared",
@@ -1407,7 +1462,393 @@ const premiumOptionSeeds = [
   },
 ] as const;
 
+const referenceCatalogueSources = [
+  {
+    categoryKey: "quests",
+    serviceKey: "quest-progression",
+    recordTypes: ["quest"],
+    groupLabel: "Quest",
+    requirementType: "QUEST" as const,
+    requirementTitle: "Quest prerequisites",
+    requirementDescription:
+      "Confirm prerequisite quests, levels and account restrictions before review.",
+    modes: ["NORMAL", "IRONMAN"] as const,
+    orderOffset: 1000,
+  },
+  {
+    categoryKey: "diaries",
+    serviceKey: "diary-progression",
+    recordTypes: ["achievement-diary"],
+    groupLabel: "Achievement diary",
+    requirementType: "ACCOUNT" as const,
+    requirementTitle: "Diary progress",
+    requirementDescription:
+      "Confirm completed tasks and any missing non-public requirements.",
+    modes: [
+      "NORMAL",
+      "IRONMAN",
+      "HARDCORE_IRONMAN",
+      "ULTIMATE_IRONMAN",
+    ] as const,
+    orderOffset: 2000,
+  },
+  {
+    categoryKey: "combat-achievements",
+    serviceKey: "combat-achievement-packages",
+    recordTypes: ["combat-achievement-tier", "combat-achievement-task"],
+    groupLabel: "Combat achievement",
+    requirementType: "ACTIVITY" as const,
+    requirementTitle: "Combat task scope",
+    requirementDescription:
+      "Confirm task selection, gear constraints and unlock context with support.",
+    modes: ["NORMAL", "IRONMAN", "HARDCORE_IRONMAN"] as const,
+    orderOffset: 3000,
+  },
+  {
+    categoryKey: "minigames",
+    serviceKey: "minigame-support",
+    recordTypes: ["minigame"],
+    groupLabel: "Minigame",
+    requirementType: "ACTIVITY" as const,
+    requirementTitle: "Minigame access",
+    requirementDescription:
+      "Confirm access, role, unlocks and account restrictions before review.",
+    modes: [
+      "NORMAL",
+      "IRONMAN",
+      "HARDCORE_IRONMAN",
+      "ULTIMATE_IRONMAN",
+    ] as const,
+    orderOffset: 4000,
+  },
+  {
+    categoryKey: "ironman",
+    serviceKey: "ironman-gathering-support",
+    recordTypes: ["ironman-gathering"],
+    groupLabel: "Ironman gathering",
+    requirementType: "ACTIVITY" as const,
+    requirementTitle: "Gathering requirements",
+    requirementDescription:
+      "Confirm account restrictions, unlocks and the requested quantity.",
+    modes: ["IRONMAN", "HARDCORE_IRONMAN", "ULTIMATE_IRONMAN"] as const,
+    orderOffset: 5000,
+  },
+] as const;
+
+const skillKeyByReferenceName = new Map<string, SkillingSkillKey>(
+  skillingSkillSeeds.map((skill) => [skill.name.toLowerCase(), skill.key]),
+);
+
+function referenceLabel(value: string) {
+  return value
+    .split(/[-_]+/g)
+    .filter(Boolean)
+    .map((part) => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`)
+    .join(" ");
+}
+
+function trimField(value: string, maxLength: number) {
+  return value.length <= maxLength ? value : value.slice(0, maxLength - 1);
+}
+
+function referenceOfferingSeededKey(
+  serviceKey: string,
+  record: ReferenceRecord,
+) {
+  return stableKey(
+    "reference-offering",
+    [serviceKey, record.recordType, record.slug],
+    140,
+  );
+}
+
+function referenceOfferingRequirementKey(
+  serviceKey: string,
+  record: ReferenceRecord,
+) {
+  return stableKey(
+    "reference-offering-requirement",
+    [serviceKey, record.recordType, record.slug],
+    160,
+  );
+}
+
+async function seedReferenceCatalogueOfferings(
+  prisma: CatalogueSeedClient,
+  serviceIds: Map<string, string>,
+  snapshot: FirstSellerReferenceSnapshot,
+) {
+  for (const source of referenceCatalogueSources) {
+    const serviceId = serviceIds.get(source.serviceKey);
+    if (!serviceId) continue;
+    let displayOffset = 0;
+    for (const record of referenceRecords(snapshot, source.categoryKey).filter(
+      (item) =>
+        (source.recordTypes as readonly string[]).includes(item.recordType),
+    )) {
+      const sourceKey = stableReferenceKey(source.categoryKey, record);
+      displayOffset += 1;
+      const quantity = numberFieldForSeed(record, "baseQuantity");
+      const seededKey = referenceOfferingSeededKey(source.serviceKey, record);
+      const offering = await prisma.catalogueOffering.upsert({
+        where: { seededKey },
+        create: {
+          seededKey,
+          serviceId,
+          slug: trimField(`reference-${record.slug}`, 180),
+          name: trimField(record.name, 191),
+          shortSummary: trimField(
+            `${record.name} reference option with final scope confirmed by support.`,
+            500,
+          ),
+          description:
+            "This option is seeded from the committed public reference snapshot. Staff confirms requirements, timing and final quote before any order step.",
+          displayOrder: source.orderOffset + displayOffset,
+          isActive: true,
+          isFeatured: displayOffset <= 3,
+          needsClientReview: true,
+          groupLabel: source.groupLabel,
+          tierLabel: record.subcategory
+            ? trimField(record.subcategory, 120)
+            : referenceLabel(record.recordType).slice(0, 120),
+          basePriceCents: record.priceCents,
+          pricingUnit: record.pricingUnit ?? undefined,
+          referenceSourceKey: sourceKey,
+          quantityEnabled: quantity != null,
+          ...(quantity != null
+            ? {
+                quantityUnit: record.pricingUnit ?? "quantity",
+                minimumQuantity: quantity,
+              }
+            : {}),
+        },
+        update: {},
+        select: { id: true },
+      });
+
+      await prisma.catalogueOfferingFacet.createMany({
+        data: [
+          {
+            offeringId: offering.id,
+            facetKey: "reference-category",
+            facetValue: slugify(source.categoryKey),
+            label: referenceLabel(source.categoryKey),
+            displayOrder: 10,
+          },
+          ...(record.subcategory
+            ? [
+                {
+                  offeringId: offering.id,
+                  facetKey: "reference-group",
+                  facetValue: slugify(record.subcategory),
+                  label: trimField(record.subcategory, 160),
+                  displayOrder: 20,
+                },
+              ]
+            : []),
+          {
+            offeringId: offering.id,
+            facetKey: "record-type",
+            facetValue: slugify(record.recordType),
+            label: referenceLabel(record.recordType),
+            displayOrder: 30,
+          },
+        ],
+        skipDuplicates: true,
+      });
+
+      await prisma.catalogueOfferingGameMode.createMany({
+        data: source.modes.map((gameMode) => ({
+          offeringId: offering.id,
+          gameMode,
+        })),
+        skipDuplicates: true,
+      });
+
+      await prisma.catalogueOfferingRequirement.createMany({
+        data: [
+          {
+            seededKey: referenceOfferingRequirementKey(
+              source.serviceKey,
+              record,
+            ),
+            offeringId: offering.id,
+            title: source.requirementTitle,
+            description: source.requirementDescription,
+            type: source.requirementType,
+            isRequired: true,
+            displayOrder: 10,
+            verificationMode: "SUPPORT_VERIFIED",
+            customerGuidance:
+              "Support reviews this requirement before confirming the final quote.",
+          },
+        ],
+        skipDuplicates: true,
+      });
+    }
+  }
+}
+
+function numberFieldForSeed(record: ReferenceRecord, key: string) {
+  const value = record[key];
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.max(1, Math.round(value))
+    : null;
+}
+
+function skillingSkillKey(record: ReferenceRecord) {
+  return typeof record.subcategory === "string"
+    ? skillKeyByReferenceName.get(record.subcategory.toLowerCase())
+    : undefined;
+}
+
+async function seedReferenceSkillingMethods(
+  prisma: CatalogueSeedClient,
+  serviceId: string,
+  skillIds: Map<SkillingSkillKey, string>,
+  snapshot: FirstSellerReferenceSnapshot,
+) {
+  let displayOffset = 1000;
+  for (const record of referenceRecords(
+    snapshot,
+    "skilling",
+    "skilling-level-band",
+  )) {
+    const skillKey = skillingSkillKey(record);
+    if (!skillKey) continue;
+    displayOffset += 1;
+    const seededKey = stableKey(
+      "skill-training-reference",
+      [skillKey, record.slug],
+      160,
+    );
+    const minimumLevel = referenceLevelField(record, "minimum") ?? 1;
+    const maximumLevel = referenceLevelField(record, "maximum") ?? 99;
+    const methodName =
+      typeof record["method"] === "string" ? record["method"] : record.name;
+    await prisma.skillingTrainingMethod.upsert({
+      where: { seededKey },
+      create: {
+        seededKey,
+        serviceId,
+        skillConfigId: skillIds.get(skillKey)!,
+        slug: trimField(record.slug, 180),
+        name: trimField(`${record.name}`, 160),
+        shortDescription: trimField(
+          `${methodName} reference route. Requirements and materials are reviewed before final quote.`,
+          500,
+        ),
+        enabled: true,
+        displayOrder: displayOffset,
+        minimumLevel,
+        maximumLevel,
+        xpPerHour: 1_000_000,
+        basePriceCentsPerMillionXp: record.priceCents,
+        minimumPriceCents: Math.max(record.priceCents, 1),
+        fixedFeeCents: 0,
+        suppliesEnabled: false,
+        suppliesFeeCents: 0,
+        notes:
+          "Seeded from committed FirstSeller public reference snapshot for pricing parity validation.",
+        needsClientReview: true,
+      },
+      update: {},
+      select: { id: true },
+    });
+  }
+}
+
+function referenceLevelField(record: ReferenceRecord, field: string) {
+  const value = record["levelRange"];
+  if (typeof value !== "object" || value === null) return null;
+  const nested = (value as Record<string, unknown>)[field];
+  return typeof nested === "number" && Number.isFinite(nested)
+    ? Math.round(nested)
+    : null;
+}
+
+async function seedReferenceBossingMethods(
+  prisma: CatalogueSeedClient,
+  serviceId: string,
+  snapshot: FirstSellerReferenceSnapshot,
+) {
+  let displayOffset = 1000;
+  for (const record of referenceRecords(snapshot, "pvm", "pvm-kill")) {
+    displayOffset += 1;
+    const bossSeededKey = stableKey(
+      "pvm-support-reference",
+      [record.slug],
+      160,
+    );
+    const bossRecord = await prisma.bossingBossConfig.upsert({
+      where: { seededKey: bossSeededKey },
+      create: {
+        seededKey: bossSeededKey,
+        serviceId,
+        bossKey: trimField(`reference-${record.slug}`, 120),
+        name: trimField(record.name, 160),
+        enabled: true,
+        displayOrder: displayOffset,
+        groupLabel: "Reference PvM",
+        iconKey: "swords",
+        description:
+          "Public reference boss entry with account preparation and gear reviewed by support.",
+        needsClientReview: true,
+      },
+      update: {},
+      select: { id: true },
+    });
+    await prisma.bossingMethod.upsert({
+      where: {
+        seededKey: stableKey(
+          "pvm-support-reference-method",
+          [record.slug, "standard-kills"],
+          180,
+        ),
+      },
+      create: {
+        seededKey: stableKey(
+          "pvm-support-reference-method",
+          [record.slug, "standard-kills"],
+          180,
+        ),
+        serviceId,
+        bossId: bossRecord.id,
+        slug: "standard-kills",
+        name: "Standard kill support",
+        shortDescription:
+          "Per-kill reference pricing with final requirements confirmed by support.",
+        enabled: true,
+        displayOrder: 10,
+        priceMode: "PER_KILL",
+        minimumKillCount: 1,
+        maximumKillCount: 1000,
+        basePriceCentsPerKill: record.priceCents,
+        fixedPackagePriceCents: 0,
+        minimumPriceCents: Math.max(record.priceCents, 1),
+        setupFeeCents: 0,
+        difficultyTierLabel: "Reference",
+        expectedRequirementsSummary:
+          "Stats, quest access, unlocks, gear and supply readiness are reviewed before quote confirmation.",
+        gearNotes:
+          "Customer confirms gear; support verifies non-public unlock context.",
+        supplyNotes: "Supply support remains separately reviewed.",
+        suppliesEnabled: false,
+        suppliesFeeCents: 0,
+        customerGearRequired: true,
+        customerGearLabel: "Customer confirms suitable encounter gear",
+        gearAdjustmentCents: 0,
+        estimatedKillsPerHour: 1,
+        needsClientReview: true,
+      },
+      update: {},
+      select: { id: true },
+    });
+  }
+}
+
 export async function seedCatalogue(prisma: CatalogueSeedClient) {
+  const referenceSnapshot = loadReferenceSnapshot();
   const categoryIds = new Map<string, string>();
   const serviceIds = new Map<string, string>();
 
@@ -1490,6 +1931,19 @@ export async function seedCatalogue(prisma: CatalogueSeedClient) {
 
   for (const definition of catalogueOfferingSeeds) {
     const quantity = "quantity" in definition ? definition.quantity : undefined;
+    const priceReference = (() => {
+      if (!("reference" in definition)) return null;
+      const [categoryKey, recordType, slug] = definition.reference;
+      return {
+        categoryKey,
+        record: requireReferenceRecord(
+          referenceSnapshot,
+          categoryKey,
+          recordType,
+          slug,
+        ),
+      };
+    })();
     const offering = await prisma.catalogueOffering.upsert({
       where: { seededKey: definition.key },
       create: {
@@ -1505,6 +1959,16 @@ export async function seedCatalogue(prisma: CatalogueSeedClient) {
         needsClientReview: true,
         groupLabel: definition.group,
         tierLabel: definition.tier,
+        ...(priceReference
+          ? {
+              basePriceCents: priceReference.record.priceCents,
+              pricingUnit: priceReference.record.pricingUnit ?? undefined,
+              referenceSourceKey: stableReferenceKey(
+                priceReference.categoryKey,
+                priceReference.record,
+              ),
+            }
+          : {}),
         quantityEnabled: Boolean(quantity),
         ...(quantity
           ? {
@@ -1553,6 +2017,8 @@ export async function seedCatalogue(prisma: CatalogueSeedClient) {
       skipDuplicates: true,
     });
   }
+
+  await seedReferenceCatalogueOfferings(prisma, serviceIds, referenceSnapshot);
 
   const skillingServiceId = serviceIds.get("skill-training-request");
   if (skillingServiceId) {
@@ -1643,6 +2109,13 @@ export async function seedCatalogue(prisma: CatalogueSeedClient) {
         select: { id: true },
       });
     }
+
+    await seedReferenceSkillingMethods(
+      prisma,
+      skillingServiceId,
+      skillIds,
+      referenceSnapshot,
+    );
   }
 
   const bossingServiceId = serviceIds.get("pvm-support");
@@ -1779,6 +2252,12 @@ export async function seedCatalogue(prisma: CatalogueSeedClient) {
         });
       }
     }
+
+    await seedReferenceBossingMethods(
+      prisma,
+      bossingServiceId,
+      referenceSnapshot,
+    );
 
     const premiumServiceId = serviceIds.get("fire-cape-premium");
     if (!premiumServiceId) return;

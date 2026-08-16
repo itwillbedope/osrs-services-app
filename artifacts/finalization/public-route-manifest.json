@@ -1,0 +1,162 @@
+[
+  {
+    "route": "/terms",
+    "file": "src\\app\\(public)\\terms\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/accounts/:listingSlug",
+    "file": "src\\app\\(public)\\accounts\\[listingSlug]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/accounts",
+    "file": "src\\app\\(public)\\accounts\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/support",
+    "file": "src\\app\\(public)\\support\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/orders/track/:token",
+    "file": "src\\app\\(public)\\orders\\track\\[token]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/gold",
+    "file": "src\\app\\(public)\\gold\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/services/:categorySlug/:serviceSlug",
+    "file": "src\\app\\(public)\\services\\[categorySlug]\\[serviceSlug]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/services/:categorySlug",
+    "file": "src\\app\\(public)\\services\\[categorySlug]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/services",
+    "file": "src\\app\\(public)\\services\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/reset/:token",
+    "file": "src\\app\\(public)\\account\\reset\\[token]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/refund-policy",
+    "file": "src\\app\\(public)\\refund-policy\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/register",
+    "file": "src\\app\\(public)\\account\\register\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/recovery",
+    "file": "src\\app\\(public)\\account\\recovery\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/custom-account-build/track/:token",
+    "file": "src\\app\\(public)\\custom-account-build\\track\\[token]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/custom-account-build",
+    "file": "src\\app\\(public)\\custom-account-build\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/products/:productSlug",
+    "file": "src\\app\\(public)\\products\\[productSlug]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/products",
+    "file": "src\\app\\(public)\\products\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/login",
+    "file": "src\\app\\(public)\\account\\login\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/privacy",
+    "file": "src\\app\\(public)\\privacy\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/",
+    "file": "src\\app\\(public)\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/checkout",
+    "file": "src\\app\\(public)\\checkout\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/login",
+    "file": "src\\app\\(auth)\\login\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/cart",
+    "file": "src\\app\\(public)\\cart\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/checkout/confirmation/:token",
+    "file": "src\\app\\(public)\\checkout\\confirmation\\[token]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/checkout/payment/:transactionId/:state",
+    "file": "src\\app\\(public)\\checkout\\payment\\[transactionId]\\[state]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/support",
+    "file": "src\\app\\(dashboard)\\account\\support\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/notifications",
+    "file": "src\\app\\(dashboard)\\account\\notifications\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/orders",
+    "file": "src\\app\\(dashboard)\\account\\orders\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account",
+    "file": "src\\app\\(dashboard)\\account\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/security",
+    "file": "src\\app\\(dashboard)\\account\\security\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/profile",
+    "file": "src\\app\\(dashboard)\\account\\profile\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/account/orders/:orderNumber",
+    "file": "src\\app\\(dashboard)\\account\\orders\\[orderNumber]\\page.tsx",
+    "kind": "page"
+  }
+]

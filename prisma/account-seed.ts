@@ -6,10 +6,10 @@ const SERVICE_ID = "accountsservicetask010";
 const MARKETPLACE_ID = "accountmarkettask010";
 
 const categoryDescription =
-  "Browse representative prebuilt account listings after staff review. Account marketplace data is disabled by default until pricing, screenshots and handover wording are approved.";
+  "Browse prebuilt account listings after staff review. Account marketplace data remains staff-reviewed until pricing, screenshots and handover wording are approved.";
 
 const serviceContent =
-  "Account marketplace listings are preview-only in Task 010. Support rechecks availability, price and safe handover readiness before any future checkout step. Never provide sensitive access details in this preview flow.";
+  "Account marketplace listings require support review. Support rechecks availability, price and safe handover readiness before any future checkout step. Never provide sensitive access details in this flow.";
 
 const marketplaceInstructions =
   "Use the listing details to request support review. Availability and price are rechecked before any checkout or handover step exists.";
@@ -21,9 +21,9 @@ const listingSeeds = [
     title: "PvM ready main account",
     slug: "pvm-ready-main-account",
     shortDescription:
-      "Reviewed demo listing for a main account with combat-focused public stats and raid-ready unlock notes.",
+      "Reviewed listing for a main account with combat-focused public stats and raid-ready unlock notes.",
     fullDescription:
-      "This representative account listing demonstrates the Account Marketplace Engine. It contains public-safe stats, unlocks, feature tags and gallery references only. No sign-in identifier, contact detail, sensitive access detail, authenticator material or private handover note is stored.",
+      "This account listing contains public-safe stats, unlocks, feature tags and gallery references only. No sign-in identifier, contact detail, sensitive access detail, authenticator material or private handover note is stored.",
     internalReferenceCode: "ACCT-DEMO-MAIN-PVM",
     basePriceCents: 24999,
     gameMode: "NORMAL" as const,
@@ -65,7 +65,7 @@ const listingSeeds = [
     title: "Ironman skilling account",
     slug: "ironman-skilling-account",
     shortDescription:
-      "Draft demo listing for an Ironman account focused on skilling progression.",
+      "Draft listing for an Ironman account focused on skilling progression.",
     fullDescription:
       "This draft listing is seeded for admin workflow validation and remains private until approved and published.",
     internalReferenceCode: "ACCT-DEMO-IRON-SKILL",
@@ -103,7 +103,7 @@ const listingSeeds = [
     title: "Pure account review listing",
     slug: "pure-account-review-listing",
     shortDescription:
-      "Draft demo listing for a pure account profile awaiting client review.",
+      "Draft listing for a pure account profile awaiting client review.",
     fullDescription:
       "This draft listing validates low-defence account feature tags without making production claims.",
     internalReferenceCode: "ACCT-DEMO-PURE",
@@ -141,15 +141,15 @@ function imageSeed(listingKey: string, listingTitle: string) {
       imageType: "COVER" as const,
       assetPath: "/artwork/portal-hero-desktop.webp",
       altText: `${listingTitle} safe marketplace cover`,
-      caption: "Safe demo artwork, not an account screenshot.",
+      caption: "Safe local artwork, not an account screenshot.",
       sortOrder: 10,
     },
     {
       stableKey: `${listingKey}:gallery`,
       imageType: "GALLERY" as const,
       assetPath: "/artwork/portal-hero-mobile.webp",
-      altText: `${listingTitle} safe gallery placeholder`,
-      caption: "Demo image without private account details.",
+      altText: `${listingTitle} safe gallery image`,
+      caption: "Local image without private account details.",
       sortOrder: 20,
     },
   ];
@@ -248,7 +248,7 @@ export async function seedAccountMarketplace(prisma: PrismaClient) {
       availabilityState: "AVAILABLE",
       publicMarketplaceInstructions: marketplaceInstructions,
       internalNotes:
-        "Task 010 seed data is non-production and must be reviewed before enabling the public flag.",
+        "Seed data is non-production and must be reviewed before enabling account handover.",
       defaultSort: "featured",
       needsClientReview: true,
     },

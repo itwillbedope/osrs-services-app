@@ -97,8 +97,9 @@ export const footerNavigation = {
     { label: "Security and privacy", href: "/#security" },
     { label: "Frequently asked questions", href: "/#faq" },
     { label: "Contact support", href: "/support" },
-    { label: "Terms placeholder", href: "/#legal-note" },
-    { label: "Privacy placeholder", href: "/#legal-note" },
+    { label: "Terms", href: "/terms" },
+    { label: "Privacy", href: "/privacy" },
+    { label: "Refund policy", href: "/refund-policy" },
   ],
 } satisfies Record<string, readonly PublicLink[]>;
 

@@ -63,11 +63,11 @@ export function PublicFooter() {
           id="legal-note"
           className="border-border text-text-muted mt-12 flex flex-col gap-3 border-t pt-6 text-xs leading-5 sm:flex-row sm:items-center sm:justify-between"
         >
-          <p>© {year} OSRS Services. All rights reserved.</p>
+          <p>Copyright {year} OSRS Services. All rights reserved.</p>
           <p className="max-w-2xl sm:text-right">
-            Legal destinations are placeholders for later project tasks. OSRS
-            Services is not affiliated with Jagex. RuneScape is a trademark of
-            its respective owner.
+            Legal policies are available for client review. OSRS Services is not
+            affiliated with Jagex. RuneScape is a trademark of its respective
+            owner.
           </p>
         </div>
       </div>
