@@ -1,0 +1,182 @@
+name: Finalization validation
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "11.7.0"
+  DATABASE_HOST: 127.0.0.1
+  DATABASE_PORT: "3306"
+  DATABASE_USER: root
+  DATABASE_PASSWORD: root
+  DATABASE_ALLOW_PUBLIC_KEY_RETRIEVAL: "true"
+  ADMIN_SEED_EMAIL: admin@example.com
+  ADMIN_SEED_PASSWORD: "FinalizationAdmin!2026"
+  ADMIN_SEED_NAME: "Finalization Admin"
+  AUTH_SECRET: finalization-auth-secret-32-characters-minimum
+  ELIGIBILITY_HMAC_SECRET: finalization-eligibility-secret-32-characters
+  NEXT_PUBLIC_APP_URL: https://osrs-services.example
+  CUSTOMER_SESSION_COOKIE: osrs_customer_session
+  AUTH_SESSION_COOKIE: osrs_staff_session
+  CHAT_ALLOWED_ORIGINS: https://osrs-services.example
+  RSN_DEVELOPMENT_FIXTURE: "false"
+  PAYMENT_PROVIDER: MANUAL_REVIEW
+  EXTERNAL_PAYMENTS_ENABLED: "false"
+  PAYMENT_WEBHOOKS_ENABLED: "false"
+  PAYMENT_REFUNDS_ENABLED: "false"
+  EMAIL_DELIVERY_ENABLED: "false"
+  EMAIL_TRANSPORT: SMTP
+  CUSTOM_BUILD_PRIVATE_ATTACHMENT_ROOT: /tmp/osrs-private-attachments
+
+jobs:
+  fresh-finalization:
+    name: Fresh DB and application validation
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: osrs_finalization
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      DATABASE_NAME: osrs_finalization
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/osrs_finalization
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+          pnpm --version
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Migrate and seed twice
+        run: |
+          pnpm db:migrate
+          pnpm db:seed
+          pnpm db:seed
+
+      - name: Reference pricing parity
+        run: pnpm pricing:reference-check
+
+      - name: Finalization artifacts
+        run: pnpm finalization:artifacts
+
+      - name: Existing validation suite
+        run: |
+          pnpm lint
+          pnpm typecheck
+          pnpm test:seed
+          pnpm test
+          pnpm format:check
+          pnpm build
+          git diff --check
+
+      - name: Production readiness validation
+        env:
+          NODE_ENV: production
+        run: |
+          pnpm production:check
+
+      - name: Payment fixture validation
+        env:
+          EMAIL_DELIVERY_ENABLED: "true"
+          EMAIL_TRANSPORT: TEST_EMAIL
+          PAYMENT_PROVIDER: TEST_HOSTED
+          TEST_HOSTED_PAYMENT_SECRET: finalization-ci-test-hosted-secret-at-least-32-characters
+        run: |
+          pnpm payments:check
+          pnpm exec tsx scripts/build-task016-review-pack.ts --scan-sources
+
+      - name: Upload finalization artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: finalization-artifacts
+          path: artifacts/finalization
+
+  upgrade-finalization:
+    name: Base SHA upgrade validation
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: osrs_upgrade
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+    env:
+      DATABASE_NAME: osrs_upgrade
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/osrs_upgrade
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+          pnpm --version
+
+      - name: Seed required base SHA
+        run: |
+          git worktree add /tmp/osrs-base 5866b5d0e31e1171479d3903b5bd028848209fd9
+          cd /tmp/osrs-base
+          pnpm install --frozen-lockfile
+          pnpm db:generate
+          pnpm db:migrate
+          pnpm db:seed
+
+      - name: Apply final branch migrations and seed
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm db:generate
+          pnpm db:migrate
+          pnpm db:seed
+          pnpm db:seed
+          pnpm pricing:reference-check
+
+      - name: Upload upgrade artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: finalization-upgrade-artifacts
+          path: artifacts/finalization

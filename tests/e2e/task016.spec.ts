@@ -248,14 +248,17 @@ test.describe("Task 016 payment launch readiness", () => {
     await expect(
       page.getByRole("radio", { name: /Hosted checkout test mode/i }),
     ).toBeVisible();
+    const checkoutForm = page.locator(
+      "form[aria-describedby='checkout-state']",
+    );
     await expect(
-      page.getByRole("link", { name: "Terms of Service" }),
+      checkoutForm.getByRole("link", { name: "Terms of Service" }),
     ).toHaveAttribute("href", "/terms");
     await expect(
-      page.getByRole("link", { name: "Privacy Policy" }),
+      checkoutForm.getByRole("link", { name: "Privacy Policy" }),
     ).toHaveAttribute("href", "/privacy");
     await expect(
-      page.getByRole("link", { name: "Refund Policy" }),
+      checkoutForm.getByRole("link", { name: "Refund Policy" }),
     ).toHaveAttribute("href", "/refund-policy");
     await expect(page.getByLabel(/card number/i)).toHaveCount(0);
     await expect(page.getByLabel(/cvv|cvc/i)).toHaveCount(0);

@@ -1,0 +1,5 @@
+Reference pricing parity report
+Status: snapshot-only
+Snapshot captured: 2026-08-16T15:05:21.011Z
+Price records: 1332
+Database environment was not configured; CI runs this check after migration and seeding.

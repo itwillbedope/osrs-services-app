@@ -1,0 +1,447 @@
+[
+  {
+    "route": "/admin/design-system",
+    "file": "src\\app\\(admin)\\admin\\design-system\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/customers/:customerId",
+    "file": "src\\app\\(admin)\\admin\\customers\\[customerId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/customers",
+    "file": "src\\app\\(admin)\\admin\\customers\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/:productId/variants",
+    "file": "src\\app\\(admin)\\admin\\products\\[productId]\\variants\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/payments/:transactionId",
+    "file": "src\\app\\(admin)\\admin\\payments\\[transactionId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/payments",
+    "file": "src\\app\\(admin)\\admin\\payments\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin",
+    "file": "src\\app\\(admin)\\admin\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/:productId/reservations",
+    "file": "src\\app\\(admin)\\admin\\products\\[productId]\\reservations\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/:productId/pricing",
+    "file": "src\\app\\(admin)\\admin\\products\\[productId]\\pricing\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/:productId",
+    "file": "src\\app\\(admin)\\admin\\products\\[productId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/launch-readiness",
+    "file": "src\\app\\(admin)\\admin\\launch-readiness\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/checkout/payment-methods",
+    "file": "src\\app\\(admin)\\admin\\checkout\\payment-methods\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/:productId/media",
+    "file": "src\\app\\(admin)\\admin\\products\\[productId]\\media\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/checkout/email",
+    "file": "src\\app\\(admin)\\admin\\checkout\\email\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/orders/:orderId",
+    "file": "src\\app\\(admin)\\admin\\orders\\[orderId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/orders",
+    "file": "src\\app\\(admin)\\admin\\orders\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/rules",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\rules\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/:productId/inventory",
+    "file": "src\\app\\(admin)\\admin\\products\\[productId]\\inventory\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/checkout/payment-eligibility",
+    "file": "src\\app\\(admin)\\admin\\checkout\\payment-eligibility\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/checkout",
+    "file": "src\\app\\(admin)\\admin\\checkout\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/gold/preview",
+    "file": "src\\app\\(admin)\\admin\\gold\\preview\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/gold",
+    "file": "src\\app\\(admin)\\admin\\gold\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/new",
+    "file": "src\\app\\(admin)\\admin\\products\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/revisions",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\revisions\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/:productId/history",
+    "file": "src\\app\\(admin)\\admin\\products\\[productId]\\history\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/categories/:id",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\categories\\[id]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/categories",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\categories\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/chat/:conversationId",
+    "file": "src\\app\\(admin)\\admin\\chat\\[conversationId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/chat",
+    "file": "src\\app\\(admin)\\admin\\chat\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/skilling",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\skilling\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/categories",
+    "file": "src\\app\\(admin)\\admin\\products\\categories\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/gold/markets",
+    "file": "src\\app\\(admin)\\admin\\gold\\markets\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products/preview",
+    "file": "src\\app\\(admin)\\admin\\products\\preview\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/products",
+    "file": "src\\app\\(admin)\\admin\\products\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/categories/new",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\categories\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/objectives",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\objectives\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/requests",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\requests\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/config",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\config\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/gold/markets/:marketId",
+    "file": "src\\app\\(admin)\\admin\\gold\\markets\\[marketId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/preview",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\preview\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/new",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/preview",
+    "file": "src\\app\\(admin)\\admin\\accounts\\preview\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts",
+    "file": "src\\app\\(admin)\\admin\\accounts\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/skilling/methods/:methodId",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\skilling\\methods\\[methodId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/premium",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\premium\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/bossing",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\bossing\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/gold/markets/:marketId/rates",
+    "file": "src\\app\\(admin)\\admin\\gold\\markets\\[marketId]\\rates\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/gold/markets/:marketId/inventory",
+    "file": "src\\app\\(admin)\\admin\\gold\\markets\\[marketId]\\inventory\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/requests/:requestId/quote",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\requests\\[requestId]\\quote\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/offerings/new",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\offerings\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/gold/markets/:marketId/presets",
+    "file": "src\\app\\(admin)\\admin\\gold\\markets\\[marketId]\\presets\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/requests/:requestId",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\requests\\[requestId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/offerings",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\offerings\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/pricing",
+    "file": "src\\app\\(admin)\\admin\\pricing\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/skilling/methods/new",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\skilling\\methods\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/offerings/:offeringId",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\offerings\\[offeringId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/requests/:requestId/history",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\requests\\[requestId]\\history\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/pricing/history",
+    "file": "src\\app\\(admin)\\admin\\pricing\\history\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/pricing/rules",
+    "file": "src\\app\\(admin)\\admin\\pricing\\rules\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/custom-builds/requests/:requestId/attachments",
+    "file": "src\\app\\(admin)\\admin\\custom-builds\\requests\\[requestId]\\attachments\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/gold/markets/:marketId/history",
+    "file": "src\\app\\(admin)\\admin\\gold\\markets\\[marketId]\\history\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/new",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/pricing/rules/:ruleId",
+    "file": "src\\app\\(admin)\\admin\\pricing\\rules\\[ruleId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/revisions",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\revisions\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/pricing/rules/new",
+    "file": "src\\app\\(admin)\\admin\\pricing\\rules\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/pricing/preview",
+    "file": "src\\app\\(admin)\\admin\\pricing\\preview\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/premium/packages/:packageId",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\premium\\packages\\[packageId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/preview",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\preview\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/premium/packages/new",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\premium\\packages\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/bossing/methods/:methodId",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\bossing\\methods\\[methodId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId/availability",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\availability\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/bossing/methods/new",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\bossing\\methods\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/premium/options/:optionId",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\premium\\options\\[optionId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId/unlocks",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\unlocks\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/premium/options/new",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\premium\\options\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/bossing/bosses/new",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\bossing\\bosses\\new\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/catalogue/services/:id/bossing/bosses/:bossId",
+    "file": "src\\app\\(admin)\\admin\\catalogue\\services\\[id]\\bossing\\bosses\\[bossId]\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId/media",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\media\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId/preview",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\preview\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId/history",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\history\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId/features",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\features\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId/stats",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\stats\\page.tsx",
+    "kind": "page"
+  },
+  {
+    "route": "/admin/accounts/listings/:listingId/handover",
+    "file": "src\\app\\(admin)\\admin\\accounts\\listings\\[listingId]\\handover\\page.tsx",
+    "kind": "page"
+  }
+]

@@ -1,5 +1,12 @@
 import type { PrismaClient } from "../src/generated/prisma/client";
 import { productRevisionSnapshot } from "../src/lib/products/estimate";
+import {
+  loadReferenceSnapshot,
+  referenceRecords,
+  stableId,
+  stableKey,
+  type ReferenceRecord,
+} from "./reference-snapshot";
 
 const CATEGORY_ID = "productscategorytask012";
 const SERVICE_ID = "productsservicetask012";
@@ -238,6 +245,311 @@ function imageSeed(productKey: string, productTitle: string) {
       sortOrder: 20,
     },
   ];
+}
+
+function referenceProductStableKey(record: ReferenceRecord) {
+  return stableKey("reference-product", [record.recordType, record.slug], 120);
+}
+
+function referenceProductVariantStableKey(record: ReferenceRecord) {
+  return stableKey(
+    "reference-product-variant",
+    [record.recordType, record.slug],
+    160,
+  );
+}
+
+function referenceInternalCode(record: ReferenceRecord) {
+  return stableKey("ref-prod", [record.recordType, record.slug], 120)
+    .toUpperCase()
+    .replace(/:/g, "-");
+}
+
+function referenceProductType(record: ReferenceRecord) {
+  return record.recordType === "bond" ? ("BOND" as const) : ("ITEM" as const);
+}
+
+function referenceProductCategoryStableKey(record: ReferenceRecord) {
+  return record.recordType === "bond"
+    ? "product-category-bonds"
+    : "product-category-items";
+}
+
+function referenceUnitLabel(record: ReferenceRecord) {
+  const quantity =
+    typeof record.quantity === "number" && record.quantity > 1
+      ? Math.round(record.quantity)
+      : null;
+  if (record.recordType === "bond") return quantity ? "bond package" : "bond";
+  return quantity ? "item package" : "unit";
+}
+
+function referenceProductImages(stableKeyValue: string, title: string) {
+  return [
+    {
+      id: stableId("prodrefcover", `${stableKeyValue}:cover`),
+      stableKey: stableKey(
+        "reference-product-image",
+        [stableKeyValue, "cover"],
+        160,
+      ),
+      imageType: "COVER" as const,
+      assetPath: "/artwork/portal-hero-desktop.webp",
+      altText: `${title} marketplace cover`,
+      caption: "Local marketplace artwork; not copied product imagery.",
+      sortOrder: 10,
+    },
+    {
+      id: stableId("prodrefgallery", `${stableKeyValue}:gallery`),
+      stableKey: stableKey(
+        "reference-product-image",
+        [stableKeyValue, "gallery"],
+        160,
+      ),
+      imageType: "GALLERY" as const,
+      assetPath: "/artwork/portal-hero-mobile.webp",
+      altText: `${title} marketplace gallery image`,
+      caption: "Local marketplace artwork for staff-reviewed listings.",
+      sortOrder: 20,
+    },
+  ];
+}
+
+async function seedReferenceProducts({
+  prisma,
+  marketplace,
+  service,
+  catalogueCategoryId,
+  categoryIds,
+  tagIds,
+}: {
+  prisma: PrismaClient;
+  marketplace: { id: string };
+  service: { id: string };
+  catalogueCategoryId: string;
+  categoryIds: Map<string, string>;
+  tagIds: Map<string, string>;
+}) {
+  const snapshot = loadReferenceSnapshot();
+  let sortOrder = 1000;
+  for (const record of referenceRecords(snapshot, "items")) {
+    sortOrder += 10;
+    const stableKeyValue = referenceProductStableKey(record);
+    const variantStableKey = referenceProductVariantStableKey(record);
+    const productType = referenceProductType(record);
+    const categoryStableKey = referenceProductCategoryStableKey(record);
+    const productTitle = record.name;
+    const productId = stableId("prodref", stableKeyValue);
+    const variantId = stableId("prodvarref", variantStableKey);
+    const revisionId = stableId("prodrevref", stableKeyValue);
+    const images = referenceProductImages(stableKeyValue, productTitle);
+    const savedProduct = await prisma.product.upsert({
+      where: { stableKey: stableKeyValue },
+      create: {
+        id: productId,
+        stableKey: stableKeyValue,
+        marketplaceId: marketplace.id,
+        categoryId: categoryIds.get(categoryStableKey)!,
+        publicTitle: productTitle,
+        slug: record.slug,
+        shortDescription:
+          "Reference-priced marketplace listing with staff-reviewed availability.",
+        fullDescription:
+          "This listing uses the committed public reference snapshot for its starting price. Stock, fulfilment details and final availability are confirmed by staff before any checkout step.",
+        internalReferenceCode: referenceInternalCode(record),
+        productType,
+        currencyCode: "USD",
+        isFeatured: sortOrder <= 1030,
+        publicBadgeText: "Reference price",
+        publicationStatus: "PUBLISHED",
+        availabilityState: "MANUAL_REVIEW_REQUIRED",
+        sortOrder,
+        needsClientReview: true,
+        publishedAt: new Date(snapshot.capturedAt),
+      },
+      update: {},
+      select: { id: true },
+    });
+
+    const reviewTagId = tagIds.get("review");
+    const packageTagId = tagIds.get("package");
+    await prisma.productTagAssignment.createMany({
+      data: [
+        ...(reviewTagId
+          ? [{ productId: savedProduct.id, tagId: reviewTagId }]
+          : []),
+        ...(packageTagId && record.pricingUnit?.includes("quantity")
+          ? [{ productId: savedProduct.id, tagId: packageTagId }]
+          : []),
+      ],
+      skipDuplicates: true,
+    });
+
+    for (const image of images) {
+      await prisma.productImage.upsert({
+        where: { stableKey: image.stableKey },
+        create: {
+          id: image.id,
+          stableKey: image.stableKey,
+          productId: savedProduct.id,
+          imageType: image.imageType,
+          assetPath: image.assetPath,
+          altText: image.altText,
+          caption: image.caption,
+          sortOrder: image.sortOrder,
+          isPublic: true,
+          needsClientReview: true,
+        },
+        update: {},
+      });
+    }
+
+    const savedVariant = await prisma.productVariant.upsert({
+      where: { stableKey: variantStableKey },
+      create: {
+        id: variantId,
+        stableKey: variantStableKey,
+        productId: savedProduct.id,
+        publicName: referenceUnitLabel(record),
+        publicSku: record.recordType === "bond" ? "BOND" : "ITEM",
+        internalSku: stableKey(
+          "ref-prod-sku",
+          [record.recordType, record.slug],
+          120,
+        )
+          .toUpperCase()
+          .replace(/:/g, "-"),
+        unitLabel: referenceUnitLabel(record),
+        priceMode: "FIXED_UNIT",
+        baseUnitPriceCents: record.priceCents,
+        minimumQuantity: 1n,
+        maximumQuantity: 1n,
+        quantityIncrement: 1n,
+        stockMode: "MANUAL_REVIEW",
+        availabilityState: "MANUAL_REVIEW_REQUIRED",
+        status: "AVAILABLE",
+        onHandQuantity: 0n,
+        lowStockThreshold: 0n,
+        sortOrder: 10,
+        enabled: true,
+        needsClientReview: true,
+      },
+      update: {},
+      select: { id: true },
+    });
+
+    await prisma.productInventoryLedgerEntry.upsert({
+      where: {
+        referenceKey: stableKey(
+          "reference-product-initial-ledger",
+          [variantStableKey],
+          160,
+        ),
+      },
+      create: {
+        id: stableId("prodrefledger", variantStableKey),
+        variantId: savedVariant.id,
+        entryType: "INITIAL_BALANCE",
+        quantity: 0n,
+        resultingOnHandQuantity: 0n,
+        reason: "Reference listing initial zero balance",
+        internalNote:
+          "Reference-priced product starts with zero stock and manual availability review.",
+        referenceKey: stableKey(
+          "reference-product-initial-ledger",
+          [variantStableKey],
+          160,
+        ),
+      },
+      update: {},
+    });
+
+    const existingRevision = await prisma.productRevision.findFirst({
+      where: { productId: savedProduct.id },
+      select: { id: true },
+    });
+    if (existingRevision) continue;
+    const category = productCategories.find(
+      (item) => item.stableKey === categoryStableKey,
+    )!;
+    await prisma.productRevision.create({
+      data: {
+        id: revisionId,
+        productId: savedProduct.id,
+        revisionNumber: 1,
+        snapshotSchemaVersion: 1,
+        snapshot: productRevisionSnapshot({
+          marketplace: {
+            id: marketplace.id,
+            stableKey: "product-main-marketplace",
+            slug: "products",
+            serviceId: service.id,
+            serviceSlug: "product-marketplace",
+            categoryId: catalogueCategoryId,
+            categorySlug: "products",
+            publicName: "OSRS Product Marketplace",
+            currencyCode: "USD",
+          },
+          product: {
+            id: savedProduct.id,
+            stableKey: stableKeyValue,
+            slug: record.slug,
+            publicTitle: productTitle,
+            shortDescription:
+              "Reference-priced marketplace listing with staff-reviewed availability.",
+            fullDescription:
+              "This listing uses the committed public reference snapshot for its starting price. Stock, fulfilment details and final availability are confirmed by staff before any checkout step.",
+            productType,
+            currencyCode: "USD",
+            publicBadgeText: "Reference price",
+            isFeatured: sortOrder <= 1030,
+            category: {
+              stableKey: category.stableKey,
+              slug: category.slug,
+              publicName: category.publicName,
+              productType: category.productType,
+            },
+          },
+          revisionId,
+          revisionNumber: 1,
+          publishedAt: new Date(snapshot.capturedAt),
+          variants: [
+            {
+              stableKey: variantStableKey,
+              publicName: referenceUnitLabel(record),
+              publicSku: record.recordType === "bond" ? "BOND" : "ITEM",
+              unitLabel: referenceUnitLabel(record),
+              priceMode: "FIXED_UNIT",
+              baseUnitPriceCents: record.priceCents,
+              minimumQuantity: "1",
+              maximumQuantity: "1",
+              quantityIncrement: "1",
+              stockMode: "MANUAL_REVIEW",
+              sortOrder: 10,
+              enabled: true,
+              priceTiers: [],
+            },
+          ],
+          tags: [
+            {
+              stableKey: "product-tag-review",
+              slug: "review",
+              publicLabel: "Needs review",
+            },
+          ],
+          images: images.map((image) => ({
+            stableKey: image.stableKey,
+            imageType: image.imageType,
+            assetPath: image.assetPath,
+            altText: image.altText,
+            caption: image.caption,
+            sortOrder: image.sortOrder,
+          })),
+        }),
+        publishedAt: new Date(snapshot.capturedAt),
+      },
+    });
+  }
 }
 
 export async function seedProductMarketplace(prisma: PrismaClient) {
@@ -585,4 +897,13 @@ export async function seedProductMarketplace(prisma: PrismaClient) {
       }
     }
   }
+
+  await seedReferenceProducts({
+    prisma,
+    marketplace,
+    service,
+    catalogueCategoryId: catalogueCategory.id,
+    categoryIds,
+    tagIds,
+  });
 }

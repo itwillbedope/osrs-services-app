@@ -5,6 +5,10 @@ import {
   seedCatalogue,
   type CatalogueSeedClient,
 } from "../../prisma/catalogue-seed";
+import {
+  loadReferenceSnapshot,
+  referenceRecords,
+} from "../../prisma/reference-snapshot";
 
 function createFakeClient() {
   const state = {
@@ -417,12 +421,24 @@ function createFakeClient() {
 describe("catalogue seed", () => {
   it("creates the normalized catalogue taxonomy", async () => {
     const { client, state } = createFakeClient();
+    const snapshot = loadReferenceSnapshot();
+    const referenceOfferingCount = [
+      "quests",
+      "diaries",
+      "combat-achievements",
+      "minigames",
+      "ironman",
+    ].reduce(
+      (total, categoryKey) =>
+        total + referenceRecords(snapshot, categoryKey).length,
+      0,
+    );
     await seedCatalogue(client);
     expect(state.categories.size).toBe(catalogueCategorySeeds.length);
-    expect(state.services.size).toBe(8);
-    expect(state.requirements.size).toBe(8);
-    expect(state.offerings.size).toBe(8);
-    expect(state.offeringRequirements.size).toBe(8);
+    expect(state.services.size).toBe(9);
+    expect(state.requirements.size).toBe(9);
+    expect(state.offerings.size).toBe(8 + referenceOfferingCount);
+    expect(state.offeringRequirements.size).toBe(8 + referenceOfferingCount);
     expect(state.skillingRules.size).toBe(1);
     expect(state.skillingRules.get("service:skill-training-request")).toEqual({
       standardDeliveryEnabled: true,
@@ -430,15 +446,21 @@ describe("catalogue seed", () => {
       expressDeliveryEnabled: false,
     });
     expect(state.skillingSkills.size).toBe(23);
-    expect(state.skillingMethods.size).toBe(4);
+    expect(state.skillingMethods.size).toBe(
+      4 + referenceRecords(snapshot, "skilling", "skilling-level-band").length,
+    );
     expect(state.bossingRules.size).toBe(1);
     expect(state.bossingRules.get("service:pvm-support")).toEqual({
       standardDeliveryEnabled: true,
       priorityDeliveryEnabled: false,
       expressDeliveryEnabled: false,
     });
-    expect(state.bossingBosses.size).toBe(3);
-    expect(state.bossingMethods.size).toBe(3);
+    expect(state.bossingBosses.size).toBe(
+      3 + referenceRecords(snapshot, "pvm", "pvm-kill").length,
+    );
+    expect(state.bossingMethods.size).toBe(
+      3 + referenceRecords(snapshot, "pvm", "pvm-kill").length,
+    );
     expect(state.bossingStatRequirements.size).toBe(8);
     expect(state.bossingGearRequirements.size).toBe(6);
     expect(state.premiumRules.size).toBe(1);
