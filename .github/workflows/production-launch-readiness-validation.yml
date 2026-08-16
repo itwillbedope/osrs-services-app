@@ -1,0 +1,327 @@
+name: production-launch-readiness-validation
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - codex/production-launch-readiness
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "11.7.0"
+  DATABASE_HOST: 127.0.0.1
+  DATABASE_PORT: "3306"
+  DATABASE_USER: osrs
+  DATABASE_PASSWORD: launch-ci-db-password
+  DATABASE_NAME: osrs_services
+  DATABASE_ALLOW_PUBLIC_KEY_RETRIEVAL: "false"
+  DATABASE_URL: mysql://osrs:launch-ci-db-password@127.0.0.1:3306/osrs_services
+  AUTH_SECRET: launch-ci-auth-secret-at-least-32-characters
+  AUTH_SESSION_COOKIE: osrs_session
+  CUSTOMER_SESSION_COOKIE: osrs_customer_session
+  ELIGIBILITY_HMAC_SECRET: launch-ci-eligibility-secret-at-least-32-characters
+  NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+  PAYMENT_PROVIDER: MANUAL_REVIEW
+  EXTERNAL_PAYMENTS_ENABLED: "false"
+  PAYMENT_WEBHOOKS_ENABLED: "false"
+  PAYMENT_REFUNDS_ENABLED: "false"
+  EMAIL_DELIVERY_ENABLED: "false"
+  EMAIL_TRANSPORT: SMTP
+  SMTP_HOST: ""
+  SMTP_FROM_EMAIL: ""
+  CHAT_ALLOWED_ORIGINS: http://127.0.0.1:3000
+  CHAT_SOCKET_PORT: "3001"
+  CHAT_SOCKET_PATH: /socket.io
+  CHAT_GUEST_COOKIE: osrs_chat_guest
+  NEXT_PUBLIC_CHAT_SOCKET_URL: http://127.0.0.1:3001
+  NEXT_PUBLIC_CHAT_SOCKET_PATH: /socket.io
+  CUSTOM_BUILD_PRIVATE_ATTACHMENT_ROOT: /tmp/osrs-services-launch-private
+  RSN_DEVELOPMENT_FIXTURE: "false"
+  CI: "true"
+
+jobs:
+  production-launch-readiness-validation:
+    name: production-launch-readiness-validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Enable Corepack and install pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@${PNPM_VERSION} --activate
+          pnpm --version
+
+      - name: Initialize hosted validation report
+        run: |
+          mkdir -p artifacts/launch
+          {
+            echo "Hosted production launch validation"
+            echo "Generated at: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            echo "Node version: $(node --version)"
+            echo "pnpm version: $(pnpm --version)"
+          } > artifacts/launch/hosted-launch-validation.txt
+
+      - name: Resolve pnpm store
+        id: pnpm-store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-node24-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node24-pnpm-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Validate deployment package and script safety
+        run: |
+          set -Eeuo pipefail
+
+          report="artifacts/launch/hosted-launch-validation.txt"
+          scripts=(
+            deploy/scripts/backup-production.sh
+            deploy/scripts/restore-production.sh
+            deploy/scripts/release.sh
+          )
+
+          for script in "${scripts[@]}"; do
+            bash -n "$script"
+            grep -Eq '^set -E?euo pipefail|^set -e' "$script"
+          done
+
+          ! grep -RInE 'DATABASE_PASSWORD=|MYSQL_PWD=|SMTP_PASSWORD=|sk_live|pk_live|AKIA|BEGIN .*PRIVATE KEY|STRIPE[A-Z0-9_]*SECRET|PAYPAL[A-Z0-9_]*SECRET|WEBHOOK_SECRET|GODADDY_|CLOUDFLARE_' deploy/scripts
+          ! grep -RInE 'prisma migrate reset|pnpm db:reset' deploy/scripts
+          ! grep -RInE 'godaddy|cloudflare|route53|dns.*(create|update|delete|mutate)' deploy/scripts
+          ! grep -RInE 'UPDATE FeatureFlag|FeatureFlag|EXTERNAL_PAYMENTS_ENABLED=true|PAYMENT_WEBHOOKS_ENABLED=true|PAYMENT_REFUNDS_ENABLED=true|EMAIL_DELIVERY_ENABLED=true' deploy/scripts
+          grep -q 'Type RESTORE osrs-services to continue' deploy/scripts/restore-production.sh
+
+          echo "Bash syntax result: PASS" >> "$report"
+          echo "deployment-script safety result: PASS" >> "$report"
+
+      - name: Validate PM2 configuration
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const fs = require("node:fs");
+          const assert = require("node:assert/strict");
+          const config = require("./deploy/ecosystem.config.cjs");
+          assert.equal(Array.isArray(config.apps), true);
+          const apps = new Map(config.apps.map((app) => [app.name, app]));
+          const web = apps.get("osrs-web");
+          const chat = apps.get("osrs-chat");
+          assert.ok(web, "osrs-web process is missing");
+          assert.ok(chat, "osrs-chat process is missing");
+          assert.equal(web.script, "pnpm");
+          assert.equal(web.args, "start");
+          assert.equal(chat.script, "pnpm");
+          assert.equal(chat.args, "chat:start");
+          assert.notEqual(chat.exec_mode, "cluster");
+          assert.notEqual(chat.instances, "max");
+          const source = fs.readFileSync("deploy/ecosystem.config.cjs", "utf8");
+          assert.equal(/AUTH_SECRET|DATABASE_PASSWORD|SMTP_PASSWORD|PAYMENT.*SECRET|WEBHOOK_SECRET/.test(source), false);
+          NODE
+          echo "PM2 config result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Install Nginx
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y nginx openssl
+
+      - name: Validate Nginx template with CI-only placeholders
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .ci/nginx/conf .ci/nginx/logs .ci/nginx/certs .ci/nginx/client_body_temp
+
+          openssl req -x509 -newkey rsa:2048 -nodes \
+            -keyout .ci/nginx/certs/ci-privkey.pem \
+            -out .ci/nginx/certs/ci-fullchain.pem \
+            -days 1 \
+            -subj "/CN=localhost"
+
+          site_conf="$PWD/.ci/nginx/conf/osrs-services.conf"
+          sed \
+            -e 's#<staging-or-production-hostnames>#localhost#g' \
+            -e "s#<path-to-fullchain.pem>#$PWD/.ci/nginx/certs/ci-fullchain.pem#g" \
+            -e "s#<path-to-privkey.pem>#$PWD/.ci/nginx/certs/ci-privkey.pem#g" \
+            deploy/nginx/osrs-services.conf.example > "$site_conf"
+
+          cat > .ci/nginx/nginx.conf <<EOF
+          worker_processes 1;
+          pid $PWD/.ci/nginx/logs/nginx.pid;
+          error_log $PWD/.ci/nginx/logs/error.log warn;
+
+          events {
+            worker_connections 128;
+          }
+
+          http {
+            access_log off;
+            client_body_temp_path $PWD/.ci/nginx/client_body_temp;
+            include $site_conf;
+          }
+          EOF
+
+          sudo nginx -t -c "$PWD/.ci/nginx/nginx.conf" -p "$PWD/.ci/nginx"
+          echo "Nginx syntax result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Validate production environment template safety
+        run: |
+          set -Eeuo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          import re
+
+          text = Path("deploy/.env.production.example").read_text(encoding="utf-8")
+          required = [
+              "NODE_ENV=production",
+              "RSN_DEVELOPMENT_FIXTURE=false",
+              "PAYMENT_PROVIDER=MANUAL_REVIEW",
+              "EXTERNAL_PAYMENTS_ENABLED=false",
+              "PAYMENT_WEBHOOKS_ENABLED=false",
+              "PAYMENT_REFUNDS_ENABLED=false",
+              "EMAIL_DELIVERY_ENABLED=false",
+          ]
+          missing = [entry for entry in required if entry not in text]
+          if missing:
+              raise SystemExit(f"Missing required safe defaults: {missing}")
+
+          forbidden = [
+              r"sk_live",
+              r"pk_live",
+              r"AKIA[0-9A-Z]{16}",
+              r"BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY",
+              r"STRIPE[A-Z0-9_]*SECRET",
+              r"PAYPAL[A-Z0-9_]*SECRET",
+              r"WEBHOOK_SECRET=.*[A-Za-z0-9]",
+              r"GODADDY",
+              r"SMTP_PASSWORD=.+",
+              r"DATABASE_PASSWORD=(?!REPLACE_WITH_PRIVATE_PASSWORD$).+",
+              r"NEXT_PUBLIC_APP_URL=https://osrsservices\.com",
+              r"<production-server-ip>",
+          ]
+          for pattern in forbidden:
+              if re.search(pattern, text, re.IGNORECASE | re.MULTILINE):
+                  raise SystemExit(f"Unsafe production template value matched: {pattern}")
+          PY
+          echo "environment-template safety result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Validate secret file exclusions
+        run: |
+          set -Eeuo pipefail
+          forbidden="$(git ls-files | grep -Ei '(^|/)(\.env|\.env\.production|\.env\.local)$|(\.pem|\.key|\.p12|\.pfx|\.dump|\.bak|\.tar\.gz|\.tgz|.*(dump|backup).*\.(sql|sql\.gz|zip|gz|tar)|task-.*review-pack.*\.zip)$' || true)"
+          if [ -n "$forbidden" ]; then
+            echo "$forbidden"
+            exit 1
+          fi
+          echo "secret file exclusion result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Validate production smoke-test script safety
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const fs = require("node:fs");
+          const source = fs.readFileSync("scripts/production-smoke-test.ts", "utf8");
+          const forbidden = [
+            /method:\s*["'`](POST|PUT|PATCH|DELETE)["'`]/i,
+            /\/api\//i,
+            /create(Order|User|Customer)/i,
+            /send(email|Mail)/i,
+            /trigger.*payment/i,
+            /UPDATE FeatureFlag|FeatureFlag.*update/i,
+            /inventory.*(adjust|update|mutate)/i,
+          ];
+          for (const pattern of forbidden) {
+            if (pattern.test(source)) {
+              throw new Error(`Smoke-test script matched forbidden destructive pattern: ${pattern}`);
+            }
+          }
+          if (!/method:\s*"GET"/.test(source)) {
+            throw new Error("Smoke-test script must explicitly use GET.");
+          }
+          NODE
+          echo "production smoke-test safety result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Validate package deployment commands
+        run: |
+          set -Eeuo pipefail
+          node <<'NODE'
+          const fs = require("node:fs");
+          const assert = require("node:assert/strict");
+          const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
+          for (const script of ["build", "start", "chat:start", "db:generate", "db:migrate", "db:seed", "production:check"]) {
+            assert.ok(pkg.scripts[script], `${script} is missing`);
+          }
+          assert.equal(pkg.scripts["db:migrate"], "prisma migrate deploy");
+          NODE
+          echo "package deployment command result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: |
+          pnpm test
+          echo "Unit-test result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Seed tests
+        run: |
+          pnpm test:seed
+          echo "Seed-test result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Build
+        run: |
+          pnpm build
+          echo "Build result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Production readiness check
+        run: |
+          pnpm production:check -- --allow-missing-production-config
+          echo "production:check result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Source privacy scan
+        run: |
+          pnpm exec tsx scripts/build-task016-review-pack.ts --scan-sources
+          echo "secret scan result: PASS" >> artifacts/launch/hosted-launch-validation.txt
+
+      - name: Git whitespace check
+        run: git diff --check
+
+      - name: Upload hosted launch validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-launch-readiness-report
+          path: artifacts/launch/hosted-launch-validation.txt
+          if-no-files-found: error
+          retention-days: 14
