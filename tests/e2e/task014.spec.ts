@@ -1,9 +1,10 @@
 import { createHash, createHmac } from "node:crypto";
 
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
-import argon2 from "argon2";
+import { hash } from "@node-rs/argon2";
 import mariadb from "mariadb";
 
+const ARGON2ID = 2;
 const customerId = "task014e2ecustomer";
 const otherCustomerId = "task014e2eother";
 const disabledCustomerId = "task014e2edisabled";
@@ -78,8 +79,8 @@ function requiredRow<T>(rows: T[]) {
 }
 
 async function customerPasswordHash() {
-  return argon2.hash(requiredEnv("TASK014_CUSTOMER_TEST_PASSWORD"), {
-    type: argon2.argon2id,
+  return hash(requiredEnv("TASK014_CUSTOMER_TEST_PASSWORD"), {
+    algorithm: ARGON2ID,
     memoryCost: 19_456,
     timeCost: 2,
     parallelism: 1,

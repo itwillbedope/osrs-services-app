@@ -1,6 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
-import argon2 from "argon2";
+import { hash } from "@node-rs/argon2";
 import mariadb from "mariadb";
+
+const ARGON2ID = 2;
 
 async function databaseRows<T extends Record<string, unknown>>(
   sql: string,
@@ -265,7 +267,12 @@ async function prepareProductFixture() {
 async function ensureSupportAgent() {
   const password = "Task012-Support-Password-Only";
   const email = "task012-support@example.test";
-  const passwordHash = await argon2.hash(password);
+  const passwordHash = await hash(password, {
+    algorithm: ARGON2ID,
+    memoryCost: 19_456,
+    timeCost: 2,
+    parallelism: 1,
+  });
   const role = requiredRow(
     await databaseRows<{ id: string }>(
       "SELECT id FROM Role WHERE `key` = 'SUPPORT_AGENT' LIMIT 1",

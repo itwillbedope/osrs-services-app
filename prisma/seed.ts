@@ -1,5 +1,5 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import argon2 from "argon2";
+import { hash } from "@node-rs/argon2";
 import { z } from "zod";
 
 import { PrismaClient } from "../src/generated/prisma/client";
@@ -14,6 +14,8 @@ import { seedPaymentsLaunchReadiness } from "./payment-seed";
 import { seedPricing } from "./pricing-seed";
 import { seedProductMarketplace } from "./product-seed";
 import { seedDatabase, type SeedClient } from "./seed-core";
+
+const ARGON2ID = 2;
 
 const seedEnvironmentSchema = z
   .object({
@@ -69,7 +71,13 @@ async function main() {
       name: env.ADMIN_SEED_NAME,
       resetPassword: env.ADMIN_SEED_RESET_PASSWORD,
     },
-    (password) => argon2.hash(password, { type: argon2.argon2id }),
+    (password) =>
+      hash(password, {
+        algorithm: ARGON2ID,
+        memoryCost: 19_456,
+        timeCost: 2,
+        parallelism: 1,
+      }),
   );
   await seedCatalogue(prisma as unknown as CatalogueSeedClient);
   await seedPricing(prisma);
