@@ -145,54 +145,54 @@ describe("database seed idempotence", () => {
     const paypalFlag = state.featureFlags.get("payments.paypal")!;
     paypalFlag.enabled = true;
     const skillingFlag = state.featureFlags.get("skilling_calculator_enabled")!;
-    expect(skillingFlag.enabled).toBe(false);
-    skillingFlag.enabled = true;
+    expect(skillingFlag.enabled).toBe(true);
+    skillingFlag.enabled = false;
     const bossingFlag = state.featureFlags.get("bossing_calculator_enabled")!;
-    expect(bossingFlag.enabled).toBe(false);
-    bossingFlag.enabled = true;
+    expect(bossingFlag.enabled).toBe(true);
+    bossingFlag.enabled = false;
     const premiumFlag = state.featureFlags.get("premium_configurator_enabled")!;
-    expect(premiumFlag.enabled).toBe(false);
-    premiumFlag.enabled = true;
+    expect(premiumFlag.enabled).toBe(true);
+    premiumFlag.enabled = false;
     const globalPricingFlag = state.featureFlags.get("global_pricing_enabled")!;
     expect(globalPricingFlag.enabled).toBe(false);
     globalPricingFlag.enabled = true;
     const goldFlag = state.featureFlags.get("gold_engine_enabled")!;
-    expect(goldFlag.enabled).toBe(false);
-    goldFlag.enabled = true;
+    expect(goldFlag.enabled).toBe(true);
+    goldFlag.enabled = false;
     const accountsFlag = state.featureFlags.get("account_marketplace_enabled")!;
-    expect(accountsFlag.enabled).toBe(false);
-    accountsFlag.enabled = true;
+    expect(accountsFlag.enabled).toBe(true);
+    accountsFlag.enabled = false;
     const customBuildFlag = state.featureFlags.get(
       "custom_account_build_enabled",
     )!;
-    expect(customBuildFlag.enabled).toBe(false);
-    customBuildFlag.enabled = true;
+    expect(customBuildFlag.enabled).toBe(true);
+    customBuildFlag.enabled = false;
     const productMarketplaceFlag = state.featureFlags.get(
       "product_marketplace_enabled",
     )!;
-    expect(productMarketplaceFlag.enabled).toBe(false);
-    productMarketplaceFlag.enabled = true;
+    expect(productMarketplaceFlag.enabled).toBe(true);
+    productMarketplaceFlag.enabled = false;
     const cartFlag = state.featureFlags.get("cart_enabled")!;
-    expect(cartFlag.enabled).toBe(false);
-    cartFlag.enabled = true;
+    expect(cartFlag.enabled).toBe(true);
+    cartFlag.enabled = false;
     const guestCheckoutFlag = state.featureFlags.get("guest_checkout_enabled")!;
-    expect(guestCheckoutFlag.enabled).toBe(false);
-    guestCheckoutFlag.enabled = true;
+    expect(guestCheckoutFlag.enabled).toBe(true);
+    guestCheckoutFlag.enabled = false;
     const customerAccountsFlag = state.featureFlags.get(
       "customer_accounts_enabled",
     )!;
-    expect(customerAccountsFlag.enabled).toBe(false);
-    customerAccountsFlag.enabled = true;
+    expect(customerAccountsFlag.enabled).toBe(true);
+    customerAccountsFlag.enabled = false;
     const customerRegistrationFlag = state.featureFlags.get(
       "customer_registration_enabled",
     )!;
-    expect(customerRegistrationFlag.enabled).toBe(false);
-    customerRegistrationFlag.enabled = true;
+    expect(customerRegistrationFlag.enabled).toBe(true);
+    customerRegistrationFlag.enabled = false;
     const customerDashboardFlag = state.featureFlags.get(
       "customer_dashboard_enabled",
     )!;
-    expect(customerDashboardFlag.enabled).toBe(false);
-    customerDashboardFlag.enabled = true;
+    expect(customerDashboardFlag.enabled).toBe(true);
+    customerDashboardFlag.enabled = false;
 
     const editor = state.roles.get("EDITOR")!;
     const manualPermission = state.permissions.get("orders.view")!;
@@ -213,19 +213,19 @@ describe("database seed idempotence", () => {
     );
 
     expect(paypalFlag.enabled).toBe(true);
-    expect(skillingFlag.enabled).toBe(true);
-    expect(bossingFlag.enabled).toBe(true);
-    expect(premiumFlag.enabled).toBe(true);
+    expect(skillingFlag.enabled).toBe(false);
+    expect(bossingFlag.enabled).toBe(false);
+    expect(premiumFlag.enabled).toBe(false);
     expect(globalPricingFlag.enabled).toBe(true);
-    expect(goldFlag.enabled).toBe(true);
-    expect(accountsFlag.enabled).toBe(true);
-    expect(customBuildFlag.enabled).toBe(true);
-    expect(productMarketplaceFlag.enabled).toBe(true);
-    expect(cartFlag.enabled).toBe(true);
-    expect(guestCheckoutFlag.enabled).toBe(true);
-    expect(customerAccountsFlag.enabled).toBe(true);
-    expect(customerRegistrationFlag.enabled).toBe(true);
-    expect(customerDashboardFlag.enabled).toBe(true);
+    expect(goldFlag.enabled).toBe(false);
+    expect(accountsFlag.enabled).toBe(false);
+    expect(customBuildFlag.enabled).toBe(false);
+    expect(productMarketplaceFlag.enabled).toBe(false);
+    expect(cartFlag.enabled).toBe(false);
+    expect(guestCheckoutFlag.enabled).toBe(false);
+    expect(customerAccountsFlag.enabled).toBe(false);
+    expect(customerRegistrationFlag.enabled).toBe(false);
+    expect(customerDashboardFlag.enabled).toBe(false);
     expect(state.rolePermissions.has(manualAssignment)).toBe(true);
     expect(state.rolePermissions.has(missingDefaultAssignment)).toBe(true);
     const superAdmin = state.roles.get("SUPER_ADMIN")!;

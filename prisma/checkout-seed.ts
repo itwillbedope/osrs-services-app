@@ -16,7 +16,7 @@ export async function seedCheckout(prisma: PrismaClient) {
         "Guest checkout is prepared for manual review. A staff member will confirm availability and next steps.",
       publicPaymentReviewInstructions:
         "Payment instructions will be provided after your order is reviewed. Do not submit card details, passwords, PINs, recovery answers or other secrets.",
-      guestCheckoutEnabled: false,
+      guestCheckoutEnabled: true,
       notificationProviderConfigured: false,
       needsClientReview: true,
     },
@@ -26,6 +26,7 @@ export async function seedCheckout(prisma: PrismaClient) {
         "Guest checkout is prepared for manual review. A staff member will confirm availability and next steps.",
       publicPaymentReviewInstructions:
         "Payment instructions will be provided after your order is reviewed. Do not submit card details, passwords, PINs, recovery answers or other secrets.",
+      guestCheckoutEnabled: true,
       notificationProviderConfigured: false,
       needsClientReview: true,
     },

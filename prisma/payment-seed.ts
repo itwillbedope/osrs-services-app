@@ -108,15 +108,15 @@ const readinessDefaults = [
     label: "Terms, privacy and refund links",
     status: "NEEDS_CLIENT_REVIEW" as const,
     safeSummary:
-      "Checkout settings and legal-policy links remain blocked until client legal review.",
+      "Guest checkout preview uses manual review while legal-policy versions still require client review.",
   },
   {
     stableKey: "customer-accounts",
     category: "Customer accounts",
     label: "Customer account activation",
-    status: "DISABLED" as const,
+    status: "NEEDS_CLIENT_REVIEW" as const,
     safeSummary:
-      "Customer account flags remain disabled by default for staged activation.",
+      "Customer account preview is enabled while SMTP delivery and operating policy still require review.",
   },
   {
     stableKey: "chat",
