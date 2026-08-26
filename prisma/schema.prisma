@@ -777,6 +777,27 @@ enum ChatArchiveReason {
   SPAM_RETENTION
 }
 
+enum HomepagePlacement {
+  MAIN_CATEGORY
+  MAIN_SERVICE
+  FEATURED_SERVICE
+}
+
+enum HomepageSourceType {
+  SERVICE
+  PRODUCT
+  ACCOUNT
+  GOLD
+  CUSTOM_BUILD
+  MANUAL_PROMO
+}
+
+enum HomepagePriceMode {
+  AUTO
+  OVERRIDE
+  HIDE
+}
+
 model User {
   id                           String                           @id @default(cuid()) @db.VarChar(30)
   email                        String                           @unique @db.VarChar(191)
@@ -832,6 +853,8 @@ model User {
   emailDeliveries              EmailDelivery[]
   chatCustomerConversations    ChatConversation[]               @relation("ChatConversationCustomer")
   chatAssignedConversations    ChatConversation[]               @relation("ChatConversationAssignedStaff")
+  homepageItemsCreated         HomepageItem[]                   @relation("HomepageItemCreatedBy")
+  homepageItemsUpdated         HomepageItem[]                   @relation("HomepageItemUpdatedBy")
 
   @@index([status])
   @@index([accountType])
@@ -3666,4 +3689,58 @@ model ChatRetentionEvent {
   @@index([conversationId, createdAt])
   @@index([reason, createdAt])
   @@index([actorId, createdAt])
+}
+
+model HomepageSection {
+  id                 String   @id @default(cuid()) @db.VarChar(30)
+  sectionKey         String   @unique @db.VarChar(80)
+  title              String   @db.VarChar(160)
+  enabled            Boolean  @default(true)
+  itemLimit          Int      @default(4)
+  displayOrder       Int      @default(0)
+  concurrencyVersion Int      @default(1)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([enabled, displayOrder])
+}
+
+model HomepageItem {
+  id                    String             @id @default(cuid()) @db.VarChar(30)
+  placement             HomepagePlacement
+  sourceType            HomepageSourceType
+  linkedRecordId        String?            @db.VarChar(30)
+  titleOverride         String?            @db.VarChar(180)
+  descriptionOverride   String?            @db.VarChar(500)
+  badgeText             String?            @db.VarChar(80)
+  badgeStyle            String?            @db.VarChar(40)
+  bulletPoints          Json?
+  imagePath             String?            @db.VarChar(500)
+  imageAltText          String?            @db.VarChar(240)
+  ctaText               String?            @db.VarChar(80)
+  ctaUrl                String?            @db.VarChar(500)
+  priceMode             HomepagePriceMode  @default(AUTO)
+  promotionalPriceCents Int?
+  oldPriceCents         Int?
+  categoryLabel         String?            @db.VarChar(120)
+  displayOrder          Int                @default(0)
+  isActive              Boolean            @default(true)
+  isFeatured            Boolean            @default(true)
+  startsAt              DateTime?
+  expiresAt             DateTime?
+  archivedAt            DateTime?
+  createdById           String?            @db.VarChar(30)
+  updatedById           String?            @db.VarChar(30)
+  concurrencyVersion    Int                @default(1)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  createdBy             User?              @relation("HomepageItemCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy             User?              @relation("HomepageItemUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@index([placement, isActive, displayOrder])
+  @@index([sourceType, linkedRecordId])
+  @@index([startsAt, expiresAt])
+  @@index([archivedAt])
+  @@index([createdById, createdAt])
+  @@index([updatedById, updatedAt])
 }

@@ -2,7 +2,7 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
-const officialLogo = "/branding/osrs-services-logo.png";
+const officialLogo = "/branding/osrs-services-logo-red.png";
 
 export function BrandLogo({
   className,

@@ -5,7 +5,6 @@ import {
   ChevronDown,
   Menu,
   MessageCircle,
-  Search,
   ShieldCheck,
   ShoppingCart,
   UserRound,
@@ -99,12 +98,12 @@ export function PublicHeader({ discordHref }: { discordHref: string }) {
 
   return (
     <>
-      <div className="border-primary/10 border-b bg-[#06140f]">
+      <div className="border-primary/20 border-b bg-[#070707]">
         <div className="mx-auto flex min-h-9 max-w-7xl items-center justify-center gap-x-5 px-4 py-1.5 text-center sm:justify-between sm:px-6 lg:px-8">
           <p className="text-text-secondary flex items-center gap-2 text-[0.7rem] font-semibold tracking-[0.04em] sm:text-xs">
             <ShieldCheck aria-hidden="true" className="text-primary size-3.5" />
-            Secure ordering, clear communication and order tracking from one
-            dashboard.
+            100% hand-played services with secure support and clear order
+            tracking.
           </p>
           <Link
             href={discordHref}
@@ -116,7 +115,7 @@ export function PublicHeader({ discordHref }: { discordHref: string }) {
         </div>
       </div>
 
-      <header className="border-border/70 sticky top-0 z-40 border-b bg-[#020b12]/92 shadow-[0_12px_36px_rgb(0_0_0_/_0.28)] backdrop-blur-xl">
+      <header className="border-primary/20 sticky top-0 z-40 border-b bg-[#030303]/96 shadow-[0_12px_36px_rgb(0_0_0_/_0.42)] backdrop-blur-xl">
         <div className="mx-auto flex h-[4.75rem] max-w-7xl items-center justify-between gap-5 px-4 sm:px-6 lg:px-8">
           <Link
             href="/"
@@ -130,6 +129,12 @@ export function PublicHeader({ discordHref }: { discordHref: string }) {
             aria-label="Main navigation"
             className="hidden h-full items-center gap-0.5 lg:flex"
           >
+            <Link
+              href="/"
+              className="text-primary focus-visible:ring-primary flex min-h-11 items-center px-3 text-sm font-black uppercase focus-visible:ring-2 focus-visible:outline-none"
+            >
+              Home
+            </Link>
             <div
               ref={servicesMenuRef}
               className="relative flex h-full items-center"
@@ -154,7 +159,7 @@ export function PublicHeader({ discordHref }: { discordHref: string }) {
               <div
                 id="desktop-services-menu"
                 className={cn(
-                  "border-border-strong/75 absolute top-[calc(100%-0.35rem)] left-0 w-[46rem] origin-top-left rounded-2xl border bg-[#07120e] p-3 shadow-[0_26px_70px_rgb(0_0_0_/_0.55)] transition duration-150",
+                  "border-border-strong/75 absolute top-[calc(100%-0.35rem)] left-0 w-[46rem] origin-top-left rounded border bg-[#090606] p-3 shadow-[0_26px_70px_rgb(0_0_0_/_0.55)] transition duration-150",
                   servicesOpen
                     ? "visible translate-y-0 opacity-100"
                     : "invisible -translate-y-1 opacity-0",
@@ -220,13 +225,6 @@ export function PublicHeader({ discordHref }: { discordHref: string }) {
 
           <div className="hidden shrink-0 items-center gap-2 lg:flex">
             <Link
-              href={publicCtaLinks.search}
-              className="text-text-secondary hover:text-text-primary focus-visible:ring-primary flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:outline-none"
-            >
-              <Search aria-hidden="true" className="size-4" />
-              Search
-            </Link>
-            <Link
               href="/account/login"
               className="text-text-secondary hover:text-text-primary focus-visible:ring-primary flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold transition focus-visible:ring-2 focus-visible:outline-none"
             >
@@ -240,11 +238,9 @@ export function PublicHeader({ discordHref }: { discordHref: string }) {
               <ShoppingCart aria-hidden="true" className="size-4" />
               Cart
             </Link>
-            <Link
-              href={publicCtaLinks.browseServices}
-              className={buttonVariants({ size: "sm" })}
-            >
-              Browse services
+            <Link href={discordHref} className={buttonVariants({ size: "sm" })}>
+              <MessageCircle aria-hidden="true" className="size-4" />
+              Discord
             </Link>
           </div>
 
@@ -286,7 +282,7 @@ export function PublicHeader({ discordHref }: { discordHref: string }) {
           aria-modal="true"
           aria-label="Mobile navigation"
           className={cn(
-            "border-border absolute top-0 right-0 flex h-full w-[min(92vw,25rem)] flex-col overflow-y-auto border-l bg-[#06110d] shadow-[-24px_0_70px_rgb(0_0_0_/_0.5)] transition-transform duration-200",
+            "border-border absolute top-0 right-0 flex h-full w-[min(92vw,25rem)] flex-col overflow-y-auto border-l bg-[#080505] shadow-[-24px_0_70px_rgb(0_0_0_/_0.5)] transition-transform duration-200",
             mobileOpen ? "translate-x-0" : "translate-x-full",
           )}
         >

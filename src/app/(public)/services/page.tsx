@@ -22,9 +22,9 @@ export const dynamic = "force-dynamic";
 export default async function ServicesDirectoryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; featured?: string }>;
 }) {
-  const { q = "", category = "" } = await searchParams;
+  const { q = "", category = "", featured = "" } = await searchParams;
   const [categories, services] = await Promise.all([
     getPublicCategories(),
     getPublicServices({
@@ -32,6 +32,10 @@ export default async function ServicesDirectoryPage({
       categorySlug: category || undefined,
     }),
   ]);
+  const visibleServices =
+    featured === "1"
+      ? services.filter((service) => service.isFeatured)
+      : services;
   return (
     <main id="main-content" className="min-h-[70vh]">
       <section className="border-border bg-surface-1 border-b py-16 sm:py-20">
@@ -113,12 +117,13 @@ export default async function ServicesDirectoryPage({
                 : "All services"}
           </h2>
           <span className="text-text-muted text-sm">
-            {services.length} result{services.length === 1 ? "" : "s"}
+            {visibleServices.length} result
+            {visibleServices.length === 1 ? "" : "s"}
           </span>
         </div>
-        {services.length ? (
+        {visibleServices.length ? (
           <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {services.map((service) => (
+            {visibleServices.map((service) => (
               <ServiceCard key={service.id} service={service} />
             ))}
           </div>

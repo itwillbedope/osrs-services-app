@@ -56,13 +56,12 @@ export const serviceNavigation = [
 ] satisfies readonly ServiceNavigationItem[];
 
 export const primaryNavigation = [
-  { label: "Gold", href: "/#gold-service" },
-  { label: "Products", href: "/products" },
   { label: "Accounts", href: "/accounts" },
-  { label: "Custom Build", href: "/custom-account-build" },
-  { label: "Membership", href: "/#membership-service" },
-  { label: "Help", href: "/#faq" },
-  { label: "Support", href: "/support" },
+  { label: "Quests", href: "/services/quests" },
+  { label: "Skills", href: "/services/power-levelling" },
+  { label: "Diaries", href: "/services/achievement-diaries" },
+  { label: "Combat", href: "/services/bossing-pvm" },
+  { label: "Offers", href: "/services?featured=1" },
 ] satisfies readonly PublicLink[];
 
 // Reintroduce this item only when verified reviews and a genuine destination exist.

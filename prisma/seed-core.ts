@@ -90,6 +90,7 @@ export const defaultRoles: Array<{
     permissions: [
       permissions.adminAccess,
       permissions.designSystemView,
+      permissions.homepageManage,
       permissions.productsView,
       permissions.productsEdit,
       permissions.productsPublish,

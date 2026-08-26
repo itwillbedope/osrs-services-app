@@ -5,12 +5,12 @@ import type { ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export const buttonVariants = cva(
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-45",
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-[0.3rem] border font-black uppercase tracking-[0.045em] transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-45",
   {
     variants: {
       variant: {
         primary:
-          "border-primary/90 bg-primary px-5 text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255_/_0.2)] hover:border-primary-hover hover:bg-primary-hover hover:shadow-[0_8px_24px_rgb(166_215_25_/_0.12)]",
+          "border-primary/90 bg-primary px-5 text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255_/_0.15)] hover:border-primary-hover hover:bg-primary-hover hover:shadow-[0_8px_28px_rgb(209_15_25_/_0.24)]",
         secondary:
           "border-border-strong/70 bg-surface-2 px-5 text-text-primary shadow-[inset_0_1px_0_rgb(255_255_255_/_0.025)] hover:border-gold/30 hover:bg-surface-3",
         ghost:

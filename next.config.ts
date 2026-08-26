@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   devIndicators: false,
   poweredByHeader: false,
   reactStrictMode: true,
+  webpack(config, { dev }) {
+    // Hostinger builds from a fresh checkout, so a persistent webpack cache only
+    // consumes the limited build volume without speeding up later deployments.
+    if (!dev) {
+      config.cache = false;
+    }
+
+    return config;
+  },
   async headers() {
     return [
       {

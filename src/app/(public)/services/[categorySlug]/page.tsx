@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import {
   CatalogueBreadcrumbs,
@@ -9,12 +9,23 @@ import { getPublicCategory } from "@/lib/catalogue/queries";
 
 export const dynamic = "force-dynamic";
 
+const categoryAliases: Record<string, string> = {
+  pvm: "bossing-pvm",
+  bossing: "bossing-pvm",
+  raids: "bossing-pvm",
+  skills: "power-levelling",
+  diaries: "achievement-diaries",
+};
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ categorySlug: string }>;
 }): Promise<Metadata> {
   const { categorySlug } = await params;
+  if (categoryAliases[categorySlug]) {
+    redirect(`/services/${categoryAliases[categorySlug]}`);
+  }
   const category = await getPublicCategory(categorySlug);
   if (!category) return { title: "Service category not found" };
   return {
@@ -35,6 +46,9 @@ export default async function CategoryPage({
   params: Promise<{ categorySlug: string }>;
 }) {
   const { categorySlug } = await params;
+  if (categoryAliases[categorySlug]) {
+    redirect(`/services/${categoryAliases[categorySlug]}`);
+  }
   const category = await getPublicCategory(categorySlug);
   if (!category) notFound();
   return (

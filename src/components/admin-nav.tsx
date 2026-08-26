@@ -7,6 +7,7 @@ import {
   CreditCard,
   Hammer,
   LayoutDashboard,
+  LayoutTemplate,
   Library,
   MessageSquare,
   ReceiptText,
@@ -22,6 +23,12 @@ import { cn } from "@/lib/utils";
 
 const navigation = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
+  {
+    href: "/admin/homepage",
+    label: "Homepage",
+    icon: LayoutTemplate,
+    exact: false,
+  },
   {
     href: "/admin/catalogue",
     label: "Catalogue",

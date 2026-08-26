@@ -46,6 +46,14 @@
 - Approved payment providers
 - Final US business address
 
+## Homepage redesign and content management decisions — 2026-08-26
+
+- The client-supplied black, red and white storefront direction supersedes the earlier green development theme for public-facing routes; the protected admin workspace remains utility-led.
+- Homepage curation is additive: `HomepageSection` controls section state and limits, while `HomepageItem` points to existing services, products, accounts, gold or custom-build records and also supports manual promotions.
+- Promotional prices are hidden by default unless the client supplies a verified linked price or an explicit override. Unverified reference-screenshot prices and performance metrics are not presented as business facts.
+- Homepage image uploads accept only safe raster formats and remain replaceable from the admin manager. The initial artwork uses the approved supplied reference and original derived hero artwork.
+- The former deployment prebuild seeded the database on every build. Because production initialization has already been completed, `prebuild` now performs `prisma generate` only; additive migrations must be applied with `prisma migrate deploy` as an explicit deployment step.
+
 ## Task 003 catalogue decisions — 2026-07-01
 
 - Categories and services use stable IDs plus unique URL slugs; services also retain a unique canonical-ready slug for later migration and SEO work.

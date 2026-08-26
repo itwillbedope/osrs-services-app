@@ -1,55 +1,30 @@
 import type { Metadata } from "next";
 import type { LucideIcon } from "lucide-react";
 import {
-  Activity,
   ArrowRight,
-  BadgeCheck,
-  BarChart3,
-  Calculator,
-  CheckCircle2,
+  Check,
   Coins,
-  Crown,
-  Flag,
-  Gauge,
   Headphones,
-  LockKeyhole,
-  Map,
-  MapPin,
-  MessageCircle,
-  MessagesSquare,
-  PackageCheck,
-  ScrollText,
-  Shield,
+  MonitorPlay,
   ShieldCheck,
-  Sparkles,
+  Skull,
   Swords,
-  Target,
-  Waypoints,
-  Zap,
+  UserRoundCheck,
+  UsersRound,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { FaqAccordion } from "@/components/faq-accordion";
-import { FeaturedServicesMarketplace } from "@/components/featured-services-marketplace";
-import { MarketplaceSearch } from "@/components/marketplace-search";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { getDiscordHref, publicCtaLinks } from "@/config/public-navigation";
 import {
-  expertiseAreas,
-  homepageCategories,
-  homepageFaqs,
-  orderSteps,
-  orderTrackingPreview,
-  processBenefits,
-  type HomepageCategoryIcon,
-} from "@/content/homepage";
-import { cn } from "@/lib/utils";
+  defaultHomepageSections,
+  fallbackHomepageCards,
+  type HomepageCard,
+} from "@/lib/homepage/core";
 
-const title = "Professional OSRS Services Marketplace";
+const title = "OSRS Services | Hand-Played Boosting & Marketplace";
 const description =
-  "Configure professional OSRS services, review transparent estimates and track progress through a clear, privacy-conscious marketplace.";
+  "Professional OSRS boosting, account builds, gold, items and PvM services with secure support and clear order tracking.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -64,781 +39,376 @@ export const metadata: Metadata = {
     siteName: "OSRS Services",
     title,
     description,
+    images: [
+      {
+        url: "/artwork/zuk-inferno-hero.png",
+        alt: "OSRS Services inferno battle artwork",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/artwork/zuk-inferno-hero.png"],
   },
   robots: { index: true, follow: true },
 };
 
-const categoryIcons: Record<HomepageCategoryIcon, LucideIcon> = {
-  activity: Activity,
-  badge: BadgeCheck,
-  coins: Coins,
-  crown: Crown,
-  flag: Flag,
-  map: Map,
-  scroll: ScrollText,
-  swords: Swords,
-};
+const trustItems = [
+  { icon: UserRoundCheck, value: "100%", label: "Hand played" },
+  { icon: ShieldCheck, value: "VPN", label: "Protected" },
+  { icon: MonitorPlay, value: "Streaming", label: "Available" },
+  { icon: ShieldCheck, value: "Safe &", label: "Secure" },
+  { icon: Headphones, value: "24/7", label: "Support" },
+] as const;
 
-const trustIcons: readonly LucideIcon[] = [
-  MessagesSquare,
-  BarChart3,
-  LockKeyhole,
+const categoryIcons: readonly LucideIcon[] = [
+  UserRoundCheck,
+  Coins,
+  ArrowRight,
+  Swords,
 ];
 
-const stepIcons: readonly LucideIcon[] = [
-  Target,
-  Waypoints,
-  ShieldCheck,
-  Gauge,
-];
+const launchMetrics = [
+  { icon: UsersRound, value: "25K+*", label: "Orders completed" },
+  { icon: ShieldCheck, value: "99.8%*", label: "Customer satisfaction" },
+  { icon: Skull, value: "1M+*", label: "Bosses killed" },
+  { icon: Headphones, value: "24/7", label: "Support coverage" },
+] as const;
 
-function SectionIntro({
-  eyebrow,
-  title: sectionTitle,
-  description: sectionDescription,
-  align = "left",
+function sectionByKey(
+  sections: readonly { sectionKey: string; title: string; enabled: boolean }[],
+  key: string,
+) {
+  return sections.find((section) => section.sectionKey === key);
+}
+
+function artworkClass(
+  kind: "category" | "service" | "featured",
+  index: number,
+) {
+  return `reference-slice reference-slice-${kind}-${index % (kind === "category" ? 4 : kind === "service" ? 7 : 4)}`;
+}
+
+function CardArtwork({
+  card,
+  kind,
+  index,
 }: {
-  eyebrow: string;
-  title: string;
-  description: string;
-  align?: "left" | "center";
+  card: HomepageCard;
+  kind: "category" | "service" | "featured";
+  index: number;
 }) {
+  if (
+    !card.imagePath ||
+    card.imagePath === "/artwork/osrs-reference-board.jpeg"
+  ) {
+    return <div className={artworkClass(kind, index)} aria-hidden="true" />;
+  }
   return (
-    <div
-      className={cn("max-w-2xl", align === "center" && "mx-auto text-center")}
-    >
-      <p
-        className={cn(
-          "text-gold kicker-type ornament-rule",
-          align === "center" && "justify-center before:hidden",
-        )}
-      >
-        {eyebrow}
-      </p>
-      <h2 className="display-type text-text-primary mt-4 text-3xl leading-[1.02] text-balance sm:text-4xl lg:text-5xl">
-        {sectionTitle}
-      </h2>
-      <p className="text-text-secondary mt-5 text-base leading-7 sm:text-lg">
-        {sectionDescription}
-      </p>
+    <div className="relative size-full overflow-hidden">
+      {card.imagePath.startsWith("/") ? (
+        <Image
+          src={card.imagePath}
+          alt={card.imageAltText}
+          fill
+          sizes={
+            kind === "service" ? "180px" : "(max-width: 768px) 100vw, 25vw"
+          }
+          className="object-cover transition duration-300 group-hover:scale-105"
+          unoptimized={card.imagePath.startsWith("/uploads/")}
+        />
+      ) : (
+        <div
+          className="size-full bg-cover bg-center transition duration-300 group-hover:scale-105"
+          style={{
+            backgroundImage: `url(${JSON.stringify(card.imagePath).slice(1, -1)})`,
+          }}
+          aria-label={card.imageAltText}
+          role="img"
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
     </div>
   );
 }
 
-function PortalArtwork() {
-  return (
-    <figure className="portal-artwork relative h-full min-h-[31rem] overflow-hidden md:min-h-[38rem] lg:min-h-[47rem]">
-      <picture>
-        <source
-          media="(max-width: 767px)"
-          srcSet="/artwork/portal-hero-mobile.webp"
-        />
-        <Image
-          src="/artwork/portal-hero-desktop.webp"
-          alt="Armoured knight standing before a glowing green fantasy portal surrounded by coins and crystals"
-          width={1600}
-          height={900}
-          priority
-          sizes="(max-width: 767px) 100vw, 62vw"
-          className="absolute inset-0 size-full object-cover object-center"
-        />
-      </picture>
-      <div className="portal-artwork-fade pointer-events-none absolute inset-0" />
-      <div className="portal-floor-glow pointer-events-none absolute right-[10%] bottom-[2%] h-24 w-2/3 rounded-[50%] blur-3xl" />
-      <span className="hero-float-label hero-float-gold hidden md:flex">
-        <Coins aria-hidden="true" className="size-3.5" /> Gold &amp; Items
-      </span>
-      <span className="hero-float-label hero-float-level hidden md:flex">
-        <Zap aria-hidden="true" className="size-3.5" /> Power Levelling
-      </span>
-      <span className="hero-float-label hero-float-raids hidden md:flex">
-        <Swords aria-hidden="true" className="size-3.5" /> Raids &amp; Bossing
-      </span>
-      <span className="hero-float-label hero-float-track hidden md:flex">
-        <Gauge aria-hidden="true" className="size-3.5" /> Order Tracking
-      </span>
-    </figure>
+async function loadHomepage() {
+  const databaseConfigured = Boolean(
+    process.env.DATABASE_USER &&
+    process.env.DATABASE_PASSWORD &&
+    process.env.DATABASE_NAME,
   );
+  if (databaseConfigured) {
+    try {
+      const { getPublicHomepageContent } =
+        await import("@/lib/homepage/server");
+      return await getPublicHomepageContent();
+    } catch {
+      // Keep the storefront available while a migration or database connection is recovering.
+    }
+  }
+  return {
+    sections: defaultHomepageSections,
+    cards: fallbackHomepageCards,
+  };
 }
 
-export default function Homepage() {
-  const discordHref = getDiscordHref();
-  const priorityCategories = homepageCategories.filter(({ id }) =>
-    ["power-levelling", "questing"].includes(id),
-  );
-  const secondaryCategories = homepageCategories.filter(
-    ({ id }) => !["power-levelling", "questing"].includes(id),
+export default async function Homepage() {
+  const { sections, cards } = await loadHomepage();
+  const categorySection = sectionByKey(sections, "main-categories");
+  const serviceSection = sectionByKey(sections, "main-services");
+  const featuredSection = sectionByKey(sections, "featured-services");
+  const categories = cards.filter((card) => card.placement === "MAIN_CATEGORY");
+  const services = cards.filter((card) => card.placement === "MAIN_SERVICE");
+  const featured = cards.filter(
+    (card) => card.placement === "FEATURED_SERVICE",
   );
 
   return (
-    <main id="main-content" className="redesign-atmosphere overflow-hidden">
-      <section className="hero-marketplace relative isolate min-h-[calc(100svh-6.8rem)] overflow-hidden">
-        <div className="hero-grid pointer-events-none absolute inset-0 -z-20" />
-        <div className="hero-portal-haze pointer-events-none absolute top-[15%] right-[8%] -z-10 size-[34rem] rounded-full blur-[120px]" />
-
-        <div className="mx-auto grid min-h-[calc(100svh-6.8rem)] max-w-[100rem] lg:grid-cols-[44%_56%]">
-          <div className="relative z-20 flex items-center px-5 py-14 sm:px-8 sm:py-18 lg:px-12 xl:pl-[max(3rem,calc((100vw-80rem)/2))]">
-            <div className="max-w-2xl">
-              <Badge
-                variant="success"
-                className="border-primary/20 bg-primary-muted/55 text-primary"
+    <main id="main-content" className="osrs-storefront overflow-hidden">
+      <section className="inferno-hero relative isolate">
+        <Image
+          src="/artwork/zuk-inferno-hero.png"
+          alt="An armoured adventurer confronting a colossal demon in a fiery fortress"
+          fill
+          priority
+          sizes="100vw"
+          className="-z-20 object-cover object-[66%_center]"
+        />
+        <div className="inferno-hero-shade absolute inset-0 -z-10" />
+        <div className="mx-auto flex min-h-[38rem] max-w-7xl items-center px-5 py-16 sm:px-8 lg:min-h-[43rem]">
+          <div className="max-w-2xl">
+            <p className="text-primary text-xs font-black tracking-[0.18em] uppercase">
+              #1 Trusted OSRS Services
+            </p>
+            <h1 className="display-type mt-5 text-5xl leading-[0.92] uppercase sm:text-7xl lg:text-[5.5rem]">
+              You fight Zuk,
+              <span className="text-primary block">we fight for you.</span>
+            </h1>
+            <p className="text-text-secondary mt-6 max-w-xl text-base leading-7 sm:text-lg">
+              Professional OSRS boosting, account builds, quests, gold and
+              more—safe, fast and hand-played.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Link href="/services" className={buttonVariants({ size: "lg" })}>
+                Browse services
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/services?featured=1"
+                className={buttonVariants({
+                  variant: "secondary",
+                  size: "lg",
+                })}
               >
-                <Sparkles aria-hidden="true" className="size-3.5" />
-                Built around your next milestone
-              </Badge>
-              <h1 className="display-type text-text-primary mt-6 text-[2.7rem] leading-[0.96] text-balance sm:text-6xl lg:text-[4.15rem] xl:text-[4.65rem]">
-                Your next OSRS milestone,
-                <span className="text-primary block">handled with care.</span>
-              </h1>
-              <p className="text-text-secondary mt-6 max-w-xl text-base leading-7 sm:text-lg sm:leading-8">
-                Configure professional OSRS services, review transparent
-                estimates and track your order from one secure dashboard.
-              </p>
-
-              <MarketplaceSearch />
-
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href={publicCtaLinks.browseServices}
-                  className={buttonVariants({ size: "lg" })}
-                >
-                  Browse Services
-                  <ArrowRight aria-hidden="true" className="size-4" />
-                </Link>
-                <Link
-                  href={publicCtaLinks.getEstimate}
-                  className={buttonVariants({
-                    variant: "secondary",
-                    size: "lg",
-                  })}
-                >
-                  Get an Estimate
-                </Link>
-              </div>
-
-              <ul className="mt-8 flex flex-wrap gap-x-5 gap-y-3">
-                {[
-                  "Clear estimates",
-                  "Secure communication",
-                  "Order progress visibility",
-                ].map((item) => (
-                  <li
-                    key={item}
-                    className="text-text-muted flex items-center gap-2 text-xs font-semibold"
-                  >
-                    <CheckCircle2
-                      aria-hidden="true"
-                      className="text-primary size-3.5"
-                    />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+                View offers
+              </Link>
             </div>
-          </div>
-
-          <div className="relative min-h-[25rem] md:min-h-[38rem] lg:min-h-0">
-            <PortalArtwork />
+            <ul className="mt-10 grid max-w-2xl grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-5">
+              {trustItems.map(({ icon: Icon, value, label }) => (
+                <li key={label} className="flex items-center gap-2">
+                  <span className="inferno-trust-icon">
+                    <Icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="text-[0.62rem] leading-tight font-bold uppercase">
+                    <span className="text-primary block">{value}</span>
+                    <span className="text-text-secondary">{label}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      <section
-        id="service-categories"
-        className="section-anchor category-marketplace py-20 sm:py-24 lg:py-28"
-      >
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
-            <SectionIntro
-              eyebrow="Marketplace entry points"
-              title="Go straight to the progress you have in mind."
-              description="Start with a priority service path or scan the wider marketplace. Each route keeps requirements and estimates visible before an order is confirmed."
-            />
-            <p className="text-text-muted max-w-md text-sm leading-6 lg:justify-self-end lg:text-right">
-              Full service configuration is scheduled for later tasks. These
-              entry points establish the discovery experience without inventing
-              prices or availability.
-            </p>
+      {categorySection?.enabled !== false && categories.length ? (
+        <section className="osrs-section mx-auto max-w-7xl px-5 py-14 sm:px-8">
+          <div className="osrs-section-heading">
+            <span />
+            <h2>{categorySection?.title ?? "What Can We Do For You?"}</h2>
+            <span />
           </div>
-
-          <div className="mt-12 grid gap-5 lg:grid-cols-2">
-            {priorityCategories.map((category, index) => {
-              const Icon = categoryIcons[category.icon];
-              return (
-                <article
-                  key={category.id}
-                  id={category.id}
-                  className={cn(
-                    "priority-category section-anchor group relative isolate min-h-80 overflow-hidden rounded-[1.75rem] p-7 sm:p-9",
-                    index === 1 && "priority-category-quest",
-                  )}
-                >
-                  <div className="category-poly-object" aria-hidden="true">
-                    <span className="category-poly-ring" />
-                    <span className="category-poly-core">
-                      <Icon className="size-10" />
-                    </span>
-                  </div>
-                  <div className="relative z-10 flex h-full max-w-md flex-col">
-                    <p className="text-gold kicker-type">
-                      {index === 0 ? "Build a skill path" : "Plan progression"}
-                    </p>
-                    <h3 className="display-type text-text-primary mt-auto pt-20 text-3xl sm:text-4xl">
-                      {category.title}
-                    </h3>
-                    <p className="text-text-secondary mt-3 text-sm leading-6">
-                      {category.description}
-                    </p>
-                    <Link
-                      href={category.href}
-                      className="text-primary focus-visible:ring-primary mt-5 inline-flex min-h-10 w-fit items-center gap-2 rounded-lg text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-                    >
-                      Explore service path
-                      <ArrowRight
-                        aria-hidden="true"
-                        className="size-4 transition-transform group-hover:translate-x-1"
-                      />
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          <div className="secondary-category-rail mt-5 grid sm:grid-cols-2 lg:grid-cols-3">
-            {secondaryCategories.map((category) => {
-              const Icon = categoryIcons[category.icon];
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {categories.map((card, index) => {
+              const Icon =
+                categoryIcons[index % categoryIcons.length] ?? UserRoundCheck;
               return (
                 <Link
-                  key={category.id}
-                  id={category.id}
-                  href={category.href}
-                  className="section-anchor group focus-visible:ring-primary flex min-h-32 items-center gap-4 px-5 py-5 transition focus-visible:ring-2 focus-visible:outline-none sm:px-6"
+                  key={card.id}
+                  href={card.href}
+                  className="osrs-category-card group"
                 >
-                  <span className="secondary-category-icon">
-                    <Icon
-                      aria-hidden="true"
-                      className="text-primary size-5 transition-transform group-hover:-translate-y-1"
-                    />
-                  </span>
-                  <span>
-                    <span className="text-text-primary group-hover:text-primary block text-sm font-bold transition">
-                      {category.title}
+                  <div className="h-56">
+                    <CardArtwork card={card} kind="category" index={index} />
+                  </div>
+                  <div className="relative z-10 -mt-14 flex flex-1 flex-col items-center px-5 pb-5 text-center">
+                    <span className="osrs-hex-icon">
+                      <Icon className="size-6" aria-hidden="true" />
                     </span>
-                    <span className="text-text-muted mt-1 block text-xs leading-5">
-                      {category.description}
-                    </span>
-                  </span>
+                    <h3 className="display-type mt-3 text-2xl uppercase">
+                      {card.title}
+                    </h3>
+                    <p className="text-text-secondary mt-2 min-h-10 text-xs leading-5">
+                      {card.description}
+                    </p>
+                    <span className="osrs-card-cta mt-5">{card.ctaText}</span>
+                  </div>
                 </Link>
               );
             })}
           </div>
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      <section
-        id="security"
-        className="section-anchor trust-editorial py-20 sm:py-24 lg:py-28"
-      >
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[0.9fr_0.65fr_0.95fr] lg:px-8">
-          <div>
-            <p className="text-gold kicker-type ornament-rule">
-              Ordering confidence
-            </p>
-            <h2 className="display-type text-text-primary mt-5 text-3xl leading-[1.03] sm:text-5xl">
-              One clear path from request to progress.
-            </h2>
-            <p className="text-text-secondary mt-5 text-base leading-7">
-              Useful detail should make an order easier to understand—not make
-              the experience feel like an internal system. Scope, updates and
-              support stay connected around your milestone.
-            </p>
+      {serviceSection?.enabled !== false && services.length ? (
+        <section className="mx-auto max-w-7xl px-5 pb-12 sm:px-8">
+          <div className="osrs-section-heading">
+            <span />
+            <h2>{serviceSection?.title ?? "Our Main Services"}</h2>
+            <span />
           </div>
-
-          <div className="trust-relic mx-auto" aria-hidden="true">
-            <span className="trust-relic-orbit" />
-            <span className="trust-relic-shield">
-              <Shield className="size-14" />
-            </span>
-            <span className="trust-relic-gem trust-relic-gem-one" />
-            <span className="trust-relic-gem trust-relic-gem-two" />
+          <div className="osrs-service-rail mt-6 flex gap-3 overflow-x-auto pb-3">
+            {services.map((card, index) => (
+              <Link
+                key={card.id}
+                href={card.href}
+                className="osrs-service-tile group"
+              >
+                <div className="h-32">
+                  <CardArtwork card={card} kind="service" index={index} />
+                </div>
+                <span className="display-type block px-3 py-3 text-center text-lg uppercase">
+                  {card.title}
+                </span>
+              </Link>
+            ))}
           </div>
-
-          <div className="divide-border/50 divide-y">
-            {processBenefits.map((benefit, index) => {
-              const Icon = trustIcons[index] ?? ShieldCheck;
-              return (
-                <article
-                  key={benefit.title}
-                  className="flex gap-4 py-6 first:pt-0 last:pb-0"
-                >
-                  <span className="bg-primary/10 text-primary flex size-10 shrink-0 items-center justify-center rounded-xl">
-                    <Icon aria-hidden="true" className="size-4.5" />
-                  </span>
-                  <div>
-                    <h3 className="text-text-primary text-base font-bold">
-                      {benefit.title}
-                    </h3>
-                    <p className="text-text-secondary mt-2 text-sm leading-6">
-                      {benefit.description}
-                    </p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="featured-services"
-        className="section-anchor featured-marketplace py-20 sm:py-24 lg:py-28"
-      >
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
-            <SectionIntro
-              eyebrow="Popular service paths"
-              title="A marketplace view built around useful choices."
-              description="Compare service context, supported account modes and estimate states without fabricated rankings, prices or delivery promises."
-            />
-            <Link
-              href={publicCtaLinks.browseServices}
-              className="text-primary focus-visible:ring-primary inline-flex min-h-11 w-fit items-center gap-2 rounded-lg text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-            >
-              View all service areas
-              <ArrowRight aria-hidden="true" className="size-4" />
+          <div className="mt-3 text-right">
+            <Link className="osrs-view-all" href="/services">
+              View all services{" "}
+              <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
-          <FeaturedServicesMarketplace />
-        </div>
-      </section>
+        </section>
+      ) : null}
 
-      <section
-        id="calculator-preview"
-        className="section-anchor calculator-atmosphere py-20 sm:py-24 lg:py-28"
-      >
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16 lg:px-8">
-          <div>
-            <Badge variant="warning">Transparent estimate preview</Badge>
-            <h2 className="display-type text-text-primary mt-5 text-3xl leading-[1.02] sm:text-5xl">
-              Configure first. Confirm the final price before ordering.
+      {featuredSection?.enabled !== false && featured.length ? (
+        <section className="osrs-featured-wrap border-primary/20 border-y py-12">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 className="display-type text-3xl uppercase">
+                {featuredSection?.title ?? "Featured Services"}
+              </h2>
+              <Link className="osrs-view-all" href="/services">
+                View all services{" "}
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+            </div>
+            <div className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {featured.map((card, index) => (
+                <article key={card.id} className="osrs-feature-card group">
+                  <div className="relative h-40">
+                    <CardArtwork card={card} kind="featured" index={index} />
+                    {card.badge ? (
+                      <span className="osrs-promo-badge">{card.badge}</span>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-1 flex-col p-4">
+                    {card.categoryLabel ? (
+                      <p className="text-primary text-[0.62rem] font-black tracking-[0.15em] uppercase">
+                        {card.categoryLabel}
+                      </p>
+                    ) : null}
+                    <h3 className="display-type mt-2 text-xl uppercase">
+                      {card.title}
+                    </h3>
+                    <p className="text-text-muted mt-2 text-xs leading-5">
+                      {card.description}
+                    </p>
+                    {card.bullets.length ? (
+                      <ul className="text-text-secondary mt-4 space-y-2 text-xs">
+                        {card.bullets.map((bullet) => (
+                          <li key={bullet} className="flex gap-2">
+                            <Check
+                              className="text-primary mt-0.5 size-3.5 shrink-0"
+                              aria-hidden="true"
+                            />
+                            {bullet}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    <div className="mt-auto flex items-end justify-between gap-3 pt-5">
+                      {card.priceLabel ? (
+                        <div>
+                          <span className="text-text-muted block text-[0.58rem] font-bold uppercase">
+                            From
+                          </span>
+                          <strong className="text-primary text-lg">
+                            {card.priceLabel}
+                          </strong>
+                          {card.oldPriceLabel ? (
+                            <del className="text-text-muted ml-2 text-xs">
+                              {card.oldPriceLabel}
+                            </del>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span />
+                      )}
+                      <Link href={card.href} className="osrs-order-button">
+                        {card.ctaText}
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+        <div className="grid gap-7 xl:grid-cols-[1.05fr_2fr] xl:items-stretch">
+          <div className="osrs-why-panel p-6">
+            <h2 className="display-type text-2xl uppercase">
+              Why choose <span className="text-primary">OSRS Services?</span>
             </h2>
-            <p className="text-text-secondary mt-5 text-base leading-7">
-              The planned calculators will adapt to service type, current
-              progress, target, account mode and relevant requirements. This
-              preview demonstrates the information hierarchy only.
-            </p>
-            <ul className="text-text-secondary mt-7 space-y-3 text-sm">
+            <ul className="text-text-secondary mt-5 space-y-2.5 text-sm">
               {[
-                "Skill and XP targets",
-                "Quest and diary requirements",
-                "Bossing and PvM scope",
-                "Account-mode adjustments",
+                "Experienced and verified boosters",
+                "Safe, hand-played methods",
+                "24/7 customer support",
+                "Clear order communication",
+                "Trusted service workflows",
               ].map((item) => (
-                <li key={item} className="flex items-center gap-3">
-                  <CheckCircle2
-                    aria-hidden="true"
-                    className="text-primary size-4"
-                  />
+                <li key={item} className="flex items-center gap-2">
+                  <span className="bg-primary flex size-4 items-center justify-center rounded-full text-[0.65rem] text-white">
+                    ✓
+                  </span>
                   {item}
                 </li>
               ))}
             </ul>
-            <Link
-              href={publicCtaLinks.browseServices}
-              className={cn(
-                buttonVariants({ variant: "secondary", size: "lg" }),
-                "mt-8",
-              )}
-            >
-              Browse calculator types
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
           </div>
-
-          <div className="calculator-stage relative" data-content-status="demo">
-            <div
-              className="calculator-coins pointer-events-none"
-              aria-hidden="true"
-            >
-              <span />
-              <span />
-              <span />
-            </div>
-            <div
-              className="calculator-crystal pointer-events-none"
-              aria-hidden="true"
-            />
-            <div className="calculator-window relative z-10">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-gold text-[0.65rem] font-bold tracking-[0.16em] uppercase">
-                    Calculator interface preview
-                  </p>
-                  <h3 className="text-text-primary mt-2 text-xl font-bold">
-                    Skill progression estimate
-                  </h3>
-                </div>
-                <span className="bg-primary/10 text-primary flex size-10 items-center justify-center rounded-xl">
-                  <Calculator aria-hidden="true" className="size-5" />
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {launchMetrics.map(({ icon: Icon, value, label }) => (
+              <div key={label} className="osrs-metric-card">
+                <Icon className="text-primary size-8" aria-hidden="true" />
+                <strong className="display-type mt-4 text-3xl">{value}</strong>
+                <span className="text-text-secondary mt-1 text-center text-[0.62rem] font-bold tracking-[0.06em] uppercase">
+                  {label}
                 </span>
               </div>
-
-              <fieldset className="mt-7 grid gap-4 sm:grid-cols-2" disabled>
-                <label className="space-y-2 sm:col-span-2">
-                  <span className="text-text-secondary text-xs font-bold">
-                    Service
-                  </span>
-                  <select
-                    aria-label="Preview service"
-                    defaultValue="Agility training"
-                    className="border-border bg-background/65 text-text-primary h-12 w-full rounded-xl border px-4 text-sm"
-                  >
-                    <option>Agility training</option>
-                  </select>
-                </label>
-                <label className="space-y-2">
-                  <span className="text-text-secondary text-xs font-bold">
-                    Current level
-                  </span>
-                  <input
-                    aria-label="Preview current level"
-                    value="62"
-                    readOnly
-                    className="border-border bg-background/65 text-text-primary h-12 w-full rounded-xl border px-4 text-sm"
-                  />
-                </label>
-                <label className="space-y-2">
-                  <span className="text-text-secondary text-xs font-bold">
-                    Target level
-                  </span>
-                  <input
-                    aria-label="Preview target level"
-                    value="80"
-                    readOnly
-                    className="border-border bg-background/65 text-text-primary h-12 w-full rounded-xl border px-4 text-sm"
-                  />
-                </label>
-                <label className="space-y-2 sm:col-span-2">
-                  <span className="text-text-secondary text-xs font-bold">
-                    Game mode
-                  </span>
-                  <select
-                    aria-label="Preview game mode"
-                    defaultValue="Normal"
-                    className="border-border bg-background/65 text-text-primary h-12 w-full rounded-xl border px-4 text-sm"
-                  >
-                    <option>Normal</option>
-                  </select>
-                </label>
-              </fieldset>
-
-              <div className="estimate-preview mt-6 p-5">
-                <div className="flex items-center justify-between gap-4">
-                  <p className="text-text-primary text-sm font-bold">
-                    Estimate summary
-                  </p>
-                  <span className="text-primary text-[0.62rem] font-bold tracking-[0.12em] uppercase">
-                    Configuration required
-                  </span>
-                </div>
-                <p className="display-type text-text-primary mt-5 text-2xl">
-                  Estimate updates after configuration
-                </p>
-                <p className="text-text-muted mt-2 text-xs leading-5">
-                  Final pricing is confirmed before order submission.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-      </section>
-
-      <section
-        id="how-it-works"
-        className="section-anchor journey-atmosphere py-20 sm:py-24 lg:py-28"
-      >
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-          <SectionIntro
-            eyebrow="How ordering works"
-            title="Follow one connected route to your next milestone."
-            description="The homepage explains the intended journey. Service engines, checkout and real tracking remain later implementation tasks."
-            align="center"
-          />
-          <ol className="journey-path relative mt-14 grid gap-8 lg:grid-cols-4 lg:gap-5">
-            {orderSteps.map((step, index) => {
-              const Icon = stepIcons[index] ?? MapPin;
-              return (
-                <li
-                  key={step.number}
-                  className="journey-stop relative flex gap-5 lg:block"
-                >
-                  <span className="journey-marker">
-                    <Icon aria-hidden="true" className="size-5" />
-                  </span>
-                  <div className="lg:pt-7">
-                    <span className="text-gold text-[0.62rem] font-black tracking-[0.16em]">
-                      {step.number}
-                    </span>
-                    <h3 className="text-text-primary mt-2 text-lg font-bold">
-                      {index === 0
-                        ? "Choose a service"
-                        : index === 1
-                          ? "Configure requirements"
-                          : index === 2
-                            ? "Confirm securely"
-                            : "Track progress"}
-                    </h3>
-                    <p className="text-text-secondary mt-2 text-sm leading-6">
-                      {step.description}
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        </div>
-      </section>
-
-      <section
-        id="order-tracking"
-        className="section-anchor tracking-atmosphere py-20 sm:py-24 lg:py-28"
-      >
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 sm:px-6 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20 lg:px-8">
-          <div>
-            <Badge variant="success">Development-safe preview</Badge>
-            <h2 className="display-type text-text-primary mt-5 text-3xl leading-[1.02] sm:text-5xl">
-              Keep progress, messages and the next milestone together.
-            </h2>
-            <p className="text-text-secondary mt-5 text-base leading-7">
-              The planned customer dashboard will make the meaningful parts of
-              an order easy to follow without exposing internal operations. All
-              information shown here is demonstration content.
-            </p>
-            <Link
-              href={publicCtaLinks.account}
-              className={cn(
-                buttonVariants({ variant: "secondary", size: "lg" }),
-                "mt-8",
-              )}
-            >
-              Customer account
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
-          </div>
-
-          <div className="tracking-stage relative" data-content-status="demo">
-            <span className="tracking-float tracking-float-one">
-              Secure messages
-            </span>
-            <span className="tracking-float tracking-float-two">
-              Milestone completed
-            </span>
-            <span className="tracking-float tracking-float-three">
-              Support available
-            </span>
-            <div className="tracking-window">
-              <div className="border-border/70 flex flex-wrap items-center justify-between gap-4 border-b px-5 py-4 sm:px-7">
-                <div className="flex items-center gap-3">
-                  <span className="bg-primary/12 text-primary flex size-10 items-center justify-center rounded-xl">
-                    <PackageCheck aria-hidden="true" className="size-5" />
-                  </span>
-                  <div>
-                    <p className="text-text-primary text-sm font-bold">
-                      {orderTrackingPreview.title}
-                    </p>
-                    <p className="text-text-muted mt-0.5 text-xs">
-                      {orderTrackingPreview.category}
-                    </p>
-                  </div>
-                </div>
-                <span className="bg-primary/10 text-primary rounded-full px-3 py-1.5 text-[0.65rem] font-bold tracking-[0.1em] uppercase">
-                  {orderTrackingPreview.status}
-                </span>
-              </div>
-
-              <div className="grid gap-6 p-5 sm:p-7 md:grid-cols-[1.1fr_0.9fr]">
-                <div>
-                  <div className="flex items-end justify-between gap-4">
-                    <div>
-                      <p className="text-text-muted text-xs font-bold">
-                        Order progress
-                      </p>
-                      <p className="display-type text-text-primary mt-2 text-4xl">
-                        {orderTrackingPreview.progress}%
-                      </p>
-                    </div>
-                    <Gauge aria-hidden="true" className="text-primary size-8" />
-                  </div>
-                  <div className="bg-background mt-5 h-2 overflow-hidden rounded-full">
-                    <span
-                      className="bg-primary block h-full rounded-full"
-                      style={{ width: `${orderTrackingPreview.progress}%` }}
-                    />
-                  </div>
-                  <div className="tracking-route mt-8">
-                    {[
-                      "Confirmed",
-                      "Requirements",
-                      "In progress",
-                      "Complete",
-                    ].map((milestone, index) => (
-                      <span
-                        key={milestone}
-                        className={cn(index < 3 && "tracking-route-active")}
-                      >
-                        {milestone}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <div className="tracking-info-row">
-                    <MessagesSquare
-                      aria-hidden="true"
-                      className="text-gold size-4"
-                    />
-                    <span>
-                      <span className="text-text-muted block text-[0.62rem] font-bold uppercase">
-                        Communication
-                      </span>
-                      <span className="text-text-primary mt-1 block text-xs font-bold">
-                        {orderTrackingPreview.activity}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="tracking-info-row">
-                    <Target
-                      aria-hidden="true"
-                      className="text-primary size-4"
-                    />
-                    <span>
-                      <span className="text-text-muted block text-[0.62rem] font-bold uppercase">
-                        Next milestone
-                      </span>
-                      <span className="text-text-primary mt-1 block text-xs font-bold">
-                        {orderTrackingPreview.nextMilestone}
-                      </span>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    disabled
-                    className="border-border text-text-secondary flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border text-xs font-bold disabled:opacity-70"
-                  >
-                    <Headphones aria-hidden="true" className="size-4" />
-                    Support action preview
-                  </button>
-                </div>
-              </div>
-              <p className="border-border/70 text-warning border-t px-5 py-3 text-center text-[0.62rem] font-bold tracking-[0.1em] uppercase sm:px-7">
-                Demonstration content — not a real customer order
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="expertise-atmosphere py-20 sm:py-24 lg:py-28">
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
-          <div className="grid gap-10 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
-            <SectionIntro
-              eyebrow="Areas of expertise"
-              title="Service knowledge organised around the work."
-              description="Explore category expertise without fabricated employee profiles, qualifications or experience claims."
-            />
-            <div className="expertise-rail grid sm:grid-cols-2">
-              {expertiseAreas.map((area) => {
-                const Icon = categoryIcons[area.icon];
-                return (
-                  <article key={area.title} className="expertise-item group">
-                    <span className="expertise-symbol">
-                      <Icon
-                        aria-hidden="true"
-                        className="size-6 transition-transform group-hover:-translate-y-1"
-                      />
-                    </span>
-                    <h3 className="text-text-primary mt-5 text-base font-bold">
-                      {area.title}
-                    </h3>
-                    <p className="text-text-secondary mt-2 text-sm leading-6">
-                      {area.description}
-                    </p>
-                  </article>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="faq"
-        className="section-anchor faq-atmosphere py-20 sm:py-24 lg:py-28"
-      >
-        <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-6 lg:grid-cols-[0.72fr_1.28fr] lg:gap-20 lg:px-8">
-          <div>
-            <SectionIntro
-              eyebrow="Common questions"
-              title="Clear answers before you configure an order."
-              description="Review the planned service process, account information, communication and custom-estimate approach."
-            />
-            <div className="help-relic mt-10" aria-hidden="true">
-              <span className="help-scroll" />
-              <span className="help-seal">
-                <MessageCircle className="size-5" />
-              </span>
-            </div>
-            <Link
-              href={discordHref}
-              className="text-primary focus-visible:ring-primary mt-8 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-            >
-              <Headphones aria-hidden="true" className="size-4" />
-              Request support
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
-          </div>
-          <FaqAccordion items={homepageFaqs} />
-        </div>
-      </section>
-
-      <section
-        id="support"
-        className="section-anchor final-portal-cta relative isolate overflow-hidden py-20 sm:py-24"
-      >
-        <div className="cta-grid pointer-events-none absolute inset-0 -z-20" />
-        <div className="cta-portal-energy pointer-events-none absolute top-1/2 right-[8%] -z-10 size-80 -translate-y-1/2 rounded-full" />
-        <span className="cta-crystal cta-crystal-one" aria-hidden="true" />
-        <span className="cta-crystal cta-crystal-two" aria-hidden="true" />
-        <span className="cta-coin cta-coin-one" aria-hidden="true" />
-        <span className="cta-coin cta-coin-two" aria-hidden="true" />
-        <div className="mx-auto flex max-w-7xl flex-col gap-9 px-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div className="max-w-3xl">
-            <p className="text-gold kicker-type">Continue the journey</p>
-            <h2 className="display-type text-text-primary mt-4 text-3xl leading-[1.02] text-balance sm:text-5xl">
-              Ready to plan your next OSRS milestone?
-            </h2>
-            <p className="text-text-secondary mt-4 max-w-2xl text-base leading-7">
-              Explore the marketplace preview or request support before choosing
-              a service path.
-            </p>
-          </div>
-          <div className="relative z-10 flex shrink-0 flex-col gap-3 sm:flex-row">
-            <Link
-              href={publicCtaLinks.browseServices}
-              className={buttonVariants({ size: "lg" })}
-            >
-              Browse Services
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
-            <Link
-              href={discordHref}
-              className={buttonVariants({ variant: "secondary", size: "lg" })}
-            >
-              Request Support
-            </Link>
-          </div>
-        </div>
+        <p className="text-text-muted mt-3 text-right text-[0.65rem]">
+          * Illustrative layout values; replace with client-verified metrics
+          before launch.
+        </p>
       </section>
     </main>
   );

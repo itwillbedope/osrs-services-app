@@ -1,55 +1,102 @@
-import { ArrowUpRight, MessageCircle } from "lucide-react";
+import { Headphones, MessageCircle, MonitorPlay, Send } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
-import { footerNavigation, getDiscordHref } from "@/config/public-navigation";
+import { getDiscordHref } from "@/config/public-navigation";
+
+const columns = [
+  {
+    title: "Quick links",
+    links: [
+      ["Home", "/"],
+      ["Services", "/services"],
+      ["Accounts", "/accounts"],
+      ["Offers", "/services?featured=1"],
+      ["About us", "/support"],
+      ["Contact", "/support"],
+    ],
+  },
+  {
+    title: "Our services",
+    links: [
+      ["Inferno", "/services/bossing-pvm"],
+      ["Quiver service", "/services"],
+      ["Bossing", "/services/bossing-pvm"],
+      ["Raids", "/services/bossing-pvm"],
+      ["Skilling", "/services/power-levelling"],
+      ["Questing", "/services/quests"],
+      ["Diaries", "/services/achievement-diaries"],
+    ],
+  },
+  {
+    title: "Support",
+    links: [
+      ["Discord support", getDiscordHref()],
+      ["Terms of service", "/terms"],
+      ["Privacy policy", "/privacy"],
+      ["Refund policy", "/refund-policy"],
+      ["FAQ", "/#faq"],
+    ],
+  },
+] as const;
+
+const socialLinks: ReadonlyArray<{
+  icon: LucideIcon;
+  href: string;
+  label: string;
+}> = [
+  { icon: MessageCircle, href: getDiscordHref(), label: "Discord" },
+  { icon: MonitorPlay, href: "/support", label: "Video updates" },
+  { icon: Headphones, href: "/support", label: "Support" },
+];
 
 export function PublicFooter() {
-  const discordHref = getDiscordHref();
   const year = new Date().getFullYear();
-
   return (
-    <footer className="border-border border-t bg-[#020a0d]">
-      <div className="mx-auto max-w-7xl px-5 pt-12 pb-7 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-[1.05fr_2.3fr]">
-          <div className="max-w-sm">
+    <footer className="border-primary/20 border-t bg-[#030303]">
+      <div className="mx-auto max-w-7xl px-5 pt-10 pb-6 sm:px-8">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_1.8fr_1fr]">
+          <div>
             <Link
               href="/"
               aria-label="OSRS Services home"
-              className="focus-visible:ring-primary inline-block rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+              className="inline-block"
             >
-              <BrandLogo className="w-48" />
+              <BrandLogo className="w-52" />
             </Link>
-            <p className="text-text-secondary mt-5 text-sm leading-7">
-              Professional OSRS services with clear estimates, visible order
-              progress and privacy-conscious handling.
+            <p className="text-text-secondary mt-4 max-w-sm text-sm leading-6">
+              Professional OSRS services with clear estimates, secure
+              communication and visible order progress.
             </p>
-            <div className="border-primary/15 bg-primary/5 mt-6 inline-flex rounded-xl border p-1.5">
-              <Link
-                href={discordHref}
-                className="text-primary hover:text-primary-hover focus-visible:ring-primary inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-bold focus-visible:ring-2 focus-visible:outline-none"
-              >
-                <MessageCircle aria-hidden="true" className="size-4" />
-                Discord support
-                <ArrowUpRight aria-hidden="true" className="size-3.5" />
-              </Link>
+            <div className="mt-5 flex gap-2">
+              {socialLinks.map(({ icon: Icon, href, label }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  className="border-border bg-surface-2 hover:border-primary hover:text-primary flex size-9 items-center justify-center rounded-full border transition"
+                >
+                  <Icon className="size-4" aria-hidden="true" />
+                </Link>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-4">
-            {Object.entries(footerNavigation).map(([group, links]) => (
-              <div key={group}>
-                <h2 className="text-text-primary text-sm font-bold capitalize">
-                  {group}
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            {columns.map((column) => (
+              <div key={column.title}>
+                <h2 className="display-type text-sm uppercase">
+                  {column.title}
                 </h2>
-                <ul className="mt-4 space-y-3">
-                  {links.map((link) => (
-                    <li key={link.label}>
+                <ul className="mt-4 space-y-2.5">
+                  {column.links.map(([label, href]) => (
+                    <li key={label}>
                       <Link
-                        href={link.href}
-                        className="text-text-muted hover:text-primary focus-visible:ring-primary inline-flex min-h-7 items-center rounded text-sm transition focus-visible:ring-2 focus-visible:outline-none"
+                        href={href}
+                        className="text-text-muted hover:text-primary text-xs transition"
                       >
-                        {link.label}
+                        {label}
                       </Link>
                     </li>
                   ))}
@@ -57,17 +104,39 @@ export function PublicFooter() {
               </div>
             ))}
           </div>
-        </div>
 
-        <div
-          id="legal-note"
-          className="border-border text-text-muted mt-12 flex flex-col gap-3 border-t pt-6 text-xs leading-5 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <p>Copyright {year} OSRS Services. All rights reserved.</p>
-          <p className="max-w-2xl sm:text-right">
-            Legal policies are available for client review. OSRS Services is not
-            affiliated with Jagex. RuneScape is a trademark of its respective
-            owner.
+          <div>
+            <h2 className="display-type text-sm uppercase">Newsletter</h2>
+            <p className="text-text-muted mt-4 text-xs leading-5">
+              Ask support to add you to launch offers and product updates.
+            </p>
+            <form action="/support" method="get" className="mt-4 flex">
+              <label className="sr-only" htmlFor="footer-email">
+                Email address
+              </label>
+              <input
+                id="footer-email"
+                name="email"
+                type="email"
+                required
+                placeholder="Enter your email"
+                className="border-border bg-surface-1 focus:border-primary min-w-0 flex-1 border px-3 text-xs outline-none"
+              />
+              <button
+                type="submit"
+                aria-label="Contact support about newsletter updates"
+                className="bg-primary hover:bg-primary-hover flex size-11 items-center justify-center text-white transition"
+              >
+                <Send className="size-4" aria-hidden="true" />
+              </button>
+            </form>
+          </div>
+        </div>
+        <div className="border-border text-text-muted mt-9 flex flex-col gap-2 border-t pt-5 text-[0.65rem] sm:flex-row sm:justify-between">
+          <p>© {year} OSRS Services. All rights reserved.</p>
+          <p>
+            Not affiliated with Jagex. RuneScape is a trademark of its
+            respective owner.
           </p>
         </div>
       </div>

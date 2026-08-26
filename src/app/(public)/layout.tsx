@@ -7,6 +7,11 @@ import { getDiscordHref } from "@/config/public-navigation";
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   const discordHref = getDiscordHref();
+  const databaseConfigured = Boolean(
+    process.env.DATABASE_USER &&
+    process.env.DATABASE_PASSWORD &&
+    process.env.DATABASE_NAME,
+  );
 
   return (
     <div className="min-h-screen overflow-x-clip">
@@ -19,7 +24,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <PublicHeader discordHref={discordHref} />
       {children}
       <PublicFooter />
-      <ChatLauncher />
+      {databaseConfigured ? <ChatLauncher /> : null}
     </div>
   );
 }
