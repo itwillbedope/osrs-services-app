@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "prebuild": "prisma generate && pnpm deploy:migrate && pnpm deploy:seed",
+    "prebuild": "prisma generate && node scripts/hostinger-sql-migrate.mjs && node --import tsx prisma/seed.ts",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
