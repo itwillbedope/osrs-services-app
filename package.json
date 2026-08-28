@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "prebuild": "prisma generate && node scripts/hostinger-prisma-migrate.mjs && prisma db seed",
+    "prebuild": "prisma generate && pnpm deploy:migrate && pnpm deploy:seed",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
@@ -18,7 +18,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:seed": "vitest run src/tests/seed-idempotence.test.ts",
-    "test:hostinger-migrate": "node scripts/hostinger-prisma-migrate.mjs --verify-engine-only",
+    "test:hostinger-migrate": "vitest run src/tests/hostinger-sql-migrate.test.ts",
     "test:watch": "vitest",
     "test:e2e": "playwright test --workers=1",
     "chat:dev": "tsx realtime/chat-server.ts",
@@ -47,7 +47,9 @@
     "screenshots:task016": "tsx scripts/capture-task-016.ts",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "deploy:migrate": "node scripts/hostinger-sql-migrate.mjs",
+    "deploy:seed": "node --import tsx prisma/seed.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "2.1.0",
