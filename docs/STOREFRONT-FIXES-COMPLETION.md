@@ -5,7 +5,7 @@
 - Task ID: STOREFRONT-SERVICE-FIXES
 - Task title: Dedicated Quiver service, advisory skilling levels, quest tag distinction and Infernal artwork sizing
 - Branch: fix/quiver-skilling-storefront
-- Date: 2026-09-21
+- Date: 2026-09-22
 
 ## Summary
 
@@ -27,6 +27,7 @@ F2P uses green and Members uses gold with readable text. Infernal artwork has ex
 - `pnpm lint`
 - `pnpm typecheck`
 - `pnpm test`
+- `pnpm format:check`
 - `node --env-file=.env scripts/hostinger-sql-migrate.mjs`
 - `node --env-file=.env --import tsx prisma/seed.ts`
 - `STOREFRONT_LOCAL_CHECK=1 node --env-file=.env --conditions=react-server --import tsx scripts/check-storefront-fixes.ts`
@@ -54,7 +55,7 @@ Stored outside the repository at `F:/Codex/2026-09-20/oka/outputs/storefront-che
 
 ## Known issues
 
-- Repository-wide historical CI formatting and migration-preservation checks may fail independently of this change; changed files are formatted and current lint, typecheck, tests and build pass locally.
+- Historical CI scripts still expect launch features to default to disabled and report existing configuration-preservation failures. The main application job passed all 276 tests but stopped on lockfile formatting; the lockfile was formatted with its parsed contents verified unchanged, together with two other existing formatting issues.
 - No real checkout payment or customer order was submitted during verification.
 
 ## Documentation updates
@@ -68,7 +69,10 @@ Work is limited to the customer's four requested storefront fixes and their vali
 ## Files changed
 
 - `docs/DECISIONS.md`
+- `docs/PRODUCTION-DEPLOYMENT.md` (formatting only)
 - `docs/STOREFRONT-FIXES-COMPLETION.md`
+- `pnpm-lock.yaml` (formatting only)
+- `pnpm-workspace.yaml` (formatting only)
 - `prisma/migrations/20260921120000_quiver_homepage_link/migration.sql`
 - `prisma/quiver-seed.ts`
 - `prisma/seed.ts`
