@@ -1,6 +1,10 @@
 packages:
   - "."
 
+# Hostinger packages Next.js into a deployment directory. Keep runtime
+# dependencies resolvable without preserving pnpm's virtual-store symlinks.
+nodeLinker: hoisted
+
 allowBuilds:
   "@prisma/engines": true
   esbuild: true

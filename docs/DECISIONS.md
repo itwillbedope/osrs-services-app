@@ -1,5 +1,20 @@
 # Decision Log
 
+## Hostinger runtime dependency repair — 2026-09-21
+
+- Production logs show Next.js cannot resolve `@swc/helpers/_/_interop_require_default`.
+  The existing lockfile already contains the correct helper version (0.5.15).
+  Mixed flat and virtual-store Next.js paths suggest deployment layout problems;
+  the exact Hostinger packaging step has not been independently inspected.
+- Use `nodeLinker: hoisted` and explicitly declare `@swc/helpers@0.5.15` as a
+  production dependency. Preserve the other locked package versions.
+- Check dependency resolution from both the application and Next.js before build
+  and normal start. Hostinger-generated entrypoints may bypass `prestart`, so run
+  `node scripts/check-runtime-dependencies.mjs` against the deployed artifact too.
+- No migrations, seed changes, commercial settings, or authentication changes
+  are part of this repair. A clean installation/build is necessary to replace the
+  previously packaged dependency tree.
+
 ## Confirmed
 
 - Product name: OSRS Services
