@@ -135,6 +135,33 @@ beforeAll(async () => {
 });
 
 describe("skilling estimate route", () => {
+  it.each([
+    { currentLevel: 1, targetLevel: 90 },
+    { inputMode: "XP", currentXp: 0, targetXp: 5_000_000 },
+  ])("allows a quote outside method recommendations: %j", async (input) => {
+    const service = await mocks.catalogueServiceFindFirst();
+    mocks.catalogueServiceFindFirst.mockResolvedValue({
+      ...service,
+      skillingSkills: [
+        {
+          name: "Attack",
+          methods: [{ ...method, minimumLevel: 70, maximumLevel: 85 }],
+        },
+      ],
+    });
+    const response = await POST(request(input));
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.ok).toBe(true);
+    expect(body.estimate.requirementsReviewRequired).toBe(true);
+    expect(body.estimate.estimatedTotalCents).toBeGreaterThan(500);
+  });
+
+  it("still rejects a target at or below current progress", async () => {
+    const response = await POST(request({ currentLevel: 70, targetLevel: 60 }));
+    expect(response.status).toBe(400);
+    expect((await response.json()).message).toMatch(/higher than current/);
+  });
   it("calculates a server-side estimate and ignores client-submitted prices", async () => {
     const response = await POST(request({ estimatedTotalCents: 1 }));
     const body = await response.json();

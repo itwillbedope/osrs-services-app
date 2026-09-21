@@ -9,6 +9,11 @@ export type ServiceNavigationItem = PublicLink & {
 
 export const serviceNavigation = [
   {
+    label: "Dizana's Quiver",
+    href: "/quiver",
+    description: "Fortis Colosseum completion and account setup review.",
+  },
+  {
     label: "Skills",
     href: "/skills",
     description: "Structured training paths for individual skills.",
@@ -69,6 +74,7 @@ export const primaryNavigation = [
   { label: "Skills", href: "/skills" },
   { label: "Bossing", href: "/bossing" },
   { label: "Infernal", href: "/infernal" },
+  { label: "Quiver", href: "/quiver" },
   { label: "Quests", href: "/quests" },
   { label: "Diaries", href: "/diaries" },
   { label: "Gold", href: "/gold" },
@@ -89,6 +95,7 @@ export const footerNavigation = {
     { label: "Achievement diaries", href: "/diaries" },
     { label: "Bossing and PvM", href: "/bossing" },
     { label: "Infernal Cape", href: "/infernal" },
+    { label: "Dizana's Quiver", href: "/quiver" },
     { label: "Misc gathering", href: "/misc-gathering" },
     { label: "Gold", href: "/gold" },
     { label: "Products", href: "/products" },

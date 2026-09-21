@@ -429,95 +429,98 @@ export function PremiumConfiguratorEngine({
             </div>
           ) : (
             <>
-              <fieldset className="reference-premium-stats">
-                <legend className="px-2 text-sm font-bold">Stat check</legend>
-                <div className="grid gap-3 md:grid-cols-3">
-                  {eligibilityEnabled && rule.rsnEligibilityEnabled && (
-                    <label className="border-border bg-background/45 flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold">
-                      <input
-                        type="radio"
-                        name="statCheckMode"
-                        checked={statCheckMode === "RSN"}
-                        onChange={() => {
-                          setStatCheckMode("RSN");
-                          setResult(null);
-                        }}
-                      />
-                      Check public stats using RSN
-                    </label>
-                  )}
-                  {rule.supportsManualStatFallback &&
-                    manualMetricRequirements.length > 0 && (
+              {((eligibilityEnabled && rule.rsnEligibilityEnabled) ||
+                (rule.supportsManualStatFallback &&
+                  manualMetricRequirements.length > 0)) && (
+                <fieldset className="reference-premium-stats">
+                  <legend className="px-2 text-sm font-bold">Stat check</legend>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {eligibilityEnabled && rule.rsnEligibilityEnabled && (
                       <label className="border-border bg-background/45 flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold">
                         <input
                           type="radio"
                           name="statCheckMode"
-                          checked={statCheckMode === "MANUAL"}
+                          checked={statCheckMode === "RSN"}
                           onChange={() => {
-                            setStatCheckMode("MANUAL");
+                            setStatCheckMode("RSN");
                             setResult(null);
                           }}
                         />
-                        Enter stats manually
+                        Check public stats using RSN
                       </label>
                     )}
-                  <label className="border-border bg-background/45 flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold">
-                    <input
-                      type="radio"
-                      name="statCheckMode"
-                      checked={statCheckMode === "NONE"}
-                      onChange={() => {
-                        setStatCheckMode("NONE");
-                        setResult(null);
-                      }}
-                    />
-                    Continue without a stat check
-                  </label>
-                </div>
-                {statCheckMode === "RSN" &&
-                  eligibilityEnabled &&
-                  rule.rsnEligibilityEnabled && (
-                    <label className="text-sm font-bold">
-                      RuneScape name
-                      <input
-                        className="border-border bg-background mt-2 min-h-11 w-full rounded-xl border px-3"
-                        name="rsn"
-                        maxLength={12}
-                        placeholder="No password, PIN or authenticator code"
-                      />
-                    </label>
-                  )}
-                {statCheckMode === "MANUAL" &&
-                  rule.supportsManualStatFallback &&
-                  manualMetricRequirements.length > 0 && (
-                    <div className="reference-stat-fields">
-                      {manualMetricRequirements.map((requirement) => (
-                        <label
-                          className="text-sm font-bold"
-                          key={requirement.metricKey}
-                        >
-                          {requirement.label}
+                    {rule.supportsManualStatFallback &&
+                      manualMetricRequirements.length > 0 && (
+                        <label className="border-border bg-background/45 flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold">
                           <input
-                            className="border-border bg-background mt-2 min-h-11 w-full rounded-xl border px-3"
-                            name={`manualStat:${requirement.metricKey}`}
-                            type="number"
-                            min={0}
-                            max={
-                              requirement.metricKey === "total.level"
-                                ? 2277
-                                : 99
-                            }
-                            step={1}
+                            type="radio"
+                            name="statCheckMode"
+                            checked={statCheckMode === "MANUAL"}
+                            onChange={() => {
+                              setStatCheckMode("MANUAL");
+                              setResult(null);
+                            }}
                           />
+                          Enter stats manually
                         </label>
-                      ))}
-                      <p className="text-text-muted text-xs leading-5 sm:col-span-2">
-                        Customer-entered / not independently verified.
-                      </p>
-                    </div>
-                  )}
-              </fieldset>
-
+                      )}
+                    <label className="border-border bg-background/45 flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold">
+                      <input
+                        type="radio"
+                        name="statCheckMode"
+                        checked={statCheckMode === "NONE"}
+                        onChange={() => {
+                          setStatCheckMode("NONE");
+                          setResult(null);
+                        }}
+                      />
+                      Continue without a stat check
+                    </label>
+                  </div>
+                  {statCheckMode === "RSN" &&
+                    eligibilityEnabled &&
+                    rule.rsnEligibilityEnabled && (
+                      <label className="text-sm font-bold">
+                        RuneScape name
+                        <input
+                          className="border-border bg-background mt-2 min-h-11 w-full rounded-xl border px-3"
+                          name="rsn"
+                          maxLength={12}
+                          placeholder="No password, PIN or authenticator code"
+                        />
+                      </label>
+                    )}
+                  {statCheckMode === "MANUAL" &&
+                    rule.supportsManualStatFallback &&
+                    manualMetricRequirements.length > 0 && (
+                      <div className="reference-stat-fields">
+                        {manualMetricRequirements.map((requirement) => (
+                          <label
+                            className="text-sm font-bold"
+                            key={requirement.metricKey}
+                          >
+                            {requirement.label}
+                            <input
+                              className="border-border bg-background mt-2 min-h-11 w-full rounded-xl border px-3"
+                              name={`manualStat:${requirement.metricKey}`}
+                              type="number"
+                              min={0}
+                              max={
+                                requirement.metricKey === "total.level"
+                                  ? 2277
+                                  : 99
+                              }
+                              step={1}
+                            />
+                          </label>
+                        ))}
+                        <p className="text-text-muted text-xs leading-5 sm:col-span-2">
+                          Customer-entered / not independently verified.
+                        </p>
+                      </div>
+                    )}
+                </fieldset>
+              )}
               <div className="mt-7 grid gap-5 md:grid-cols-2">
                 <label className="text-sm font-bold">
                   {rule.configuratorType === "INFERNAL_CAPE"

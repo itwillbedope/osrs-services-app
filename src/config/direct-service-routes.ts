@@ -20,6 +20,8 @@ export const directServiceRoutes = {
   "pvm-support": "/bossing",
   "gold-trading": "/gold",
   "infernal-cape-service": "/infernal",
+  "dizanas-quiver-service": "/quiver",
+  "quiver-service": "/quiver",
   "ironman-gathering-support": "/misc-gathering",
 } as const satisfies Record<string, string>;
 

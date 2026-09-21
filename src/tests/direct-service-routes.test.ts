@@ -25,6 +25,8 @@ describe("direct service routing", () => {
     ["quest-progression", "/quests"],
     ["diary-progression", "/diaries"],
     ["infernal-cape-service", "/infernal"],
+    ["dizanas-quiver-service", "/quiver"],
+    ["quiver-service", "/quiver"],
     ["gold-trading", "/gold"],
     ["ironman-gathering-support", "/misc-gathering"],
   ])("bypasses the %s legacy detail", (slug, destination) => {
