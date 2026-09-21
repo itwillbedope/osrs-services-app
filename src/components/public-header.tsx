@@ -10,6 +10,7 @@ const destinations = [
   ["Skills", "/skills"],
   ["Bossing", "/bossing"],
   ["Infernal", "/infernal"],
+  ["Quiver", "/quiver"],
   ["Quests", "/quests"],
   ["Diaries", "/diaries"],
   ["Gold", "/gold"],

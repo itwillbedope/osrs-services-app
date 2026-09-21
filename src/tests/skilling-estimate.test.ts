@@ -83,7 +83,39 @@ describe("skilling estimate engine", () => {
     expect(estimate.estimatedHours).toBe(20);
   });
 
-  it("rejects unavailable options and invalid method ranges", () => {
+  it.each([
+    calculateLevelProgress({ currentLevel: 1, targetLevel: 10 }),
+    calculateLevelProgress({ currentLevel: 1, targetLevel: 90 }),
+    calculateLevelProgress({ currentLevel: 75, targetLevel: 99 }),
+    calculateXpProgress({ currentXp: 0, targetXp: 5_000_000 }),
+  ])(
+    "prices all requested XP outside a recommended method range",
+    (progress) => {
+      const estimate = calculateSkillingEstimate({
+        progress,
+        method: { ...method, minimumLevel: 20, maximumLevel: 70 },
+        rule,
+        gameMode: "NORMAL",
+        includeSupplies: false,
+        includeDiscordStream: false,
+        deliverySpeed: "STANDARD",
+      });
+      expect(estimate.xpRequired).toBe(progress.xpRequired);
+      expect(estimate.estimatedTotalCents).toBe(
+        Math.max(
+          500,
+          Math.ceil(
+            (progress.xpRequired * method.basePriceCentsPerMillionXp) /
+              1_000_000,
+          ) + method.fixedFeeCents,
+        ),
+      );
+      expect(estimate.requirementsReviewRequired).toBe(true);
+      expect(estimate.requirementsNote).toContain("confirmed before starting");
+    },
+  );
+
+  it("rejects unavailable options", () => {
     expect(() =>
       calculateSkillingEstimate({
         progress: calculateLevelProgress({ currentLevel: 1, targetLevel: 10 }),
@@ -95,18 +127,6 @@ describe("skilling estimate engine", () => {
         deliverySpeed: "STANDARD",
       }),
     ).toThrow(/unavailable/);
-
-    expect(() =>
-      calculateSkillingEstimate({
-        progress: calculateLevelProgress({ currentLevel: 1, targetLevel: 10 }),
-        method: { ...method, minimumLevel: 20 },
-        rule,
-        gameMode: "NORMAL",
-        includeSupplies: false,
-        includeDiscordStream: false,
-        deliverySpeed: "STANDARD",
-      }),
-    ).toThrow(/starts at level 20/);
 
     expect(() =>
       calculateSkillingEstimate({

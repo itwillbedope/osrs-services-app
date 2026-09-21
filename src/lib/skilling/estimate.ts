@@ -134,16 +134,14 @@ export function calculateSkillingEstimate(input: SkillingEstimateInput) {
   if (!method.enabled) {
     throw new SkillingValidationError("This training method is unavailable.");
   }
-  if (progress.currentLevel < method.minimumLevel) {
-    throw new SkillingValidationError(
-      `This method starts at level ${method.minimumLevel}.`,
-    );
-  }
-  if (progress.targetLevel > method.maximumLevel) {
-    throw new SkillingValidationError(
-      `This method supports targets up to level ${method.maximumLevel}.`,
-    );
-  }
+  // Method levels describe a recommended route, not purchase eligibility.
+  // Price the entire requested XP; support confirms any preparatory training.
+  const requirementsReviewRequired =
+    progress.currentLevel < method.minimumLevel ||
+    progress.targetLevel > method.maximumLevel;
+  const requirementsNote = requirementsReviewRequired
+    ? "Your levels extend beyond this method's recommended range. Requirements and any earlier or alternative training will be confirmed before starting. This estimate covers all requested XP."
+    : "Requirements will be reviewed and confirmed before starting.";
   [
     ["Base price", method.basePriceCentsPerMillionXp],
     ["Minimum price", method.minimumPriceCents],
@@ -230,6 +228,8 @@ export function calculateSkillingEstimate(input: SkillingEstimateInput) {
     lineItems,
     estimatedTotalCents: subtotal,
     estimatedTotal: formatCents(subtotal),
+    requirementsReviewRequired,
+    requirementsNote,
     finalPriceNote: "Final price is confirmed before checkout.",
   };
 }

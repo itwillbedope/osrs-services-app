@@ -132,7 +132,7 @@ const fallbackHomepageRows: ReadonlyArray<
     "View Inferno",
     "PvM",
   ],
-  ["quiver", "MAIN_SERVICE", "Quiver", "", "/services", "View Quiver", "PvM"],
+  ["quiver", "MAIN_SERVICE", "Quiver", "", "/quiver", "View Quiver", "PvM"],
   ["bossing", "MAIN_SERVICE", "Bossing", "", "/bossing", "View Bossing", "PvM"],
   ["raids", "MAIN_SERVICE", "Raids", "", "/bossing", "View Raids", "PvM"],
   [

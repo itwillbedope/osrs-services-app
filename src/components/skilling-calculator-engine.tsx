@@ -63,6 +63,7 @@ type EstimateResponse = {
     targetXp: number;
     xpRequired: number;
     estimatedHours: number | null;
+    requirementsNote: string;
     delivery: {
       speed: SkillingDeliverySpeed;
       label: string;
@@ -336,12 +337,14 @@ export function SkillingCalculatorEngine({
               {inputMode === "LEVEL" ? (
                 <>
                   <StoreNumberField
+                    key="current-level"
                     label="Current level"
                     name="currentLevel"
                     initial={1}
                     onAdjust={invalidate}
                   />
                   <StoreNumberField
+                    key="target-level"
                     label="Target level"
                     name="targetLevel"
                     initial={50}
@@ -352,6 +355,7 @@ export function SkillingCalculatorEngine({
               ) : (
                 <>
                   <StoreNumberField
+                    key="current-xp"
                     label="Current XP"
                     name="currentXp"
                     initial={0}
@@ -360,6 +364,7 @@ export function SkillingCalculatorEngine({
                     onAdjust={invalidate}
                   />
                   <StoreNumberField
+                    key="target-xp"
                     label="Target XP"
                     name="targetXp"
                     initial={101333}
@@ -387,6 +392,11 @@ export function SkillingCalculatorEngine({
               </fieldset>
             </div>
             <h3 className="reference-method-heading">Select Training Method</h3>
+            <p className="reference-method-guidance">
+              Choose how you would like us to train. Recommended levels are a
+              guide; you can order your full level or XP target with any
+              available method. Requirements will be confirmed before starting.
+            </p>
             <div className="reference-training-methods">
               {selectedSkill?.methods.map((method) => (
                 <label
@@ -407,7 +417,8 @@ export function SkillingCalculatorEngine({
                     <strong>{method.name}</strong>
                     <p>{method.shortDescription}</p>
                     <small>
-                      Levels {method.minimumLevel}–{method.maximumLevel}
+                      Recommended levels {method.minimumLevel}–
+                      {method.maximumLevel}
                       {method.xpPerHour
                         ? " · " + formatNumber(method.xpPerHour) + " XP/hr"
                         : ""}
@@ -478,6 +489,11 @@ export function SkillingCalculatorEngine({
             {result && !result.ok && (
               <p role="alert" className="store-error">
                 {result.message}
+              </p>
+            )}
+            {result?.estimate && (
+              <p className="reference-method-guidance" role="status">
+                {result.estimate.requirementsNote}
               </p>
             )}
             <div className="reference-price-footer">

@@ -391,7 +391,7 @@ async function resolveSkilling(input: CartSourceInput) {
     currencyCode: "USD",
     title: `${skill.name} training`,
     description: service.shortSummary,
-    summary: `${estimate.currentLevel}-${estimate.targetLevel} via ${estimate.methodName}, ${estimate.delivery.label}`,
+    summary: `${estimate.currentLevel}-${estimate.targetLevel} via ${estimate.methodName}, ${estimate.delivery.label}. ${estimate.requirementsNote}`,
     lines: priced.lineItems,
     subtotalCents: estimate.estimatedTotalCents,
     globalLines,

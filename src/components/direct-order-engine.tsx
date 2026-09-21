@@ -63,7 +63,8 @@ const modeCopy = {
 
 function displayTier(offering: DirectOrderOffering, mode: Mode) {
   if (mode === "QUESTS") {
-    return facetLabel(offering, "difficulty") ?? offering.tierLabel;
+    const label = facetLabel(offering, "difficulty") ?? offering.tierLabel;
+    return label?.toLowerCase() === "f2p" ? "F2P" : label;
   }
   return facetLabel(offering, "tier") ?? offering.tierLabel;
 }
@@ -369,7 +370,7 @@ export function DirectOrderEngine({
                 <tr>
                   <th>Quest Name</th>
                   <th>Quest Points</th>
-                  <th>Difficulty</th>
+                  <th>Difficulty / Type</th>
                   <th>Price</th>
                   <th>ETA</th>
                   <th>Requirements</th>
@@ -392,7 +393,7 @@ export function DirectOrderEngine({
                     <td data-label="Quest points">
                       {facetLabel(offering, "quest-points") ?? "—"}
                     </td>
-                    <td data-label="Difficulty">
+                    <td data-label="Difficulty / Type">
                       <span
                         className={
                           "reference-difficulty difficulty-" +

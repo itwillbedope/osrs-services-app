@@ -253,17 +253,19 @@ export function SkillingMethodForm({
         </label>
       </div>
       <fieldset className="border-border grid gap-4 rounded-2xl border p-5 md:grid-cols-2">
-        <legend className="px-2 font-bold">Level range and rate</legend>
+        <legend className="px-2 font-bold">
+          Recommended level range and rate
+        </legend>
         <NumberField
           name="minimumLevel"
-          label="Minimum level"
+          label="Recommended starting level (advisory)"
           defaultValue={method?.minimumLevel ?? 1}
           min={1}
           max={99}
         />
         <NumberField
           name="maximumLevel"
-          label="Maximum level"
+          label="Recommended ending level (advisory)"
           defaultValue={method?.maximumLevel ?? 99}
           min={1}
           max={99}

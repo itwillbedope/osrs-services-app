@@ -12,6 +12,7 @@ import { seedCustomBuild } from "./custom-build-seed";
 import { seedGold } from "./gold-seed";
 import { seedPaymentsLaunchReadiness } from "./payment-seed";
 import { seedPricing } from "./pricing-seed";
+import { seedQuiver } from "./quiver-seed";
 import { seedProductMarketplace } from "./product-seed";
 import { seedDatabase, type SeedClient } from "./seed-core";
 
@@ -80,6 +81,7 @@ async function main() {
       }),
   );
   await seedCatalogue(prisma as unknown as CatalogueSeedClient);
+  await seedQuiver(prisma);
   await seedPricing(prisma);
   await seedGold(prisma);
   await seedAccountMarketplace(prisma);

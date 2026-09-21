@@ -208,6 +208,8 @@ export async function POST(request: Request) {
         targetXp: estimate.targetXp,
         xpRequired: estimate.xpRequired,
         estimatedHours: estimate.estimatedHours,
+        requirementsReviewRequired: estimate.requirementsReviewRequired,
+        requirementsNote: estimate.requirementsNote,
         delivery: estimate.delivery,
         lineItems: publicPricing.lineItems,
         globalAdjustmentLines: publicPricing.globalAdjustmentLines,

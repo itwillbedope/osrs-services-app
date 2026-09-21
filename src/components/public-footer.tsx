@@ -22,7 +22,7 @@ const columns = [
     title: "Our services",
     links: [
       ["Inferno", "/infernal"],
-      ["Quiver service", "/services"],
+      ["Quiver service", "/quiver"],
       ["Bossing", "/bossing"],
       ["Raids", "/bossing"],
       ["Skilling", "/skills"],
