@@ -133,3 +133,9 @@
 - The existing hero composition is retained. Desktop displays the image at its natural ratio with the complete monster's head visible. Phone/tablet copy and artwork occupy separate blocks; the red headline cannot overlap the fire. The image is prioritized and service cards use responsive lazy-loaded images.
 - The official red wordmark remains unchanged. A corrected CSS region/aspect ratio displays its complete lettering, header padding centers it vertically, and the customer-requested tagline is removed. The document's old 320px minimum width was removed because a vertical scrollbar caused horizontal overflow on a 320px viewport.
 - No database migration or seed changes are needed. Existing live-site repair authorization applies to the GitHub/Hostinger delivery.
+
+## Footer credit and color refinement — 2026-09-23
+
+- Replace the footer trademark line at the customer's request with the exact Conceptive credit, linking the brand name to https://conceptive.online. Existing copyright text and policy links remain.
+- Footer headings use a muted gray sans-serif style at medium weight. A footer-only contrast and screen-blend treatment makes the official logo's navy backdrop match the near-black footer while preserving red/white branding; the source logo and header remain unchanged.
+- The homepage LEVEL UP emphasis uses red (#ff2020), retaining the approved responsive layout. No data or ordering changes; deliver through the existing authorized GitHub/Hostinger workflow.

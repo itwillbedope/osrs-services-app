@@ -89,9 +89,7 @@ export function PublicFooter() {
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
             {columns.map((column) => (
               <div key={column.title}>
-                <h2 className="display-type text-sm uppercase">
-                  {column.title}
-                </h2>
+                <h2 className="reference-footer-heading">{column.title}</h2>
                 <ul className="mt-4 space-y-2.5">
                   {column.links.map(([label, href]) => (
                     <li key={label}>
@@ -109,7 +107,7 @@ export function PublicFooter() {
           </div>
 
           <div>
-            <h2 className="display-type text-sm uppercase">Newsletter</h2>
+            <h2 className="reference-footer-heading">Newsletter</h2>
             <p className="text-text-muted mt-4 text-xs leading-5">
               Ask support to add you to launch offers and product updates.
             </p>
@@ -138,8 +136,14 @@ export function PublicFooter() {
         <div className="border-border text-text-muted mt-9 flex flex-col gap-2 border-t pt-5 text-[0.65rem] sm:flex-row sm:justify-between">
           <p>© {year} OSRS Services. All rights reserved.</p>
           <p>
-            Not affiliated with Jagex. RuneScape is a trademark of its
-            respective owner.
+            Designed and Developed by{" "}
+            <a
+              href="https://conceptive.online"
+              className="underline underline-offset-4 hover:text-white"
+            >
+              Conceptive
+            </a>
+            .
           </p>
         </div>
       </div>
