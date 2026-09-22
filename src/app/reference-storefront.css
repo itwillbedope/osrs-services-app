@@ -89,19 +89,15 @@
 .reference-official-logo {
   display: block;
   width: 208px;
-  height: 61px;
+  aspect-ratio: 3 / 1;
   background-image: url("/branding/osrs-services-logo-red.png");
-  background-size: 146% 464%;
-  background-position: 33% 49.3%;
+  background-size: 139.333% 418%;
+  background-position: 31.07% 49.27%;
   background-repeat: no-repeat;
 }
 .reference-brand > .reference-official-logo {
-  width: 175px;
-  height: 49px;
+  width: 180px;
   margin: 0 auto;
-}
-.reference-brand .reference-official-logo {
-  aspect-ratio: auto;
 }
 .reference-footer > div:last-child {
   padding-top: 25px;
@@ -119,13 +115,6 @@
 }
 .reference-service-banner-art {
   mask-image: linear-gradient(90deg, transparent, #000 35%);
-}
-.reference-brand > span {
-  display: block;
-  font-size: 8px;
-  letter-spacing: 1.7px;
-  text-align: center;
-  margin-top: 2px;
 }
 .reference-header-icon {
   display: grid;
@@ -629,10 +618,10 @@
   background-repeat: no-repeat;
 }
 .reference-header {
-  height: 64px;
+  min-height: 80px;
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 18px;
   padding: 0 28px;
   background: #030709;
   border-bottom: 2px solid #bb1230;
@@ -641,7 +630,9 @@
   color: #f7f7f7;
 }
 .reference-brand {
-  width: 222px;
+  display: flex;
+  align-items: center;
+  width: 180px;
   flex-shrink: 0;
 }
 .reference-brand img {
@@ -720,6 +711,9 @@
 }
 .reference-menu-button {
   display: none;
+  min-width: 44px;
+  min-height: 44px;
+  place-items: center;
 }
 .reference-mobile-overlay {
   position: fixed;
@@ -759,8 +753,11 @@
 }
 .reference-home-hero {
   position: relative;
-  min-height: 385px;
-  padding: 30px 5%;
+  min-height: clamp(480px, 38vw, 600px);
+  display: flex;
+  align-items: center;
+  padding: 40px 5%;
+  background: #020407;
   isolation: isolate;
   overflow: hidden;
 }
@@ -768,12 +765,24 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background:
-    linear-gradient(90deg, #020407e6 0%, #02040795 32%, transparent 62%),
-    url("/artwork/zuk-inferno-hero.png") center 47% / cover;
+}
+.reference-home-art img {
+  object-fit: contain;
+  object-position: right center;
+}
+.reference-home-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    #020407 0%,
+    #020407e8 25%,
+    transparent 58%
+  );
 }
 .reference-home-copy {
-  max-width: 535px;
+  width: min(43%, 535px);
 }
 .reference-eyebrow {
   color: #ff375a;
@@ -790,7 +799,7 @@
   margin: 12px 0;
 }
 .reference-home-copy h1 em {
-  color: #ff0038;
+  color: #ff4568;
 }
 .reference-home-copy h2 {
   font-size: 22px;
@@ -918,6 +927,9 @@
   gap: 12px;
 }
 .reference-home-service {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
   border: 1px solid #743342;
   border-radius: 6px;
   padding: 8px;
@@ -933,13 +945,12 @@
   border-color: #886535;
 }
 .reference-home-service-art {
+  position: relative;
+  overflow: hidden;
   display: block;
-  height: 120px;
+  aspect-ratio: 1 / 1;
   width: 100%;
   border-radius: 4px;
-}
-.gathering-tile-art {
-  background: url("/artwork/misc-gathering-resources.png") center/cover;
 }
 .reference-home-service h3 {
   font:
@@ -951,6 +962,7 @@
   font-size: 12px;
   min-height: 35px;
   color: #ccd2d7;
+  flex: 1;
 }
 .reference-card-link {
   display: flex;
@@ -968,11 +980,12 @@
 }
 .reference-home-categories > div {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 15px;
   margin-top: 20px;
 }
 .reference-category {
+  min-width: 0;
   border: 1px solid #29323b;
   border-radius: 6px;
   overflow: hidden;
@@ -980,7 +993,7 @@
 }
 .reference-category-art {
   display: block;
-  height: 135px;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
 }
 .reference-category h3,
@@ -1003,11 +1016,12 @@
 }
 .reference-featured > div {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 15px;
   margin-top: 16px;
 }
 .reference-featured a {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1016,13 +1030,20 @@
   border-radius: 5px;
 }
 .reference-featured-art {
-  width: 75px;
-  height: 85px;
+  width: 96px;
+  height: 104px;
   flex-shrink: 0;
   overflow: hidden;
 }
 .reference-featured h3 {
   font-weight: 700;
+}
+.reference-featured a > div {
+  min-width: 0;
+}
+.reference-featured a > svg {
+  flex-shrink: 0;
+  margin-left: auto;
 }
 .reference-featured p {
   font-size: 12px;
@@ -1699,8 +1720,11 @@
   .reference-header {
     justify-content: space-between;
   }
+  .reference-header .reference-brand {
+    margin-right: auto;
+  }
   .reference-menu-button {
-    display: block;
+    display: grid;
   }
   .reference-header-actions {
     margin-left: auto;
@@ -1799,6 +1823,27 @@
   .reference-home-copy h1 {
     font-size: 58px;
   }
+  .reference-home-hero {
+    min-height: 0;
+    padding: 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .reference-home-copy {
+    width: 100%;
+    max-width: none;
+    padding: 32px 5% 24px;
+    order: -1;
+  }
+  .reference-home-art {
+    position: relative;
+    inset: auto;
+    z-index: 0;
+    aspect-ratio: 16 / 9;
+  }
+  .reference-home-art::after {
+    background: linear-gradient(#020407, transparent 18%);
+  }
   .reference-home-quote {
     display: none;
   }
@@ -1806,17 +1851,20 @@
     grid-template-columns: repeat(3, 1fr);
   }
   .reference-home-service-art {
-    height: 145px;
+    height: auto;
   }
 }
 @media (max-width: 600px) {
   .reference-header {
-    height: 62px;
-    padding: 0 14px;
-    gap: 12px;
+    min-height: 72px;
+    padding: 8px 12px;
+    gap: 8px;
   }
   .reference-brand {
-    width: 178px;
+    width: 150px;
+  }
+  .reference-brand > .reference-official-logo {
+    width: 150px;
   }
   .reference-header-actions {
     gap: 12px;
@@ -1825,14 +1873,21 @@
     min-width: 25px;
   }
   .reference-home-hero {
-    min-height: 420px;
-    padding: 30px 20px;
+    min-height: 0;
+    padding: 0;
   }
   .reference-home-art {
-    background-position: 63% center;
+    aspect-ratio: 3 / 2;
+  }
+  .reference-home-art img {
+    object-fit: cover;
+    object-position: right center;
+  }
+  .reference-home-copy {
+    padding: 28px 20px 12px;
   }
   .reference-home-copy h1 {
-    font-size: 54px;
+    font-size: clamp(44px, 13vw, 64px);
   }
   .reference-eyebrow {
     font-size: 10px;
@@ -1845,15 +1900,18 @@
   }
   .reference-home-actions {
     gap: 8px;
+    flex-wrap: wrap;
   }
   .reference-home-actions a {
     font-size: 12px;
     padding: 11px 14px;
   }
   .store-trust-strip {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 18px 14px;
   }
   .store-trust-fact {
+    min-width: 0;
     justify-content: start;
     border: 0;
   }
@@ -1873,25 +1931,26 @@
     font-size: 13px;
   }
   .reference-home-service-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
   .reference-home-service-art {
-    height: 128px;
+    height: auto;
   }
   .reference-home-categories > div,
   .reference-featured > div {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .reference-category-art {
-    height: 110px;
+    height: auto;
   }
   .reference-featured a {
     flex-wrap: wrap;
   }
   .reference-featured-art {
     width: 100%;
-    height: 110px;
+    height: auto;
+    aspect-ratio: 3 / 2;
   }
   .reference-skill-layout {
     grid-template-columns: 1fr;
