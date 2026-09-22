@@ -102,6 +102,18 @@
 .reference-footer > div:last-child {
   padding-top: 25px;
 }
+.reference-footer .reference-official-logo {
+  filter: contrast(1.4);
+  mix-blend-mode: screen;
+}
+.reference-footer-heading {
+  color: #aeb9bf;
+  font-family: var(--font-sans), Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 .store-training-type legend {
   float: none !important;
   width: auto !important;
@@ -799,7 +811,7 @@
   margin: 12px 0;
 }
 .reference-home-copy h1 em {
-  color: #ff4568;
+  color: #ff2020;
 }
 .reference-home-copy h2 {
   font-size: 22px;
