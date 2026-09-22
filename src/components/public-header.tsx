@@ -68,7 +68,6 @@ export function PublicHeader({ discordHref }: { discordHref: string }) {
         className="reference-brand"
       >
         <BrandLogo priority forceRed />
-        <span>YOUR OSRS BOOSTING PARTNER</span>
       </Link>
       <nav className="reference-nav" aria-label="Main navigation">
         {destinations.map(([name, href]) => (

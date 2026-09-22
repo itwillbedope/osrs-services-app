@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
-import { ReferenceArt } from "@/components/reference-art";
+import { homepageArtwork, serviceArtwork } from "@/lib/homepage/artwork";
 import { StoreTrustStrip } from "@/components/store-trust-strip";
 import Link from "next/link";
 
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     description,
     images: [
       {
-        url: "/artwork/zuk-inferno-hero.png",
+        url: "/artwork/inferno-hero.webp",
         alt: "OSRS Services inferno battle artwork",
       },
     ],
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: ["/artwork/zuk-inferno-hero.png"],
+    images: ["/artwork/inferno-hero.webp"],
   },
   robots: { index: true, follow: true },
 };
@@ -52,69 +52,39 @@ function sectionByKey(
   return sections.find((section) => section.sectionKey === key);
 }
 
-function artworkClass(
-  kind: "category" | "service" | "featured",
-  index: number,
-) {
-  return `reference-slice reference-slice-${kind}-${index % (kind === "category" ? 5 : kind === "service" ? 7 : 4)}`;
-}
-
 function CardArtwork({
   card,
   kind,
-  index,
 }: {
   card: HomepageCard;
   kind: "category" | "service" | "featured";
-  index: number;
 }) {
-  if (
-    kind === "category" &&
-    card.href === "/misc-gathering" &&
-    (!card.imagePath || card.imagePath === "/artwork/osrs-reference-board.jpeg")
-  ) {
-    return (
-      <div className="relative size-full overflow-hidden">
-        <Image
-          src="/artwork/misc-gathering-resources.png"
-          alt="Gathered herbs, logs, ore and fish beside a woodland river"
-          fill
-          sizes="(max-width: 768px) 100vw, 25vw"
-          className="object-cover transition duration-300 group-hover:scale-105"
-        />
-      </div>
-    );
-  }
-  if (
-    !card.imagePath ||
-    card.imagePath === "/artwork/osrs-reference-board.jpeg"
-  ) {
-    return <div className={artworkClass(kind, index)} aria-hidden="true" />;
-  }
+  const artwork = homepageArtwork(card);
   return (
     <div className="relative size-full overflow-hidden">
-      {card.imagePath.startsWith("/") ? (
+      {artwork.src.startsWith("/") ? (
         <Image
-          src={card.imagePath}
-          alt={card.imageAltText}
+          src={artwork.src}
+          alt={artwork.alt}
           fill
           sizes={
-            kind === "service" ? "180px" : "(max-width: 768px) 100vw, 25vw"
+            kind === "category"
+              ? "(max-width: 600px) 50vw, (max-width: 1279px) 33vw, 320px"
+              : "(max-width: 600px) 50vw, 112px"
           }
           className="object-cover transition duration-300 group-hover:scale-105"
-          unoptimized={card.imagePath.startsWith("/uploads/")}
+          unoptimized={artwork.src.startsWith("/uploads/")}
         />
       ) : (
         <div
           className="size-full bg-cover bg-center transition duration-300 group-hover:scale-105"
           style={{
-            backgroundImage: `url(${JSON.stringify(card.imagePath).slice(1, -1)})`,
+            backgroundImage: `url(${JSON.stringify(artwork.src).slice(1, -1)})`,
           }}
-          aria-label={card.imageAltText}
+          aria-label={artwork.alt}
           role="img"
         />
       )}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent" />
     </div>
   );
 }
@@ -163,7 +133,15 @@ export default async function Homepage() {
   return (
     <main id="main-content" className="reference-home">
       <section className="reference-home-hero">
-        <div className="reference-home-art" />
+        <div className="reference-home-art">
+          <Image
+            src="/artwork/inferno-hero.webp"
+            alt="An adventurer facing a towering lava-armored monster in the Inferno"
+            fill
+            priority
+            sizes="(max-width: 900px) 100vw, 1100px"
+          />
+        </div>
         <div className="reference-home-copy">
           <p className="reference-eyebrow">
             Professional OSRS boosting services
@@ -208,17 +186,17 @@ export default async function Homepage() {
             </span>
           </div>
           <div className="reference-home-service-grid">
-            {mainServices.map(([name, href, description], index) => (
+            {mainServices.map(([name, href, description]) => (
               <Link className="reference-home-service" href={href} key={href}>
-                {index < 8 ? (
-                  <ReferenceArt
-                    board="home"
-                    crop={[45 + index * 182, 654, 162, 128]}
-                    className="reference-home-service-art"
+                <span className="reference-home-service-art">
+                  <Image
+                    src={serviceArtwork(href).src}
+                    alt={serviceArtwork(href).alt}
+                    fill
+                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, (max-width: 1279px) 20vw, 180px"
+                    className="object-cover"
                   />
-                ) : (
-                  <span className="reference-home-service-art gathering-tile-art" />
-                )}
+                </span>
                 <h3>{name}</h3>
                 <p>{description}</p>
                 <span className="reference-card-link">
@@ -233,14 +211,14 @@ export default async function Homepage() {
         <section className="reference-home-categories">
           <h2>{categorySection.title}</h2>
           <div>
-            {categories.map((card, index) => (
+            {categories.map((card) => (
               <Link
                 href={card.href}
                 key={card.id}
                 className="reference-category"
               >
                 <span className="reference-category-art">
-                  <CardArtwork card={card} kind="category" index={index} />
+                  <CardArtwork card={card} kind="category" />
                 </span>
                 <h3>{card.title}</h3>
                 <p>{card.description}</p>
@@ -256,10 +234,10 @@ export default async function Homepage() {
         <section className="reference-featured">
           <h2>{featuredSection.title}</h2>
           <div>
-            {featured.map((card, index) => (
+            {featured.map((card) => (
               <Link href={card.href} key={card.id}>
                 <span className="reference-featured-art">
-                  <CardArtwork card={card} kind="featured" index={index} />
+                  <CardArtwork card={card} kind="featured" />
                 </span>
                 <div>
                   <h3>{card.title}</h3>
@@ -279,10 +257,10 @@ export default async function Homepage() {
             <div>
               {cards
                 .filter((card) => card.placement === "MAIN_SERVICE")
-                .map((card, index) => (
+                .map((card) => (
                   <Link href={card.href} key={card.id}>
                     <span className="reference-featured-art">
-                      <CardArtwork card={card} kind="service" index={index} />
+                      <CardArtwork card={card} kind="service" />
                     </span>
                     <div>
                       <h3>{card.title}</h3>
