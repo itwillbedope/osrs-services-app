@@ -4,6 +4,7 @@ import Image from "next/image";
 import { homepageArtwork, serviceArtwork } from "@/lib/homepage/artwork";
 import { StoreTrustStrip } from "@/components/store-trust-strip";
 import Link from "next/link";
+import { getDiscordHref } from "@/config/public-navigation";
 
 import {
   defaultHomepageSections,
@@ -159,9 +160,10 @@ export default async function Homepage() {
             <a className="reference-primary-button" href="#main-services">
               Browse Services <ArrowRight size={18} />
             </a>
-            <Link className="reference-secondary-button" href="/support">
-              Contact our team
-            </Link>
+            <a className="reference-secondary-button" href={getDiscordHref()}>
+              <span className="reference-discord-icon" aria-hidden="true" />
+              Join our Discord
+            </a>
           </div>
         </div>
         <p className="reference-home-quote">
