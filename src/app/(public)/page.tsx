@@ -4,7 +4,6 @@ import Image from "next/image";
 import { homepageArtwork, serviceArtwork } from "@/lib/homepage/artwork";
 import { StoreTrustStrip } from "@/components/store-trust-strip";
 import Link from "next/link";
-import { getDiscordHref } from "@/config/public-navigation";
 
 import {
   defaultHomepageSections,
@@ -112,6 +111,7 @@ async function loadHomepage() {
 }
 
 export default async function Homepage() {
+  const discordUrl = process.env.NEXT_PUBLIC_DISCORD_URL?.trim();
   const { sections, cards } = await loadHomepage();
   const categorySection = sectionByKey(sections, "main-categories");
   const serviceSection = sectionByKey(sections, "main-services");
@@ -160,10 +160,25 @@ export default async function Homepage() {
             <a className="reference-primary-button" href="#main-services">
               Browse Services <ArrowRight size={18} />
             </a>
-            <a className="reference-secondary-button" href={getDiscordHref()}>
-              <span className="reference-discord-icon" aria-hidden="true" />
-              Join our Discord
-            </a>
+            {discordUrl ? (
+              <a className="reference-secondary-button" href={discordUrl}>
+                <span className="reference-discord-icon" aria-hidden="true" />
+                Join our Discord
+              </a>
+            ) : (
+              <button
+                className="reference-secondary-button"
+                type="button"
+                disabled
+                aria-label="Join our Discord — coming soon"
+              >
+                <span className="reference-discord-icon" aria-hidden="true" />
+                <span>
+                  Join our Discord
+                  <small className="reference-discord-soon">Coming soon</small>
+                </span>
+              </button>
+            )}
           </div>
         </div>
         <p className="reference-home-quote">
