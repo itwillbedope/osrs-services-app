@@ -764,6 +764,7 @@
   color: #f7f7f7;
 }
 .reference-home-hero {
+  --hero-red: #ff2020;
   position: relative;
   min-height: clamp(480px, 38vw, 600px);
   display: flex;
@@ -797,7 +798,7 @@
   width: min(43%, 535px);
 }
 .reference-eyebrow {
-  color: #ff375a;
+  color: var(--hero-red);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -811,7 +812,7 @@
   margin: 12px 0;
 }
 .reference-home-copy h1 em {
-  color: #ff2020;
+  color: var(--hero-red);
 }
 .reference-home-copy h2 {
   font-size: 22px;
@@ -846,6 +847,30 @@
 .reference-secondary-button {
   background: #050d11d9;
   border: 1px solid #b5253e;
+}
+.reference-home-actions .reference-primary-button {
+  background: var(--hero-red);
+  border-color: var(--hero-red);
+}
+.reference-home-actions .reference-secondary-button {
+  border-color: var(--hero-red);
+}
+.reference-home-actions .reference-secondary-button:disabled {
+  cursor: not-allowed;
+}
+.reference-discord-soon {
+  display: block;
+  color: #aeb9bf;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+.reference-discord-icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  background: var(--hero-red);
+  mask: url("/branding/discord.svg") center / contain no-repeat;
 }
 .reference-home-quote {
   position: absolute;
@@ -1914,7 +1939,8 @@
     gap: 8px;
     flex-wrap: wrap;
   }
-  .reference-home-actions a {
+  .reference-home-actions a,
+  .reference-home-actions button {
     font-size: 12px;
     padding: 11px 14px;
   }

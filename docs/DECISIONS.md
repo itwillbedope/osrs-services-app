@@ -139,3 +139,8 @@
 - Replace the footer trademark line at the customer's request with the exact Conceptive credit, linking the brand name to https://conceptive.online. Existing copyright text and policy links remain.
 - Footer headings use a muted gray sans-serif style at medium weight. A footer-only contrast and screen-blend treatment makes the official logo's navy backdrop match the near-black footer while preserving red/white branding; the source logo and header remain unchanged.
 - The homepage LEVEL UP emphasis uses red (#ff2020), retaining the approved responsive layout. No data or ordering changes; deliver through the existing authorized GitHub/Hostinger workflow.
+
+## Hero red accents and Discord action — 2026-09-23
+
+- A hero-scoped red token (#ff2020) keeps the eyebrow, LEVEL UP, Browse Services background/border and Discord icon consistent. Other service buttons are unchanged.
+- The secondary hero action reads Join our Discord with a decorative red brand icon. As requested by the customer, no invite is required for this release: while NEXT_PUBLIC_DISCORD_URL is empty it is a disabled button with a Coming soon label. Populating that existing setting enables the real invite link on a subsequent deployment. It never routes the hero Discord action to the support-page fallback. The SVG comes from Simple Icons (https://github.com/simple-icons/simple-icons/blob/develop/icons/discord.svg); a CSS mask colors it without raster generation or extra dependencies.
