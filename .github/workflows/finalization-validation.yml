@@ -94,7 +94,9 @@ jobs:
           pnpm test:seed
           pnpm test
           pnpm format:check
-          pnpm build
+          pnpm runtime:check
+          pnpm compatibility:check
+          NEXT_TEST_NATIVE_DIR="$RUNNER_TEMP/osrs-missing-native-swc" pnpm build
           git diff --check
 
       - name: Production readiness validation

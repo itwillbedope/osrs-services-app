@@ -24,3 +24,7 @@ Lint, typecheck, formatting, unit tests, seed/migration checks, production build
 ## Security follow-up
 
 PR 26 is deployed and its live ordering/discovery/admin-protection checks pass. Hostinger reported dependency advisories; patch the affected runtime and compatible transitive libraries within the customer's security request. Preserve authentication document redirects, verify npm/pnpm runtime audit parity, generation/migrations/seeds, full tests, build and release CI, then deploy the patch. See docs/MINIGAMES-SECURITY-FOLLOWUP.md.
+
+## Hostinger compatibility follow-up
+
+PR 27's release validation passed, but Hostinger's older GLIBC cannot load the patched native SWC compiler. Preserve the patched versions, use a strictly checked plain MJS Next configuration, package Next's official WASM fallback without a build-time download, and include sharp's official WASM image fallback. Validate compiler and WebP image processing with native bindings unavailable, a full WASM production build, release CI and the live image optimizer. No schema or merchant configuration change is authorized by this compatibility fix.

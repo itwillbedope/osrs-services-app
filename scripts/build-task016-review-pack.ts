@@ -37,7 +37,7 @@ const requiredExtraPaths = [
   "changed-files.txt",
   "package.json",
   "pnpm-lock.yaml",
-  "next.config.ts",
+  "next.config.mjs",
   "prisma/schema.prisma",
   "prisma/migrations/20260810150000_task016_payments_launch_readiness/migration.sql",
   "prisma/payment-seed.ts",
