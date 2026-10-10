@@ -157,3 +157,7 @@
 
 - Hostinger's successful Minigames deployment exposed dependency advisories. Patch Next.js to stable 16.3.8, its matched lint config, MariaDB to 3.5.4 and compatible transitive security fixes; mirror overrides for npm and pnpm. Prisma schema/runtime remains 7.8.0. Record audit and validation evidence in MINIGAMES-SECURITY-FOLLOWUP.md.
 - Preserve full document reloads on authentication changes so stale session-dependent client state is cleared; narrowly document exceptions to the new navigation lint rule. Limit build workers to two to avoid development/hosting memory exhaustion; request-serving behavior is unchanged.
+
+# 2026-10-10 — Hostinger native-library compatibility
+
+The security release PR 27 passed CI but Hostinger rejected its native SWC binary because GLIBC_2.29 is unavailable. Keep Next.js 16.3.8 and the security patches. Rename next.config.ts to next.config.mjs to avoid compiler-dependent configuration bootstrapping, with a separate strict checkJs TypeScript project. Lock the matching official SWC WASM package and copy it to Next's existing fallback directory during the runtime check; production uses automatic fallback, without unstable test flags or build-time downloads. Add sharp's official WASM dependency because the native image library also requires newer GLIBC. Test-only native-binding fault injection verifies the fallback compiler, WebP image resize and full production build; release validation runs the same checks. No database migration or payment activation is involved.
