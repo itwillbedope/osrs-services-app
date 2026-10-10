@@ -10,20 +10,27 @@ import { Button } from "@/components/ui/button";
 export function AdminShell({
   children,
   user,
+  capabilities,
 }: {
   children: ReactNode;
   user: { name: string | null; email: string };
+  capabilities: readonly string[];
 }) {
   return (
     <div className="bg-background min-h-screen lg:grid lg:grid-cols-[18rem_1fr]">
-      <aside className="border-border bg-surface-1/95 border-b shadow-2xl shadow-black/25 backdrop-blur lg:fixed lg:inset-y-0 lg:z-20 lg:w-72 lg:border-r lg:border-b-0">
+      <aside className="border-border bg-surface-1/95 border-b shadow-2xl shadow-black/25 backdrop-blur lg:fixed lg:inset-y-0 lg:z-20 lg:flex lg:w-72 lg:flex-col lg:border-r lg:border-b-0">
         <div className="flex h-20 items-center justify-between px-5 lg:h-24 lg:px-6">
           <Link href="/admin" aria-label="Admin overview">
             <BrandLogo priority className="w-40 lg:w-44" />
           </Link>
-          <span className="border-gold/25 bg-gold-muted/50 text-gold flex size-9 items-center justify-center rounded-xl border lg:hidden">
-            <ShieldCheck aria-label="Protected" className="size-4" />
-          </span>
+          <div className="flex items-center gap-2 lg:hidden">
+            <ShieldCheck aria-label="Protected" className="text-gold size-4" />
+            <form action={logoutAction}>
+              <Button type="submit" variant="ghost" aria-label="Sign out">
+                <LogOut className="size-4" />
+              </Button>
+            </form>
+          </div>
         </div>
 
         <div className="hidden px-7 pb-3 lg:block">
@@ -33,14 +40,14 @@ export function AdminShell({
           </p>
         </div>
 
-        <div className="border-border/70 lg:mx-5 lg:border-t lg:pt-5">
+        <div className="border-border/70 lg:mx-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:border-t lg:pt-5">
           <p className="text-text-muted kicker-type mb-2 hidden px-3 lg:block">
             Workspace
           </p>
-          <AdminNav />
+          <AdminNav capabilities={capabilities} />
         </div>
 
-        <div className="border-border bg-background/25 absolute inset-x-0 bottom-0 hidden border-t p-4 lg:block">
+        <div className="border-border bg-background/25 hidden border-t p-4 lg:block lg:shrink-0">
           <div className="border-border bg-surface-2/65 mb-3 flex items-center gap-3 rounded-xl border px-3 py-3">
             <span className="border-gold/20 bg-gold-muted/45 text-gold flex size-9 shrink-0 items-center justify-center rounded-lg border">
               <Gem className="size-4" aria-hidden="true" />

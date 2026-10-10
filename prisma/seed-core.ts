@@ -40,6 +40,10 @@ export type SeedClient = {
     }): Promise<unknown>;
   };
   user: {
+    findUnique(args: {
+      where: { email: string };
+      select: { accountType: true };
+    }): Promise<{ accountType: "STAFF" | "CUSTOMER" } | null>;
     upsert(args: {
       where: { email: string };
       create: {
@@ -79,9 +83,53 @@ export const defaultRoles: Array<{
 }> = [
   {
     key: "SUPER_ADMIN",
-    name: "Super Administrator",
+    name: "Head",
     description: "Full platform administration.",
     permissions: allPermissionKeys,
+  },
+  {
+    key: "CHAT_SUPPORT",
+    name: "Chat Support",
+    description:
+      "Support conversations only, without sales, listings, payment or user administration.",
+    permissions: [
+      permissions.adminAccess,
+      permissions.chatView,
+      permissions.chatRespond,
+      permissions.chatAssign,
+      permissions.chatStatusManage,
+      permissions.chatInternalNotesCreate,
+    ],
+  },
+  {
+    key: "PRODUCT_DATA_EDITOR",
+    name: "Products & Data Editor",
+    description:
+      "Service and product listings, content, prices, media and stock; no sales, customer, payment or user administration.",
+    permissions: [
+      permissions.adminAccess,
+      permissions.homepageManage,
+      permissions.productsView,
+      permissions.productsEdit,
+      permissions.productsPublish,
+      permissions.productsMediaManage,
+      permissions.productsInventoryAdjust,
+      permissions.pricingView,
+      permissions.pricingEdit,
+      permissions.pricingPublish,
+      permissions.goldView,
+      permissions.goldEdit,
+      permissions.goldPublish,
+      permissions.goldInventoryAdjust,
+      permissions.accountsView,
+      permissions.accountsEdit,
+      permissions.accountsApprove,
+      permissions.accountsPublish,
+      permissions.accountsAvailabilityManage,
+      permissions.customBuildsView,
+      permissions.customBuildsEdit,
+      permissions.customBuildsPublish,
+    ],
   },
   {
     key: "EDITOR",
@@ -245,6 +293,15 @@ export async function seedDatabase(
 
   if (admin.email && admin.password) {
     const email = admin.email.toLowerCase();
+    const existing = await prisma.user.findUnique({
+      where: { email },
+      select: { accountType: true },
+    });
+    if (existing && existing.accountType !== "STAFF") {
+      throw new Error(
+        "Owner seed cannot promote an existing customer account. Choose a new staff login identifier.",
+      );
+    }
     const passwordHash = await hashPassword(admin.password);
     const user = await prisma.user.upsert({
       where: { email },

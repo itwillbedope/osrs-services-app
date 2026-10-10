@@ -98,6 +98,10 @@ function createFakeSeedClient() {
       },
     },
     user: {
+      async findUnique(args) {
+        const user = state.users.get(args.where.email);
+        return user ? { accountType: user.accountType } : null;
+      },
       async upsert(args) {
         const existing = state.users.get(args.where.email);
         if (existing) {
@@ -138,6 +142,14 @@ const initialAdmin: AdminSeedConfiguration = {
 const hashPassword = async (password: string) => `hash:${password}`;
 
 describe("database seed idempotence", () => {
+  it("refuses to promote an existing customer through owner initialization", async () => {
+    const { client, state } = createFakeSeedClient();
+    client.user.findUnique = async () => ({ accountType: "CUSTOMER" });
+    await expect(
+      seedDatabase(client, initialAdmin, hashPassword),
+    ).rejects.toThrow("cannot promote an existing customer");
+    expect(state.userRoles.size).toBe(0);
+  });
   it("preserves live flags, permission assignments, and the admin password", async () => {
     const { client, state } = createFakeSeedClient();
     await seedDatabase(client, initialAdmin, hashPassword);

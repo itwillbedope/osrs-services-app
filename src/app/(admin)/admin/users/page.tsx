@@ -33,8 +33,17 @@ export default async function StaffPage() {
     prisma.permission.findMany({ orderBy: { key: "asc" } }),
   ]);
   const roles = allRoles
+    .sort((a, b) => {
+      const preferred = ["SUPER_ADMIN", "CHAT_SUPPORT", "PRODUCT_DATA_EDITOR"];
+      const rank = (key: string) => {
+        const index = preferred.indexOf(key);
+        return index < 0 ? preferred.length : index;
+      };
+      return rank(a.key) - rank(b.key);
+    })
     .map((role) => ({
       id: role.id,
+      key: role.key,
       name: role.name,
       description: role.description,
       permissionKeys: role.permissions.map((p) => p.permission.key),
@@ -51,6 +60,28 @@ export default async function StaffPage() {
         Create staff accounts and choose the permissions they receive. Access
         changes are recorded and existing sessions are revoked.
       </p>
+      <section
+        aria-label="Recommended staff roles"
+        className="grid gap-4 md:grid-cols-3"
+      >
+        {roles
+          .filter((role) =>
+            ["SUPER_ADMIN", "CHAT_SUPPORT", "PRODUCT_DATA_EDITOR"].includes(
+              role.key,
+            ),
+          )
+          .map((role) => (
+            <article
+              key={role.id}
+              className="border-border bg-surface-1 rounded-xl border p-5"
+            >
+              <h2 className="font-bold">{role.name}</h2>
+              <p className="text-text-secondary mt-3 text-sm">
+                {role.description}
+              </p>
+            </article>
+          ))}
+      </section>
       <section className="border-border bg-surface-1 space-y-5 rounded-xl border p-6">
         <h2 className="text-xl font-semibold">Create user</h2>
         <StaffCreateForm roles={roles} />
