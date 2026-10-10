@@ -144,3 +144,11 @@
 
 - A hero-scoped red token (#ff2020) keeps the eyebrow, LEVEL UP, Browse Services background/border and Discord icon consistent. Other service buttons are unchanged.
 - The secondary hero action reads Join our Discord with a decorative red brand icon. As requested by the customer, no invite is required for this release: while NEXT_PUBLIC_DISCORD_URL is empty it is a disabled button with a Coming soon label. Populating that existing setting enables the real invite link on a subsequent deployment. It never routes the hero Discord action to the support-page fallback. The SVG comes from Simple Icons (https://github.com/simple-icons/simple-icons/blob/develop/icons/discord.svg); a CSS mask colors it without raster generation or extra dependencies.
+
+## Minigames, quantity ordering, discovery and payments — 2026-10-10
+
+- The customer explicitly authorizes the reference Minigames products and prices. Capture only the live product names, rates, units and modifiers; 105 options in 26 active groups initialize a new independent catalogue once. Existing pricing and staff edits are preserved. Artwork and page copy are original. Full scope and configuration notes are in MINIGAMES-PAYMENTS-SEO.md.
+- Quantity fields precede selection and retain draft values. Stream is removed for INFERNAL_CAPE and COLOSSEUM in both UI and server estimation; other services and delivery settings retain their configurations.
+- Public indexability is intentional; sensitive routes retain noindex. Structured data matches visible facts. No rankings, speed scores, fake customer reviews or trust ratings are promised. Public homepage cache expiry is 30 seconds and chat is deferred/omitted when disabled.
+- The user confirms accounts will be connected later. Stripe hosted Checkout code and signed webhook verification are prepared, while Payoneer/BTC/OSRS GP use explicit support-reviewed methods until real provider details are supplied. Every new method starts disabled. Existing live-site delivery authorization applies, without entering or activating real merchant credentials.
+- The customer requests self-managed staff creation and roles rather than an owner email account provisioned in chat. Users & roles is protected by users.manage, bounded by the actor's capabilities, with session revocation and audit records. No new production owner credential is created or published.

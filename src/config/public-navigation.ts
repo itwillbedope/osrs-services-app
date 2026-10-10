@@ -30,7 +30,7 @@ export const serviceNavigation = [
   },
   {
     label: "Minigames",
-    href: "/services/minigames",
+    href: "/minigames",
     description: "Focused help for rewards and unlocks.",
   },
   {

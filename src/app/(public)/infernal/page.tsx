@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { Flame } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -12,12 +13,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Infernal Cape Service",
-  description:
-    "Configure an Infernal Cape service using admin-managed weapons, account modes, options, requirements and pricing.",
-  alternates: { canonical: "/infernal" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "Infernal Cape Service",
+  "Configure an Infernal Cape service using admin-managed weapons, account modes, options, requirements and pricing.",
+  "/infernal",
+);
 
 export default async function InfernalPage() {
   const [engine, flags] = await Promise.all([

@@ -65,6 +65,8 @@ const requiredExtraPaths = [
   "src/lib/payments/eligibility.ts",
   "src/lib/payments/public.ts",
   "src/lib/payments/refunds.ts",
+  "src/lib/payments/stripe.ts",
+  "src/lib/payments/stripe-events.ts",
   "src/lib/payments/transactions.ts",
   "src/lib/payments/webhooks.ts",
   "src/lib/readiness.ts",
@@ -318,15 +320,31 @@ function assertNoPrivateText(entryName: string, data: Buffer) {
   ) {
     throw new Error(`Raw token literal detected in review pack: ${entryName}`);
   }
-  if (/sk_(live|test)_|pk_(live|test)_/i.test(text)) {
+  if (
+    /sk_(live|test)_|pk_(live|test)_|\bwhsec_[A-Za-z0-9]{16,}\b/i.test(text)
+  ) {
     throw new Error(`Payment provider key pattern detected: ${entryName}`);
+  }
+  // The authorized Stripe adapter reads private configuration at runtime.
+  // Allow only empty declarations and explicit environment reads, never values.
+  let providerScanText = text;
+  if (entryName === "src/lib/env.ts") {
+    providerScanText = providerScanText.replace(
+      /^[ \t]+STRIPE_(?:SECRET_KEY|WEBHOOK_SECRET): z\.string\(\)\.default\(""\),\r?$/gm,
+      "",
+    );
+  }
+  if (entryName === "src/lib/payments/stripe.ts") {
+    providerScanText = providerScanText
+      .replace(/env\.STRIPE_(?:SECRET_KEY|WEBHOOK_SECRET)\b/g, "")
+      .replace(/"(?:STRIPE_NOT_CONFIGURED|INVALID_STRIPE_EVENT)"/g, "");
   }
   if (
     ![".env.example", "scripts/build-task016-review-pack.ts"].includes(
       entryName,
     ) &&
     /(STRIPE|PAYPAL|SQUARE|ADYEN|BRAINTREE|COINBASE|SMTP_PASSWORD|WEBHOOK_SECRET)_/i.test(
-      text,
+      providerScanText,
     )
   ) {
     throw new Error(`External provider secret variable detected: ${entryName}`);
@@ -386,6 +404,24 @@ async function validateScannerRules() {
     assertNoPrivateText(
       "src/lib/env.ts",
       scannerFixture(["STRIPE", "_SECRET_KEY=", "sk", "_live_", "example"]),
+    ),
+  );
+  assertNoPrivateText(
+    "src/lib/env.ts",
+    scannerFixture(['  STRIPE_SECRET_KEY: z.string().default(""),']),
+  );
+  assertScannerRejects("nonempty Stripe defaults", () =>
+    assertNoPrivateText(
+      "src/lib/env.ts",
+      scannerFixture([
+        '  STRIPE_SECRET_KEY: z.string().default("private-value"),',
+      ]),
+    ),
+  );
+  assertScannerRejects("literal webhook signing secrets", () =>
+    assertNoPrivateText(
+      "src/lib/payments/stripe.ts",
+      scannerFixture(["whsec", "_", "a".repeat(24)]),
     ),
   );
   assertScannerRejects("raw token literals", () =>

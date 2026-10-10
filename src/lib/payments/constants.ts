@@ -13,7 +13,7 @@ export const paymentPermissions = {
 export const paymentProviderLabels = {
   MANUAL_REVIEW: "Manual review",
   TEST_HOSTED: "TEST_HOSTED",
-  EXTERNAL_HOSTED_CHECKOUT: "External hosted checkout",
+  EXTERNAL_HOSTED_CHECKOUT: "Stripe hosted checkout",
 } as const;
 
 export const paymentTransactionStatusLabels = {

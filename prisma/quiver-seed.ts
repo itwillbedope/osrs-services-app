@@ -47,7 +47,7 @@ export async function seedQuiver(prisma: PrismaClient) {
         shortSummary:
           "A complete Fortis Colosseum run through Sol Heredit for Dizana's Quiver, with your account setup reviewed before starting.",
         content:
-          "Complete the 12 waves of the Fortis Colosseum, including Sol Heredit, for Dizana's Quiver. Configure your account type, gear review, delivery and available stream option. Support confirms combat stats, equipment, prayers, supplies and Colosseum access before scheduling. Charging or blessing the Quiver with sunfire splinters is a separate request.",
+          "Complete the 12 waves of the Fortis Colosseum, including Sol Heredit, for Dizana's Quiver. Configure your account type, gear review and delivery. Support confirms combat stats, equipment, prayers, supplies and Colosseum access before scheduling. Charging or blessing the Quiver with sunfire splinters is a separate request.",
         engineType: "PREMIUM_SERVICE_CONFIGURATOR",
         publicationStatus: "PUBLISHED",
         availabilityState: "AVAILABLE",
@@ -81,6 +81,7 @@ export async function seedQuiver(prisma: PrismaClient) {
         ...publishedRule,
         serviceId: service.id,
         configuratorType: "COLOSSEUM",
+        discordStreamEnabled: false,
         rsnEligibilityEnabled: false,
         supportsManualStatFallback: true,
       },

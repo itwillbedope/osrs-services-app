@@ -99,6 +99,9 @@ export function DirectOrderEngine({
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [selected, setSelected] = useState<Record<string, string>>({});
+  const [draftQuantities, setDraftQuantities] = useState<
+    Record<string, string>
+  >({});
   const [quote, setQuote] = useState<{
     key: string;
     totalCents?: number;
@@ -194,11 +197,13 @@ export function DirectOrderEngine({
       }
       const next = {
         ...current,
-        [offering.slug]: String(
-          offering.quantityEnabled
-            ? Math.max(1, offering.minimumQuantity ?? 1)
-            : 1,
-        ),
+        [offering.slug]:
+          draftQuantities[offering.slug] ??
+          String(
+            offering.quantityEnabled
+              ? Math.max(1, offering.minimumQuantity ?? 1)
+              : 1,
+          ),
       };
       if (mode === "DIARIES") {
         for (const slug of diaryPrerequisiteSlugs(
@@ -213,7 +218,12 @@ export function DirectOrderEngine({
   }
 
   function updateQuantity(offering: DirectOrderOffering, value: string) {
-    setSelected((current) => ({ ...current, [offering.slug]: value }));
+    setDraftQuantities((current) => ({ ...current, [offering.slug]: value }));
+    setSelected((current) =>
+      current[offering.slug] != null
+        ? { ...current, [offering.slug]: value }
+        : current,
+    );
   }
 
   const cartSource = estimate
@@ -515,6 +525,24 @@ export function DirectOrderEngine({
                   {offering.estimatedDeliveryText ??
                     "Timing confirmed after review"}
                 </small>
+                {offering.quantityEnabled && (
+                  <label className="store-field">
+                    Amount
+                    <input
+                      aria-label={`Amount for ${offering.name}`}
+                      type="number"
+                      inputMode="numeric"
+                      min={offering.minimumQuantity ?? 1}
+                      max={offering.maximumQuantity ?? undefined}
+                      value={
+                        draftQuantities[offering.slug] ??
+                        selected[offering.slug] ??
+                        String(offering.minimumQuantity ?? 1)
+                      }
+                      onChange={(e) => updateQuantity(offering, e.target.value)}
+                    />
+                  </label>
+                )}
                 <button
                   className="direct-order-card-main reference-primary-button"
                   aria-pressed={selected[offering.slug] != null}
@@ -524,21 +552,6 @@ export function DirectOrderEngine({
                     ? "Selected ✓"
                     : "Select Service"}
                 </button>
-                {selected[offering.slug] != null &&
-                  offering.quantityEnabled && (
-                    <label className="store-field">
-                      Amount
-                      <input
-                        type="number"
-                        min={offering.minimumQuantity ?? 1}
-                        max={offering.maximumQuantity ?? undefined}
-                        value={selected[offering.slug]}
-                        onChange={(e) =>
-                          updateQuantity(offering, e.target.value)
-                        }
-                      />
-                    </label>
-                  )}
                 {requirementList(offering)}
               </article>
             ))}

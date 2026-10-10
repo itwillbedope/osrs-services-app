@@ -8,8 +8,19 @@ import "./globals.css";
 import "./reference-storefront.css";
 
 export const metadata: Metadata = {
+  icons: { icon: "/branding/site-icon.svg" },
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://osrsservices.com",
+  ),
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    other: process.env.BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.BING_SITE_VERIFICATION }
+      : {},
+  },
   title: { default: "OSRS Services", template: "%s | OSRS Services" },
-  description: "The secure OSRS Services application foundation.",
+  description:
+    "OSRS services for skilling, quests, minigames, bossing and account progression with clear pricing and personal support.",
   robots: { index: false, follow: false },
 };
 

@@ -704,6 +704,15 @@ const catalogueOfferingSourceSchema = z.object({
           .max(180)
           .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
         quantity: z.number().int().positive().max(1_000_000_000).optional(),
+        modifierSlugs: z
+          .array(
+            z
+              .string()
+              .regex(/^[a-z0-9-]+$/)
+              .max(100),
+          )
+          .max(8)
+          .optional(),
       }),
     )
     .min(1)

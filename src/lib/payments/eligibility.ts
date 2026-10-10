@@ -45,9 +45,12 @@ async function cartKindRule(client: EligibilityClient, kind: CartItem["kind"]) {
 
 async function serviceRule(client: EligibilityClient, item: CartItem) {
   if (
-    !["SKILLING_ESTIMATE", "BOSSING_ESTIMATE", "PREMIUM_ESTIMATE"].includes(
-      item.kind,
-    )
+    ![
+      "SKILLING_ESTIMATE",
+      "BOSSING_ESTIMATE",
+      "PREMIUM_ESTIMATE",
+      "CATALOGUE_OFFERING_ESTIMATE",
+    ].includes(item.kind)
   ) {
     return null;
   }

@@ -1,0 +1,20 @@
+{
+  "environment": "Local Next.js production preview on Windows; Lighthouse 13.5.0 simulated mobile; not a live PageSpeed or GTmetrix result",
+  "url": "http://127.0.0.1:3000/",
+  "before": {
+    "performance": 73,
+    "seo": 100,
+    "bestPractices": 96,
+    "lcp": "9.5 s",
+    "logoBytes": 1289462
+  },
+  "after": {
+    "performance": 95,
+    "seo": 100,
+    "bestPractices": 100,
+    "lcp": "3.0 s",
+    "logoBytes": 15176
+  },
+  "reports": "Full Lighthouse reports are saved in workspace outputs/minigames",
+  "limitations": "Single local laboratory runs. Hosting, network, load and caching affect live results; no ranking or score guaranteed."
+}

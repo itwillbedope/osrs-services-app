@@ -9,6 +9,7 @@ import type {
 import { hashIdempotencyKey } from "@/lib/checkout/security";
 import { prisma } from "@/lib/db/prisma";
 import { adapterForProvider } from "@/lib/payments/adapters";
+import { stripeSessionUrl } from "@/lib/payments/stripe";
 import {
   assertAmountMinor,
   assertCurrencyCode,
@@ -120,7 +121,10 @@ export async function createHostedCheckoutForTransaction(input: {
     orderNumber: payment.order.orderNumber,
     amountMinor: payment.amountMinor,
     currency: payment.currencyCode,
-    idempotencyKey: input.idempotencyKey,
+    idempotencyKey:
+      payment.provider === "EXTERNAL_HOSTED_CHECKOUT"
+        ? `stripe-checkout:${payment.id}`
+        : input.idempotencyKey,
   });
   const updated = await prisma.$transaction(async (transaction) => {
     const locked = await transaction.paymentTransaction.findUniqueOrThrow({
@@ -250,6 +254,20 @@ export async function getCheckoutPaymentResume(orderId: string) {
       payment,
       redirectUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/checkout/payment/${payment.id}/pending?providerCheckoutId=${payment.providerCheckoutId}`,
     };
+  }
+  if (
+    payment.provider === "EXTERNAL_HOSTED_CHECKOUT" &&
+    ["CREATED", "PENDING", "REQUIRES_CUSTOMER_ACTION"].includes(payment.status)
+  ) {
+    if (payment.providerCheckoutId)
+      return {
+        payment,
+        redirectUrl: await stripeSessionUrl(payment.providerCheckoutId),
+      };
+    return createHostedCheckoutForTransaction({
+      transactionId: payment.id,
+      idempotencyKey: `stripe-order:${payment.orderId}`,
+    });
   }
   return { redirectUrl: null, payment };
 }

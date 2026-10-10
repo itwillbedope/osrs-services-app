@@ -12,6 +12,7 @@ import {
   type HostedWebhookFixture,
 } from "@/lib/payments/core";
 import { env } from "@/lib/env";
+import { stripeHostedAdapter } from "@/lib/payments/stripe";
 
 export type HostedCheckoutSession = {
   provider: PaymentProviderType;
@@ -49,6 +50,7 @@ export type PaymentProviderAdapter = {
     ok: boolean;
     event?: HostedWebhookFixture;
     failureCode?: string;
+    ignored?: boolean;
   }>;
   handleWebhookEvent(input: {
     event: HostedWebhookFixture;
@@ -252,6 +254,7 @@ export const testHostedAdapter: PaymentProviderAdapter = {
 export function adapterForProvider(provider: PaymentProviderType) {
   if (provider === "MANUAL_REVIEW") return manualReviewAdapter;
   if (provider === "TEST_HOSTED") return testHostedAdapter;
+  if (provider === "EXTERNAL_HOSTED_CHECKOUT") return stripeHostedAdapter;
   throw new Error(
     "No approved external hosted checkout provider adapter is configured.",
   );

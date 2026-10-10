@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { Target } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -11,12 +12,11 @@ import {
 } from "@/lib/catalogue/queries";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = {
-  title: "Dizana's Quiver | Fortis Colosseum Service",
-  description:
-    "Configure your Fortis Colosseum completion for Dizana's Quiver, including account type, gear review, delivery and available streaming options.",
-  alternates: { canonical: "/quiver" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "Dizana's Quiver | Fortis Colosseum Service",
+  "Configure your Fortis Colosseum completion for Dizana's Quiver, including account type, gear review and Standard or Express delivery.",
+  "/quiver",
+);
 
 export default async function QuiverPage() {
   const [engine, flags] = await Promise.all([

@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { Pickaxe } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -12,12 +13,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "OSRS Skilling Calculator",
-  description:
-    "Choose an OSRS skill, levels and an admin-configured training method, then see the price and add the configuration to cart.",
-  alternates: { canonical: "/skills" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "OSRS Skilling Calculator",
+  "Choose an OSRS skill, levels and an admin-configured training method, then see the price and add the configuration to cart.",
+  "/skills",
+);
 
 export default async function SkillsPage() {
   const [engine, flags] = await Promise.all([

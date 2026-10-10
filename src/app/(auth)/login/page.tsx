@@ -80,8 +80,7 @@ export default async function LoginPage({
                 Sign in to continue
               </h2>
               <p className="text-text-secondary mt-3 text-sm leading-6">
-                Enter the Super Admin credentials provided through your local
-                environment.
+                Enter the staff credentials provided by your administrator.
               </p>
               <LoginForm next={next} />
             </div>

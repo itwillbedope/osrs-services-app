@@ -43,6 +43,7 @@ export type PremiumEstimateOption = {
 };
 
 export type PremiumEstimateRule = {
+  configuratorType?: string;
   statPricingRules?: unknown;
   normalModeMultiplierBps: number;
   ironmanMultiplierBps: number;
@@ -267,7 +268,10 @@ export function calculatePremiumEstimate(input: PremiumEstimateInput) {
   }
 
   if (input.includeDiscordStream) {
-    if (!rule.discordStreamEnabled) {
+    if (
+      !rule.discordStreamEnabled ||
+      ["INFERNAL_CAPE", "COLOSSEUM"].includes(rule.configuratorType ?? "")
+    ) {
       throw new PremiumValidationError(
         "Discord Stream is not available for this service.",
       );

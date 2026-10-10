@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { Coins } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -9,12 +10,11 @@ import { getPublicGoldTradingService } from "@/lib/gold/server";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Buy OSRS Gold",
-  description:
-    "Choose a configured OSRS gold amount or enter a custom amount, see the published rate and add the purchase to cart.",
-  alternates: { canonical: "/gold" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "Buy OSRS Gold",
+  "Choose a configured OSRS gold amount or enter a custom amount, see the published rate and add the purchase to cart.",
+  "/gold",
+);
 
 export default async function GoldPage() {
   const engine = await getPublicGoldTradingService({

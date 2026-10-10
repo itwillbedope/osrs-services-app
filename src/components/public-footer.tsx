@@ -28,6 +28,7 @@ const columns = [
       ["Skilling", "/skills"],
       ["Questing", "/quests"],
       ["Diaries", "/diaries"],
+      ["Minigames", "/minigames"],
       ["Misc Gathering", "/misc-gathering"],
     ],
   },

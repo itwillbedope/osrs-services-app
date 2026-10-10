@@ -33,12 +33,27 @@ async function checkoutConfiguration() {
     orderBy: { createdAt: "asc" },
     include: {
       paymentMethods: {
-        where: { enabled: true },
+        where: {
+          OR: [
+            { enabled: true },
+            {
+              stableKey: {
+                in: [
+                  "stripe-checkout",
+                  "payoneer-review",
+                  "bitcoin-review",
+                  "osrs-gp-review",
+                ],
+              },
+            },
+          ],
+        },
         orderBy: [{ sortOrder: "asc" }, { publicName: "asc" }],
         select: {
           stableKey: true,
           publicName: true,
           publicDescription: true,
+          enabled: true,
         },
       },
     },
@@ -64,7 +79,9 @@ export default async function CheckoutPage() {
     ]);
   const cart = cartResult.cart;
   const settingsEnabled = Boolean(settings?.guestCheckoutEnabled);
-  const hasPaymentMethod = Boolean(settings?.paymentMethods.length);
+  const hasPaymentMethod = Boolean(
+    settings?.paymentMethods.some((method) => method.enabled),
+  );
   const disabled =
     !cartEnabled ||
     !guestCheckoutEnabled ||

@@ -118,6 +118,18 @@ export async function updateCheckoutPaymentMethod({
   expectedVersion: number;
   actorId: string;
 }) {
+  if (input.enabled && input.needsClientReview)
+    throw new CheckoutSecurityError(
+      "Complete payment-method review before enabling it.",
+    );
+  if (
+    input.enabled &&
+    (!String(input.publicInstructions ?? "").trim() ||
+      String(input.publicInstructions).includes("SETUP REQUIRED"))
+  )
+    throw new CheckoutSecurityError(
+      "Provide payment and verification instructions before enabling this method.",
+    );
   const updated = await prisma.checkoutPaymentMethod.updateMany({
     where: {
       id: input.id,

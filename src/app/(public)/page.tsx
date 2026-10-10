@@ -4,6 +4,7 @@ import Image from "next/image";
 import { homepageArtwork, serviceArtwork } from "@/lib/homepage/artwork";
 import { StoreTrustStrip } from "@/components/store-trust-strip";
 import Link from "next/link";
+import { unstable_cache } from "next/cache";
 
 import {
   defaultHomepageSections,
@@ -89,6 +90,15 @@ function CardArtwork({
   );
 }
 
+const cachedHomepage = unstable_cache(
+  async () => {
+    const { getPublicHomepageContent } = await import("@/lib/homepage/server");
+    return getPublicHomepageContent();
+  },
+  ["public-homepage-v2"],
+  { revalidate: 30, tags: ["homepage"] },
+);
+
 async function loadHomepage() {
   const databaseConfigured = Boolean(
     process.env.DATABASE_USER &&
@@ -97,9 +107,7 @@ async function loadHomepage() {
   );
   if (databaseConfigured) {
     try {
-      const { getPublicHomepageContent } =
-        await import("@/lib/homepage/server");
-      return await getPublicHomepageContent();
+      return await cachedHomepage();
     } catch {
       // Keep the storefront available while a migration or database connection is recovering.
     }
@@ -126,6 +134,7 @@ export default async function Homepage() {
     ["Infernal", "/infernal", "Claim your cape"],
     ["Quests", "/quests", "Complete your journey"],
     ["Diaries", "/diaries", "Unlock new content"],
+    ["Minigames", "/minigames", "Rewards, points and unlocks"],
     ["Gold", "/gold", "See the current gold rate"],
     ["Items", "/products", "Find your next upgrade"],
     ["Accounts", "/accounts", "Explore available accounts"],
@@ -140,6 +149,7 @@ export default async function Homepage() {
             alt="An adventurer facing a towering lava-armored monster in the Inferno"
             fill
             priority
+            fetchPriority="high"
             sizes="(max-width: 900px) 100vw, 1100px"
           />
         </div>
@@ -210,7 +220,7 @@ export default async function Homepage() {
                     src={serviceArtwork(href).src}
                     alt={serviceArtwork(href).alt}
                     fill
-                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, (max-width: 1279px) 20vw, 180px"
+                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, (max-width: 1599px) 20vw, 160px"
                     className="object-cover"
                   />
                 </span>

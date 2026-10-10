@@ -22,6 +22,18 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navigation = [
+  {
+    href: "/admin/users",
+    label: "Users & roles",
+    icon: UsersRound,
+    exact: false,
+  },
+  {
+    href: "/admin/payments/setup",
+    label: "Payment setup",
+    icon: CreditCard,
+    exact: false,
+  },
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   {
     href: "/admin/homepage",

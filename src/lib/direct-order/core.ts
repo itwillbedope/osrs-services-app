@@ -33,7 +33,72 @@ export type DirectOrderOffering = {
 export type DirectOrderSelection = {
   slug: string;
   quantity?: number;
+  modifierSlugs?: string[];
 };
+
+export function minigameModifiers(offering: DirectOrderOffering) {
+  return offering.facets
+    .filter((f) => f.facetKey === "minigame-modifier")
+    .map((f) => {
+      const match = /^([a-z0-9-]+)-bps-(plus|minus)-(\d+)$/.exec(f.facetValue);
+      const bps = match
+        ? Number(match[3]) * (match[2] === "minus" ? -1 : 1)
+        : NaN;
+      if (!match || bps < -9000 || bps > 10000) {
+        throw new DirectOrderValidationError(
+          "An option has invalid pricing adjustments.",
+        );
+      }
+      return { slug: match[1]!, label: f.label, bps };
+    });
+}
+
+export function directOrderLinePrice(
+  offering: DirectOrderOffering,
+  quantity: number,
+  modifierSlugs: string[] = [],
+) {
+  const allowed = minigameModifiers(offering);
+  if (
+    new Set(modifierSlugs).size !== modifierSlugs.length ||
+    modifierSlugs.length > 8
+  )
+    throw new DirectOrderValidationError("Choose each adjustment once.");
+  const selected = modifierSlugs.map((slug) => {
+    const modifier = allowed.find((m) => m.slug === slug);
+    if (!modifier)
+      throw new DirectOrderValidationError(
+        "Choose available pricing adjustments.",
+      );
+    return modifier;
+  });
+  for (const mutuallyExclusive of [
+    ["under-60-herblore", "under-70-herblore"],
+    [
+      "easy-combat-achievements",
+      "medium-combat-achievements",
+      "hard-combat-achievements",
+    ],
+  ]) {
+    if (selected.filter((m) => mutuallyExclusive.includes(m.slug)).length > 1)
+      throw new DirectOrderValidationError(
+        "Choose only one applicable level or achievement tier.",
+      );
+  }
+  const units = offering.quantityEnabled
+    ? Math.ceil(quantity / Math.max(1, offering.minimumQuantity ?? 1))
+    : 1;
+  const multiplier = selected.reduce(
+    (value, m) => (value * (10000 + m.bps)) / 10000,
+    1,
+  );
+  return {
+    amountCents: Math.round(
+      (offering.basePriceCents ?? 0) * units * multiplier,
+    ),
+    modifierLabels: selected.map((m) => m.label),
+  };
+}
 
 export type DirectOrderFilterMode = "QUESTS" | "DIARIES" | "GATHERING";
 
@@ -118,13 +183,11 @@ export function calculateDirectOrderEstimate(
       );
     }
     const quantity = safeQuantity(offering, selection.quantity);
-    const priceIncrement = offering.quantityEnabled
-      ? Math.max(1, offering.minimumQuantity ?? 1)
-      : 1;
-    const units = offering.quantityEnabled
-      ? Math.ceil(quantity / priceIncrement)
-      : 1;
-    const amountCents = offering.basePriceCents * units;
+    const { amountCents, modifierLabels } = directOrderLinePrice(
+      offering,
+      quantity,
+      selection.modifierSlugs,
+    );
     if (!Number.isSafeInteger(amountCents) || amountCents > 100_000_000) {
       throw new DirectOrderValidationError(
         "The selected total requires support review.",
@@ -138,9 +201,11 @@ export function calculateDirectOrderEstimate(
         ? `${quantity.toLocaleString()} ${offering.quantityUnit ?? "units"}`
         : null,
       amountCents,
-      label: offering.quantityEnabled
-        ? `${offering.name} · ${quantity.toLocaleString()} ${offering.quantityUnit ?? "units"}`
-        : offering.name,
+      label:
+        (offering.quantityEnabled
+          ? `${offering.name} · ${quantity.toLocaleString()} ${offering.quantityUnit ?? "units"}`
+          : offering.name) +
+        (modifierLabels.length ? ` · ${modifierLabels.join(", ")}` : ""),
     };
   });
   const subtotalCents = lines.reduce(
