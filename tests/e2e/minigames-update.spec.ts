@@ -12,6 +12,11 @@ test("homepage exposes Minigames without horizontal overflow", async ({
   await expect(card).toBeVisible();
   await expect(card).toHaveAttribute("href", "/minigames");
   expect(
+    await card
+      .getByRole("heading", { name: "Minigames", exact: true })
+      .evaluate((heading) => heading.scrollWidth <= heading.clientWidth),
+  ).toBe(true);
+  expect(
     await page.evaluate(
       () =>
         document.documentElement.scrollWidth <=

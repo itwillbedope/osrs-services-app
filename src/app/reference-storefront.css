@@ -1094,7 +1094,7 @@
 }
 .reference-home-service-grid {
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 .reference-home-service {
@@ -1875,6 +1875,9 @@
   margin-bottom: 0;
 }
 @media (min-width: 1600px) {
+  .reference-home-service-grid {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
   .reference-header {
     padding-inline: max(28px, calc((100vw - 1560px) / 2));
   }

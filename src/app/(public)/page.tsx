@@ -220,7 +220,7 @@ export default async function Homepage() {
                     src={serviceArtwork(href).src}
                     alt={serviceArtwork(href).alt}
                     fill
-                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, (max-width: 1279px) 20vw, 180px"
+                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, (max-width: 1599px) 20vw, 160px"
                     className="object-cover"
                   />
                 </span>
