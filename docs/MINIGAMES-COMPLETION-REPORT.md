@@ -195,3 +195,7 @@ PR 26: https://github.com/itwillbedope/osrs-services-app/pull/26. Initial commit
 Hostinger redirects to sign-in because the existing session expired. The user must verify their GitHub email and sign in to Hostinger before delivery can finish. No credentials were requested in chat. The disposable local QA owner is now disabled, its sessions revoked, and its temporary credential file removed.
 
 The homepage grid uses five columns at narrower desktop widths and ten above 1600px. This prevents the Minigames heading from clipping; the production build and both browser tests, including heading-width assertions, passed after the adjustment. Final fixes remain locally committed pending GitHub email verification.
+
+## Account access follow-up
+
+The customer reports a verified GitHub email and has signed in to Hostinger. Hostinger access is confirmed; the current production deployment remains main/f14054fa. The final Git push and PR update still receive verification-required errors. Read-only checks reveal Git Credential Manager stores fypwork6-arch while GitHub CLI and the connector identify Faizan279. The GitHub browser tab is still signed out. Existing-auth refresh was prepared without requesting broader scopes, then cancelled pending the customer's sign-in/account identity; the temporary device-code file was removed. Finish by authenticating the customer's verified account, align only this repository's Git credentials, push the committed changes, run release CI, merge and verify Hostinger delivery. No production changes were made during this follow-up.
