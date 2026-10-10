@@ -9,5 +9,9 @@ export default async function AdminLayout({
   children: ReactNode;
 }) {
   const session = await requireCapability("admin.access", "/admin");
-  return <AdminShell user={session.user}>{children}</AdminShell>;
+  return (
+    <AdminShell user={session.user} capabilities={[...session.capabilities]}>
+      {children}
+    </AdminShell>
+  );
 }

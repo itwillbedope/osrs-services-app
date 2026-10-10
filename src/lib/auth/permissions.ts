@@ -1,5 +1,6 @@
 export const permissions = {
   adminAccess: "admin.access",
+  dashboardView: "dashboard.view",
   designSystemView: "design_system.view",
   homepageManage: "homepage.manage",
   productsView: "products.view",
@@ -66,6 +67,8 @@ export type PermissionKey = (typeof permissions)[keyof typeof permissions];
 
 export const permissionDescriptions: Record<PermissionKey, string> = {
   [permissions.adminAccess]: "Access the protected administration area.",
+  [permissions.dashboardView]:
+    "View business sales totals and operational statistics.",
   [permissions.designSystemView]: "View the protected design-system showcase.",
   [permissions.homepageManage]:
     "Manage curated homepage sections and promotional cards.",

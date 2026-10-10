@@ -118,18 +118,20 @@ export default async function AdminChatPage({
             conversations={serializable<AdminConversation[]>(conversations)}
           />
         </div>
-        <aside className="border-border bg-surface-1 self-start rounded-xl border p-5">
-          <h2 className="text-xl font-bold">Chat settings</h2>
-          <p className="text-text-muted mt-2 text-sm">
-            Seeded values remain offline and marked for client review until
-            deliberately changed.
-          </p>
-          <div className="mt-5">
-            <ChatSettingsForm
-              settings={serializable<ChatSettings>(dashboard.settings)}
-            />
-          </div>
-        </aside>
+        {session.capabilities.has("chat.settings.manage") && (
+          <aside className="border-border bg-surface-1 self-start rounded-xl border p-5">
+            <h2 className="text-xl font-bold">Chat settings</h2>
+            <p className="text-text-muted mt-2 text-sm">
+              Seeded values remain offline and marked for client review until
+              deliberately changed.
+            </p>
+            <div className="mt-5">
+              <ChatSettingsForm
+                settings={serializable<ChatSettings>(dashboard.settings)}
+              />
+            </div>
+          </aside>
+        )}
       </section>
     </main>
   );
