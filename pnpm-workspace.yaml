@@ -5,6 +5,22 @@ packages:
 # dependencies resolvable without preserving pnpm's virtual-store symlinks.
 nodeLinker: hoisted
 
+# Match npm overrides because Hostinger currently installs with npm.
+overrides:
+  "@prisma/adapter-mariadb>mariadb": "3.5.4"
+  "@hono/node-server": "1.19.15"
+  hono: "4.13.7"
+  engine.io: "6.6.10"
+  fast-uri: "3.1.8"
+  mysql2: "3.23.1"
+  valibot: "1.4.2"
+  deepmerge-ts: "8.0.0"
+  browserslist: "4.28.7"
+  baseline-browser-mapping: "2.11.0"
+  postcss: "8.5.23"
+  source-map-js: "1.2.2"
+  "nanoid@>=3.0.0 <3.3.18": "3.3.18"
+
 allowBuilds:
   "@prisma/engines": true
   esbuild: true

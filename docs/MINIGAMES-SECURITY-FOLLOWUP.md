@@ -1,0 +1,17 @@
+# Minigames release security follow-up — 2026-10-10
+
+The requested storefront update was merged in PR 26 and deployed by Hostinger as `b8b691e0` (deployment `01a1252f-7e00-7128-a576-425b3a73d84c`). Live checks confirmed the homepage link, 105 Minigames options, quantity entry before selection, a server-confirmed $13.60 quote for two Anglers sets, Stream exclusion on Infernal/Quiver, discovery files and anonymous admin denial. Live desktop/mobile screenshots and HTTP verification are saved in workspace `outputs/minigames`.
+
+Hostinger's install output reported dependency advisories, which were reviewed as part of the customer's security request. This follow-up pins Next.js and its ESLint configuration to 16.3.8, MariaDB to 3.5.4 and SWC helpers to 0.5.23. Compatible transitive security fixes are pinned in both npm `overrides` and pnpm-workspace `overrides`, so Hostinger's npm installation and CI's frozen pnpm installation use the same intended patched libraries. Prisma remains 7.8.0; its config helper deepmerge-ts is overridden to 8.0.0 and validated through client generation, migration, seed and build. No schema or order data changes are needed.
+
+The new Next.js lint rule is explicitly excepted at the two existing authentication document redirects: registration/logout intentionally clear all session-dependent client caches. Authentication behavior is preserved. Build workers are limited to two because the initial local build exhausted Windows virtual memory when spawning 15 workers; this setting affects compilation, not request handling.
+
+Both `pnpm audit --prod` and an independently resolved npm `audit --omit=dev` returned zero known advisories after the patch. npm's complete development tree still has advisories; those tools do not serve customer requests. Audit snapshots are in workspace `work/minigames-prod-audit-final.json` and `work/minigames-npm-runtime-audit.json`. An audit result is time-specific and does not guarantee all future vulnerabilities, site trust ratings or search rankings.
+
+Validation: runtime dependency check, lint and formatting passed; 288 tests in 51 files passed. Prisma client generation, existing SQL migrations and seed passed. The production build passed with bounded workers, typecheck passed and all eight production browser tests passed on desktop/mobile. Release requires successful fresh DB/application and base-upgrade CI, followed by deployment and live verification.
+
+Sources: [Next.js 16.3.8 security release](https://github.com/vercel/next.js/releases/tag/v16.3.8), [Next.js image-optimization advisory](https://github.com/advisories/GHSA-2xp9-vwfh-vxw4), [MariaDB connector advisory](https://github.com/advisories/GHSA-r3rv-jm3r-62q2). Original Minigames/artwork/payment configuration is documented in MINIGAMES-PAYMENTS-SEO.md and MINIGAMES-ASSETS-PROMPTS.md. Merchant methods remain inactive pending the owner's later configuration.
+
+Changed files: `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `next.config.ts`, generated `next-env.d.ts`, authentication redirect comments in `src/components/customer-account-forms.tsx`, the active task, DECISIONS.md and this report. No unrelated feature was started.
+
+Refreshed QA screenshots: artifacts/minigames/desktop-chromium-quantity.png, desktop-chromium-roles.png, mobile-chromium-quantity.png and mobile-chromium-roles.png. Runtime audit summary: artifacts/minigames/security-audit-summary.json.

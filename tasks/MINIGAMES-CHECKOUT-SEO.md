@@ -20,3 +20,7 @@ Reference prices are expressly authorized by the customer, overriding the earlie
 ## Verification
 
 Lint, typecheck, formatting, unit tests, seed/migration checks, production build, desktop/mobile ordering and metadata checks, webhook/idempotency/amount validation, anonymous admin denial. Document any external configuration still required.
+
+## Security follow-up
+
+PR 26 is deployed and its live ordering/discovery/admin-protection checks pass. Hostinger reported dependency advisories; patch the affected runtime and compatible transitive libraries within the customer's security request. Preserve authentication document redirects, verify npm/pnpm runtime audit parity, generation/migrations/seeds, full tests, build and release CI, then deploy the patch. See docs/MINIGAMES-SECURITY-FOLLOWUP.md.
