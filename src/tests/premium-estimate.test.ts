@@ -89,6 +89,22 @@ const options: PremiumEstimateOption[] = [
 ];
 
 describe("premium service estimate engine", () => {
+  it("rejects Stream for Infernal and Colosseum even when an older rule enables it", () => {
+    for (const configuratorType of ["INFERNAL_CAPE", "COLOSSEUM"]) {
+      expect(() =>
+        calculatePremiumEstimate({
+          package: premiumPackage,
+          rule: { ...rule, configuratorType },
+          availableOptions: [],
+          selectedOptions: [],
+          gameMode: "NORMAL",
+          customerGearConfirmed: true,
+          includeDiscordStream: true,
+          deliverySpeed: "STANDARD",
+        }),
+      ).toThrow("Discord Stream is not available");
+    }
+  });
   it("applies published stat bands in the same engine used by quotes and cart", () => {
     const input = {
       package: premiumPackage,

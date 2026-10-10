@@ -193,6 +193,9 @@ export function PremiumConfiguratorEngine({
     [options, selectedPackage],
   );
   const isInfernal = rule?.configuratorType === "INFERNAL_CAPE";
+  const streamAvailable =
+    !!rule?.discordStreamEnabled &&
+    !["INFERNAL_CAPE", "COLOSSEUM"].includes(rule?.configuratorType ?? "");
   const infernalBuildOptions = isInfernal
     ? packageOptions.filter((option) => option.optionType === "UNLOCK_SUPPORT")
     : [];
@@ -351,7 +354,7 @@ export function PremiumConfiguratorEngine({
       optionSelections: selectedOptions,
       gameMode: formData.get("gameMode"),
       customerGearConfirmed,
-      includeDiscordStream,
+      includeDiscordStream: streamAvailable && includeDiscordStream,
       deliverySpeed,
       configuration: {
         statCheckMode,
@@ -617,7 +620,7 @@ export function PremiumConfiguratorEngine({
                       "Customer-provided gear confirmed"}
                   </label>
                 )}
-                {rule.discordStreamEnabled && (
+                {streamAvailable && (
                   <label className="border-border bg-background/45 flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold">
                     <input
                       type="checkbox"

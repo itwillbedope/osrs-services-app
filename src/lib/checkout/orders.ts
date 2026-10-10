@@ -686,7 +686,8 @@ export async function submitGuestCheckout(input: CheckoutInput) {
   const paymentMethod =
     settings.paymentMethods.find(
       (method) => method.stableKey === input.paymentMethodStableKey,
-    ) ?? settings.paymentMethods[0];
+    ) ??
+    (input.paymentMethodStableKey ? undefined : settings.paymentMethods[0]);
   if (!paymentMethod) {
     throw new CheckoutError("Choose an available payment method.");
   }
@@ -697,6 +698,27 @@ export async function submitGuestCheckout(input: CheckoutInput) {
       throw new CheckoutError("External hosted checkout is not enabled.", 403);
     }
     await assertProviderEligibilityForCartItems(cart.items);
+    if (paymentMethod.providerType === "EXTERNAL_HOSTED_CHECKOUT") {
+      const { stripeHostedAdapter } = await import("@/lib/payments/stripe");
+      if (!(await stripeHostedAdapter.validateConfiguration()).ready)
+        throw new CheckoutError("Stripe checkout is not configured yet.", 503);
+      const configuration = paymentMethod.providerConfigId
+        ? await prisma.paymentProviderConfiguration.findUnique({
+            where: { id: paymentMethod.providerConfigId },
+          })
+        : null;
+      if (
+        !configuration?.enabled ||
+        !configuration.webhookEnabled ||
+        configuration.needsClientReview ||
+        (process.env.NODE_ENV === "production" &&
+          !configuration.productionAllowed)
+      )
+        throw new CheckoutError(
+          "Stripe checkout requires completed merchant configuration.",
+          503,
+        );
+    }
   }
   if (!hostedCheckoutSelected && paymentMethod.methodType !== "MANUAL_REVIEW") {
     throw new CheckoutError("Choose an available payment method.");

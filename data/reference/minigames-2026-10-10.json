@@ -1,0 +1,936 @@
+{
+  "source": "https://bald.gg/services/minigames",
+  "capturedAt": "2026-10-10",
+  "currency": "USD",
+  "remoteAccessModifier": ["parsec", "Parsec remote access", 5000],
+  "groups": [
+    {
+      "name": "Anglers Outfit",
+      "products": [
+        {
+          "name": "Full Set",
+          "slug": "anglers-outfit-full-set",
+          "priceCents": 680,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "anglers-outfit",
+      "modifiers": []
+    },
+    {
+      "name": "Bank Organization",
+      "products": [
+        {
+          "name": "Bank Org Main Account",
+          "slug": "bank-organization-bank-org-main-account",
+          "priceCents": 1200,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Bank Org Iron Account",
+          "slug": "bank-organization-bank-org-iron-account",
+          "priceCents": 1500,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "bank-organization",
+      "modifiers": []
+    },
+    {
+      "name": "Barbarian Assault",
+      "products": [
+        {
+          "name": "Fighter Torso",
+          "slug": "barbarian-assault-fighter-torso",
+          "priceCents": 2465,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Fighter Torso (Leech)",
+          "slug": "barbarian-assault-fighter-torso-leech",
+          "priceCents": 2958,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Skirt",
+          "slug": "barbarian-assault-skirt",
+          "priceCents": 2465,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Skirt (Leech)",
+          "slug": "barbarian-assault-skirt-leech",
+          "priceCents": 2958,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Level 5 in a Role",
+          "slug": "barbarian-assault-level-5-in-a-role",
+          "priceCents": 2465,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Level 5 in a Role (Leech)",
+          "slug": "barbarian-assault-level-5-in-a-role-leech",
+          "priceCents": 2958,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Level 5 in All Roles",
+          "slug": "barbarian-assault-level-5-in-all-roles",
+          "priceCents": 8500,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Level 5 in All Roles (Leech)",
+          "slug": "barbarian-assault-level-5-in-all-roles-leech",
+          "priceCents": 10200,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "High Gamble",
+          "slug": "barbarian-assault-high-gamble",
+          "priceCents": 765,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "High Gamble (Leech)",
+          "slug": "barbarian-assault-high-gamble-leech",
+          "priceCents": 918,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Queen Kill",
+          "slug": "barbarian-assault-queen-kill",
+          "priceCents": 680,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Queen Kill (Leech)",
+          "slug": "barbarian-assault-queen-kill-leech",
+          "priceCents": 816,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Penance Hat",
+          "slug": "barbarian-assault-penance-hat",
+          "priceCents": 1445,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Penance Hat (Leech)",
+          "slug": "barbarian-assault-penance-hat-leech",
+          "priceCents": 1734,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Gloves",
+          "slug": "barbarian-assault-gloves",
+          "priceCents": 1445,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Gloves (Leech)",
+          "slug": "barbarian-assault-gloves-leech",
+          "priceCents": 1734,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Boots",
+          "slug": "barbarian-assault-boots",
+          "priceCents": 1445,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Boots (Leech)",
+          "slug": "barbarian-assault-boots-leech",
+          "priceCents": 1734,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "barbarian-assault",
+      "modifiers": []
+    },
+    {
+      "name": "Castle Wars",
+      "products": [
+        {
+          "name": "Per Ticket",
+          "slug": "castle-wars-per-ticket",
+          "priceCents": 34,
+          "unit": "tickets",
+          "increment": 1
+        },
+        {
+          "name": "Any Halo",
+          "slug": "castle-wars-any-halo",
+          "priceCents": 2550,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "castle-wars",
+      "modifiers": []
+    },
+    {
+      "name": "Clues",
+      "products": [
+        {
+          "name": "Beginner",
+          "slug": "clues-beginner",
+          "priceCents": 17,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Easy",
+          "slug": "clues-easy",
+          "priceCents": 26,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Medium",
+          "slug": "clues-medium",
+          "priceCents": 34,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Hard",
+          "slug": "clues-hard",
+          "priceCents": 59,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Elite",
+          "slug": "clues-elite",
+          "priceCents": 136,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Master",
+          "slug": "clues-master",
+          "priceCents": 238,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Beginner Clue from Scratch",
+          "slug": "clues-beginner-clue-from-scratch",
+          "priceCents": 20,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Easy Clue from Scratch",
+          "slug": "clues-easy-clue-from-scratch",
+          "priceCents": 35,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Medium Clue from Scratch",
+          "slug": "clues-medium-clue-from-scratch",
+          "priceCents": 90,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Hard Clue from Scratch",
+          "slug": "clues-hard-clue-from-scratch",
+          "priceCents": 185,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "clues",
+      "modifiers": []
+    },
+    {
+      "name": "Deep Sea Trawling",
+      "products": [
+        {
+          "name": "Halibut/Bluefin - Camphor Boat + Cotton Nets - per 1K",
+          "slug": "deep-sea-trawling-halibut-bluefin-camphor-boat-cotton-nets-per-1k",
+          "priceCents": 600,
+          "unit": "units",
+          "increment": 1000
+        },
+        {
+          "name": "Halibut/Bluefin - Rosewood Boat + Cotton Nets - per 1K",
+          "slug": "deep-sea-trawling-halibut-bluefin-rosewood-boat-cotton-nets-per-1k",
+          "priceCents": 400,
+          "unit": "units",
+          "increment": 1000
+        },
+        {
+          "name": "Marlin - Camphor + Cotton Nets - per 1K",
+          "slug": "deep-sea-trawling-marlin-camphor-cotton-nets-per-1k",
+          "priceCents": 1000,
+          "unit": "units",
+          "increment": 1000
+        },
+        {
+          "name": "Marlin - Rosewood boat + Cotton Nets - per 1K",
+          "slug": "deep-sea-trawling-marlin-rosewood-boat-cotton-nets-per-1k",
+          "priceCents": 700,
+          "unit": "units",
+          "increment": 1000
+        }
+      ],
+      "key": "deep-sea-trawling",
+      "modifiers": [
+        ["no-fish-offcuts", "No Fish Offcuts", 1000],
+        ["no-fish-ice-chests", "No Fish Ice Chests", 3000]
+      ]
+    },
+    {
+      "name": "Dragon Defender",
+      "products": [
+        {
+          "name": "Dragon Defender",
+          "slug": "dragon-defender-dragon-defender",
+          "priceCents": 1200,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "dragon-defender",
+      "modifiers": []
+    },
+    {
+      "name": "Giants Foundry",
+      "products": [
+        {
+          "name": "Sword Mithril/Steel Alloy",
+          "slug": "giants-foundry-sword-mithril-steel-alloy",
+          "priceCents": 25,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Sword Adamantite/Mithril Alloy",
+          "slug": "giants-foundry-sword-adamantite-mithril-alloy",
+          "priceCents": 40,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Sword Runite/Adamantite Alloy",
+          "slug": "giants-foundry-sword-runite-adamantite-alloy",
+          "priceCents": 50,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Double ammo mould",
+          "slug": "giants-foundry-double-ammo-mould",
+          "priceCents": 1000,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Colossal Blade",
+          "slug": "giants-foundry-colossal-blade",
+          "priceCents": 2000,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Giants foundry Outfit",
+          "slug": "giants-foundry-giants-foundry-outfit",
+          "priceCents": 5600,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "giants-foundry",
+      "modifiers": [["shopscape-bars", "Shopscape Bars", 2500]]
+    },
+    {
+      "name": "Gout Tuber",
+      "products": [
+        {
+          "name": "Gout Tuber",
+          "slug": "gout-tuber-gout-tuber",
+          "priceCents": 425,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "gout-tuber",
+      "modifiers": []
+    },
+    {
+      "name": "Graceful Set",
+      "products": [
+        {
+          "name": "Full Graceful",
+          "slug": "graceful-set-full-graceful",
+          "priceCents": 4000,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "graceful-set",
+      "modifiers": []
+    },
+    {
+      "name": "Guardians of the Rift",
+      "products": [
+        {
+          "name": "Level 27+",
+          "slug": "guardians-of-the-rift-level-27",
+          "priceCents": 14,
+          "unit": "searches",
+          "increment": 1
+        },
+        {
+          "name": "Level 50+",
+          "slug": "guardians-of-the-rift-level-50",
+          "priceCents": 13,
+          "unit": "searches",
+          "increment": 1
+        },
+        {
+          "name": "Level 65+",
+          "slug": "guardians-of-the-rift-level-65",
+          "priceCents": 11,
+          "unit": "searches",
+          "increment": 1
+        },
+        {
+          "name": "Level 77+",
+          "slug": "guardians-of-the-rift-level-77",
+          "priceCents": 9,
+          "unit": "searches",
+          "increment": 1
+        }
+      ],
+      "key": "guardians-of-the-rift",
+      "modifiers": []
+    },
+    {
+      "name": "Hallowed Sepulchre",
+      "products": [
+        {
+          "name": "Hallowed Mark",
+          "slug": "hallowed-sepulchre-hallowed-mark",
+          "priceCents": 6,
+          "unit": "marks",
+          "increment": 1
+        },
+        {
+          "name": "Dark Acorn",
+          "slug": "hallowed-sepulchre-dark-acorn",
+          "priceCents": 8999,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Full black graceful",
+          "slug": "hallowed-sepulchre-full-black-graceful",
+          "priceCents": 7999,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "hallowed-sepulchre",
+      "modifiers": []
+    },
+    {
+      "name": "Herbiboar",
+      "products": [
+        {
+          "name": "Herbiboar with stamina",
+          "slug": "herbiboar-herbiboar-with-stamina",
+          "priceCents": 8,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Herbiboar without stamina",
+          "slug": "herbiboar-herbiboar-without-stamina",
+          "priceCents": 10,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "herbiboar",
+      "modifiers": []
+    },
+    {
+      "name": "Hunters' rumour",
+      "products": [
+        {
+          "name": "Hunters' Rumour",
+          "slug": "hunters-rumour-hunters-rumour",
+          "priceCents": 51,
+          "unit": "rumours",
+          "increment": 1
+        }
+      ],
+      "key": "hunters-rumour",
+      "modifiers": [["bank-furs", "Bank Furs", 2000]]
+    },
+    {
+      "name": "Last Man Standing",
+      "products": [
+        {
+          "name": "LMS Point",
+          "slug": "last-man-standing-lms-point",
+          "priceCents": 19,
+          "unit": "points",
+          "increment": 1
+        },
+        {
+          "name": "Rune Pouch",
+          "slug": "last-man-standing-rune-pouch",
+          "priceCents": 1445,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Swift Blade",
+          "slug": "last-man-standing-swift-blade",
+          "priceCents": 6732,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Any Halo",
+          "slug": "last-man-standing-any-halo",
+          "priceCents": 8653,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Guthixian Icon",
+          "slug": "last-man-standing-guthixian-icon",
+          "priceCents": 9605,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Guaranteed Win",
+          "slug": "last-man-standing-guaranteed-win",
+          "priceCents": 1000,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "last-man-standing",
+      "modifiers": []
+    },
+    {
+      "name": "Mage Arena Capes",
+      "products": [
+        {
+          "name": "Mage Arena 1 Cape",
+          "slug": "mage-arena-capes-mage-arena-1-cape",
+          "priceCents": 170,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Mage Arena 2 Cape",
+          "slug": "mage-arena-capes-mage-arena-2-cape",
+          "priceCents": 578,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Mage Arena Spell Unlock",
+          "slug": "mage-arena-capes-mage-arena-spell-unlock",
+          "priceCents": 100,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "mage-arena-capes",
+      "modifiers": []
+    },
+    {
+      "name": "Mage Training Arena",
+      "products": [
+        {
+          "name": "Mages Book",
+          "slug": "mage-training-arena-mages-book",
+          "priceCents": 2652,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Master Wand",
+          "slug": "mage-training-arena-master-wand",
+          "priceCents": 2550,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Bones to Peaches",
+          "slug": "mage-training-arena-bones-to-peaches",
+          "priceCents": 1326,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Infinity Hat",
+          "slug": "mage-training-arena-infinity-hat",
+          "priceCents": 1836,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Infinity Top",
+          "slug": "mage-training-arena-infinity-top",
+          "priceCents": 2040,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Infinity Bottom",
+          "slug": "mage-training-arena-infinity-bottom",
+          "priceCents": 2346,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Infinity Gloves",
+          "slug": "mage-training-arena-infinity-gloves",
+          "priceCents": 1020,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Infinity Boots",
+          "slug": "mage-training-arena-infinity-boots",
+          "priceCents": 918,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Rune Pouch",
+          "slug": "mage-training-arena-rune-pouch",
+          "priceCents": 986,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "mage-training-arena",
+      "modifiers": []
+    },
+    {
+      "name": "Mastering Mixology",
+      "products": [
+        {
+          "name": "Reagent pouch",
+          "slug": "mastering-mixology-reagent-pouch",
+          "priceCents": 2040,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Potion Storage",
+          "slug": "mastering-mixology-potion-storage",
+          "priceCents": 1700,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Chugging Barrel",
+          "slug": "mastering-mixology-chugging-barrel",
+          "priceCents": 3400,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Alchemist's Amulet",
+          "slug": "mastering-mixology-alchemist-s-amulet",
+          "priceCents": 1445,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Prescription Goggles",
+          "slug": "mastering-mixology-prescription-goggles",
+          "priceCents": 2210,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Full Outfit",
+          "slug": "mastering-mixology-full-outfit",
+          "priceCents": 2550,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Using Paste",
+          "slug": "mastering-mixology-using-paste",
+          "priceCents": 220,
+          "unit": "units",
+          "increment": 1000
+        }
+      ],
+      "key": "mastering-mixology",
+      "modifiers": [
+        ["under-60-herblore", "Under 60 Herblore", 4000],
+        ["under-70-herblore", "Under 70 Herblore", 3000],
+        ["making-paste", "Making Paste", 2000]
+      ]
+    },
+    {
+      "name": "Misc",
+      "products": [
+        {
+          "name": "Log Basket",
+          "slug": "misc-log-basket",
+          "priceCents": 1200,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Jewelers' Chisel",
+          "slug": "misc-jewelers-chisel",
+          "priceCents": 2000,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Fletching Knife",
+          "slug": "misc-fletching-knife",
+          "priceCents": 2500,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Expert Mining Gloves",
+          "slug": "misc-expert-mining-gloves",
+          "priceCents": 4000,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "misc",
+      "modifiers": []
+    },
+    {
+      "name": "Motherlode Mine",
+      "products": [
+        {
+          "name": "Golden Nuggets",
+          "slug": "motherlode-mine-golden-nuggets",
+          "priceCents": 11,
+          "unit": "nuggets",
+          "increment": 1
+        },
+        {
+          "name": "Coal bag",
+          "slug": "motherlode-mine-coal-bag",
+          "priceCents": 1139,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Gem bag",
+          "slug": "motherlode-mine-gem-bag",
+          "priceCents": 1139,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Full prosepctor",
+          "slug": "motherlode-mine-full-prosepctor",
+          "priceCents": 2040,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "motherlode-mine",
+      "modifiers": []
+    },
+    {
+      "name": "Pest Control",
+      "products": [
+        {
+          "name": "Novice [40+ Cmb]",
+          "slug": "pest-control-novice-40-cmb",
+          "priceCents": 4,
+          "unit": "points",
+          "increment": 1
+        },
+        {
+          "name": "Intermediate [70+ Cmb]",
+          "slug": "pest-control-intermediate-70-cmb",
+          "priceCents": 3,
+          "unit": "points",
+          "increment": 1
+        },
+        {
+          "name": "Veteran [100+ Cmb]",
+          "slug": "pest-control-veteran-100-cmb",
+          "priceCents": 2,
+          "unit": "points",
+          "increment": 1
+        }
+      ],
+      "key": "pest-control",
+      "modifiers": [
+        ["easy-combat-achievements", "Easy Combat Achievements", -500],
+        ["medium-combat-achievements", "Medium Combat Achievements", -1000],
+        ["hard-combat-achievements", "Hard Combat Achievements", -1500]
+      ]
+    },
+    {
+      "name": "Rogues Outfit",
+      "products": [
+        {
+          "name": "Thieving level 50-80",
+          "slug": "rogues-outfit-thieving-level-50-80",
+          "priceCents": 680,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Thieving level 80+",
+          "slug": "rogues-outfit-thieving-level-80",
+          "priceCents": 255,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "rogues-outfit",
+      "modifiers": []
+    },
+    {
+      "name": "Soul Wars",
+      "products": [
+        {
+          "name": "Low Stats with any Gear",
+          "slug": "soul-wars-low-stats-with-any-gear",
+          "priceCents": 3,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Decent Stats with Semi-Good Gear",
+          "slug": "soul-wars-decent-stats-with-semi-good-gear",
+          "priceCents": 2,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "soul-wars",
+      "modifiers": []
+    },
+    {
+      "name": "Tempoross",
+      "products": [
+        {
+          "name": "Dragon Harpoon",
+          "slug": "tempoross-dragon-harpoon",
+          "priceCents": 5,
+          "unit": "points",
+          "increment": 1
+        },
+        {
+          "name": "Regular Harpoon",
+          "slug": "tempoross-regular-harpoon",
+          "priceCents": 6,
+          "unit": "points",
+          "increment": 1
+        }
+      ],
+      "key": "tempoross",
+      "modifiers": []
+    },
+    {
+      "name": "Tithe Farm",
+      "products": [
+        {
+          "name": "Auto Weeder",
+          "slug": "tithe-farm-auto-weeder",
+          "priceCents": 289,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Gricoller's can",
+          "slug": "tithe-farm-gricoller-s-can",
+          "priceCents": 969,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Herbsack",
+          "slug": "tithe-farm-herbsack",
+          "priceCents": 1156,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Seedbox",
+          "slug": "tithe-farm-seedbox",
+          "priceCents": 1156,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Farming Outfit Set",
+          "slug": "tithe-farm-farming-outfit-set",
+          "priceCents": 1649,
+          "unit": "services",
+          "increment": 1
+        }
+      ],
+      "key": "tithe-farm",
+      "modifiers": []
+    },
+    {
+      "name": "Wintertodt",
+      "products": [
+        {
+          "name": "Solo WinterTodt",
+          "slug": "wintertodt-solo-wintertodt",
+          "priceCents": 221,
+          "unit": "services",
+          "increment": 1
+        },
+        {
+          "name": "Mass WinterTodt",
+          "slug": "wintertodt-mass-wintertodt",
+          "priceCents": 10,
+          "unit": "rewards",
+          "increment": 1
+        }
+      ],
+      "key": "wintertodt",
+      "modifiers": []
+    }
+  ]
+}

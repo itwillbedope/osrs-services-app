@@ -31,6 +31,7 @@ function digest(value: string) {
 
 function providerFromRoute(value: string): PaymentProviderType {
   const normalized = value.trim().toUpperCase().replace(/-/g, "_");
+  if (normalized === "STRIPE") return "EXTERNAL_HOSTED_CHECKOUT";
   if (
     normalized === "MANUAL_REVIEW" ||
     normalized === "TEST_HOSTED" ||
@@ -70,6 +71,8 @@ export async function processPaymentWebhook(input: {
     payload: input.payload,
     signature: input.signature,
   });
+  if (verification.ok && verification.ignored)
+    return { ok: true, duplicate: false, status: "IGNORED" as const };
   if (!verification.ok || !verification.event) {
     await prisma.paymentWebhookEvent.upsert({
       where: {

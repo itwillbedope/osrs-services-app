@@ -1,4 +1,5 @@
 export const directCategoryRoutes = {
+  minigames: "/minigames",
   pvm: "/bossing",
   bossing: "/bossing",
   raids: "/bossing",
@@ -14,6 +15,8 @@ export const directCategoryRoutes = {
 } as const satisfies Record<string, string>;
 
 export const directServiceRoutes = {
+  "minigames-services": "/minigames",
+  "minigame-support": "/minigames",
   "skill-training-request": "/skills",
   "quest-progression": "/quests",
   "diary-progression": "/diaries",

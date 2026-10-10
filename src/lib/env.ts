@@ -31,6 +31,8 @@ export const environmentSchema = z
     PAYMENT_WEBHOOKS_ENABLED: z.stringbool().default(false),
     PAYMENT_REFUNDS_ENABLED: z.stringbool().default(false),
     TEST_HOSTED_PAYMENT_SECRET: z.string().min(32).optional().or(z.literal("")),
+    STRIPE_SECRET_KEY: z.string().default(""),
+    STRIPE_WEBHOOK_SECRET: z.string().default(""),
     EMAIL_DELIVERY_ENABLED: z.stringbool().default(false),
     EMAIL_TRANSPORT: z.enum(["SMTP", "TEST_EMAIL"]).default("SMTP"),
     SMTP_HOST: z.string().default(""),

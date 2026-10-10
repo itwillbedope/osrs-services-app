@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { MapPinned } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -8,12 +9,11 @@ import { getDirectOrderService } from "@/lib/direct-order/server";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "OSRS Achievement Diary Selector",
-  description:
-    "Choose one or more OSRS Achievement Diary regions and tiers, review dependencies and add the priced selection to cart.",
-  alternates: { canonical: "/diaries" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "OSRS Achievement Diary Selector",
+  "Choose one or more OSRS Achievement Diary regions and tiers, review dependencies and add the priced selection to cart.",
+  "/diaries",
+);
 
 export default async function DiariesPage() {
   const service = await getDirectOrderService(

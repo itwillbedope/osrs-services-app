@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { Leaf } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -8,12 +9,11 @@ import { getDirectOrderService } from "@/lib/direct-order/server";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "OSRS Misc Gathering Services",
-  description:
-    "Search and configure approved OSRS gathering services with quantity-aware pricing and direct cart ordering.",
-  alternates: { canonical: "/misc-gathering" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "OSRS Misc Gathering Services",
+  "Search and configure approved OSRS gathering services with quantity-aware pricing and direct cart ordering.",
+  "/misc-gathering",
+);
 
 export default async function MiscGatheringPage() {
   const service = await getDirectOrderService(

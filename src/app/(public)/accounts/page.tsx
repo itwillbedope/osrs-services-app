@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -15,12 +16,11 @@ import { catalogueGameModes } from "@/lib/catalogue/constants";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "OSRS account marketplace",
-  description:
-    "Browse public-safe prebuilt account listings with server-side search, filters and support-review calls to action.",
-  alternates: { canonical: "/accounts" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "OSRS account marketplace",
+  "Browse public-safe prebuilt account listings with server-side search, filters and support-review calls to action.",
+  "/accounts",
+);
 
 function scalar(
   query: Record<string, string | string[] | undefined>,

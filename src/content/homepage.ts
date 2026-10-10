@@ -50,7 +50,7 @@ export const homepageCategories = [
     title: "Minigames",
     description:
       "Request support for selected rewards, points and account unlocks.",
-    href: "/services/minigames",
+    href: "/minigames",
     icon: "flag",
     treatment: "compact",
   },

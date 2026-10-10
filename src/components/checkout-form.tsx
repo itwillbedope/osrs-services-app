@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 type PaymentMethod = {
+  enabled?: boolean;
   stableKey: string;
   publicName: string;
   publicDescription: string;
@@ -51,7 +52,8 @@ export function CheckoutForm({
     return `checkout-${random}`;
   });
   const [isPending, startTransition] = useTransition();
-  const firstPaymentMethod = paymentMethods[0]?.stableKey ?? "";
+  const firstPaymentMethod =
+    paymentMethods.find((method) => method.enabled !== false)?.stableKey ?? "";
 
   function onSubmit(formData: FormData) {
     setMessage(null);
@@ -154,7 +156,7 @@ export function CheckoutForm({
       <fieldset className="border-border bg-surface-2/55 rounded-xl border p-4">
         <legend className="px-2 text-sm font-bold">Payment review</legend>
         <div className="mt-3 grid gap-3">
-          {paymentMethods.map((method, index) => (
+          {paymentMethods.map((method) => (
             <label
               key={method.stableKey}
               className="border-border bg-background/35 flex gap-3 rounded-xl border p-3 text-sm"
@@ -163,11 +165,14 @@ export function CheckoutForm({
                 type="radio"
                 name="paymentMethodStableKey"
                 value={method.stableKey}
-                defaultChecked={index === 0}
-                disabled={disabled}
+                defaultChecked={method.stableKey === firstPaymentMethod}
+                disabled={disabled || method.enabled === false}
               />
               <span>
-                <strong className="block">{method.publicName}</strong>
+                <strong className="block">
+                  {method.publicName}
+                  {method.enabled === false ? " · Coming soon" : ""}
+                </strong>
                 <span className="text-text-muted">
                   {method.publicDescription}
                 </span>

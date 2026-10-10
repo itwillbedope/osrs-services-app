@@ -22,6 +22,7 @@ export async function POST(
   try {
     const payload = await request.text();
     const signature =
+      request.headers.get("stripe-signature") ??
       request.headers.get("x-test-hosted-signature") ??
       request.headers.get("x-payment-signature");
     const result = await processPaymentWebhook({

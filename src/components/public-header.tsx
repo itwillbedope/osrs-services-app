@@ -13,6 +13,7 @@ const destinations = [
   ["Quiver", "/quiver"],
   ["Quests", "/quests"],
   ["Diaries", "/diaries"],
+  ["Minigames", "/minigames"],
   ["Gold", "/gold"],
   ["Items", "/products"],
   ["Accounts", "/accounts"],

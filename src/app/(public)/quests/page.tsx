@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { ScrollText } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -8,12 +9,11 @@ import { getDirectOrderService } from "@/lib/direct-order/server";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "OSRS Quest Selector",
-  description:
-    "Search and select multiple OSRS quests, review quest points and requirements, and add the priced selection to cart.",
-  alternates: { canonical: "/quests" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "OSRS Quest Selector",
+  "Search and select multiple OSRS quests, review quest points and requirements, and add the priced selection to cart.",
+  "/quests",
+);
 
 export default async function QuestsPage() {
   const service = await getDirectOrderService("quests", "quest-progression");

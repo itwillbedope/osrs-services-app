@@ -1,3 +1,4 @@
+import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { Swords } from "lucide-react";
 import { notFound } from "next/navigation";
@@ -12,12 +13,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "OSRS Bossing Services",
-  description:
-    "Search an OSRS boss, choose kill count and service options, see the live server price and add the configuration to cart.",
-  alternates: { canonical: "/bossing" },
-};
+export const metadata: Metadata = publicPageMetadata(
+  "OSRS Bossing Services",
+  "Search an OSRS boss, choose kill count and service options, see the live server price and add the configuration to cart.",
+  "/bossing",
+);
 
 export default async function BossingPage() {
   const [engine, flags] = await Promise.all([

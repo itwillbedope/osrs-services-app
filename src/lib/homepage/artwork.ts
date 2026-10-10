@@ -1,6 +1,10 @@
 import type { HomepageCard } from "./core";
 
 const serviceArt = {
+  "/minigames": {
+    src: "/artwork/services/minigames.webp",
+    alt: "Minigame equipment, reward tokens and outfits beside an arena",
+  },
   "/quiver": {
     src: "/artwork/services/quiver.webp",
     alt: "Teal and gold quiver with feathered arrows beside a Colosseum arena",
