@@ -13,7 +13,9 @@ Added 105 priced Minigames options in 26 groups, original AI artwork, homepage/n
 
 ## Files changed
 
+- `.github/workflows/production-launch-readiness-validation.yml`
 - `.env.example`
+- `artifacts/minigames/performance-summary.json`
 - `artifacts/minigames/desktop-chromium-homepage.png`
 - `artifacts/minigames/desktop-chromium-quantity.png`
 - `artifacts/minigames/desktop-chromium-roles.png`
@@ -60,6 +62,9 @@ Added 105 priced Minigames options in 26 groups, original AI artwork, homepage/n
 - `public/artwork/minigames/tithe-farm.webp`
 - `public/artwork/minigames/wintertodt.webp`
 - `public/artwork/services/minigames.webp`
+- `public/branding/osrs-services-logo-red.webp`
+- `public/branding/site-icon.svg`
+- `scripts/build-task016-review-pack.ts`
 - `src/app/(admin)/admin/payments/setup/actions.ts`
 - `src/app/(admin)/admin/payments/setup/page.tsx`
 - `src/app/(admin)/admin/users/actions.ts`
@@ -176,3 +181,9 @@ Active task, DECISIONS.md, MINIGAMES-PAYMENTS-SEO.md, MINIGAMES-ASSETS-PROMPTS.m
 ## Stop condition
 
 No work beyond the customer's active website update was started.
+
+## Final performance and scanner checks
+
+Local Lighthouse simulated-mobile homepage measurements after asset optimization: performance 95, SEO 100, best practices 100. Earlier local measurements were 73/100, 100/100 and 96/100. The official logo's WebP delivery reduces its download from 1,289,462 to 15,176 bytes; composition is preserved. Hero loading uses high priority and an explicit favicon removes a missing-resource request. Single lab runs are not live field scores. Full reports are saved in outputs/minigames; the portable summary is in artifacts/minigames/performance-summary.json. Production build and both homepage browser checks passed again after these changes.
+
+The legacy launch-template and Task 016 privacy scanners now permit only blank Stripe placeholders, narrowly scoped empty schema defaults, runtime environment reads and specific error codes. Real key/signing-secret literals and nonempty defaults remain rejected. Scanner negative cases and source scan passed. Historical task workflow failures also occur on the previous merged PR 25 (obsolete disabled-feature and preserved-row assertions); current finalization and upgrade gates remain required before merge.

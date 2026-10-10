@@ -149,6 +149,7 @@ export default async function Homepage() {
             alt="An adventurer facing a towering lava-armored monster in the Inferno"
             fill
             priority
+            fetchPriority="high"
             sizes="(max-width: 900px) 100vw, 1100px"
           />
         </div>

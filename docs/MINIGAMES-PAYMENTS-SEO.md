@@ -48,3 +48,5 @@ New portraits are 384px WebP (26 files total approximately 1.18 MB); the homepag
 PageSpeed API returned 429 during the audit. The public Lighthouse mobile run returned 403; no actual PageSpeed/GTmetrix score is claimed. Scamadviser's retrieved report was last updated 2024-03-03 and references a previous Namecheap-hosted "Index of /" site. The owner should claim and update the business profile and request reassessment; code changes cannot guarantee a third-party trust rating. Source: https://www.scamadviser.com/check-website/osrsservices.com.
 
 Actual public business/contact information and Search Console/Bing ownership verification remain owner inputs. No business identity is invented.
+
+A local Lighthouse 13.5.0 simulated-mobile production homepage audit after logo compression/high-priority hero loading measured 95 performance, 100 SEO and 100 best practices. This is a single localhost lab run, not a live PageSpeed/GTmetrix score. The official logo is served as a 15 KB WebP instead of the 1.29 MB PNG, preserving composition. Audit summary: artifacts/minigames/performance-summary.json.

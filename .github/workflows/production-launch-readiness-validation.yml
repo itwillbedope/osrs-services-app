@@ -210,12 +210,16 @@ jobs:
           if missing:
               raise SystemExit(f"Missing required safe defaults: {missing}")
 
+          stripe_secret_pattern = r"^[ \t]*STRIPE[A-Z0-9_]*SECRET[A-Z0-9_]*[ \t]*=[ \t]*[^ \t\r\n]+"
+          assert not re.search(stripe_secret_pattern, "STRIPE_SECRET_KEY=\nNEXT_PUBLIC_SITE_URL=https://example.test", re.MULTILINE)
+          assert re.search(stripe_secret_pattern, "STRIPE_SECRET_KEY=private-placeholder", re.MULTILINE)
+          assert re.search(stripe_secret_pattern, "STRIPE_WEBHOOK_SECRET=private-placeholder", re.MULTILINE)
           forbidden = [
               r"sk_live",
               r"pk_live",
               r"AKIA[0-9A-Z]{16}",
               r"BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY",
-              r"STRIPE[A-Z0-9_]*SECRET",
+              stripe_secret_pattern,
               r"PAYPAL[A-Z0-9_]*SECRET",
               r"WEBHOOK_SECRET=.*[A-Za-z0-9]",
               r"GODADDY",

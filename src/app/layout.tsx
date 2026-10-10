@@ -8,6 +8,7 @@ import "./globals.css";
 import "./reference-storefront.css";
 
 export const metadata: Metadata = {
+  icons: { icon: "/branding/site-icon.svg" },
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://osrsservices.com",
   ),
