@@ -138,6 +138,8 @@ export function CustomerRegisterForm({
         });
         return;
       }
+      // Authentication changes reset the document and all session-dependent caches.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
       window.location.assign("/account");
     });
   }
@@ -331,6 +333,8 @@ export function CustomerLogoutButton() {
       onClick={() =>
         startTransition(async () => {
           await fetch("/api/account/logout", { method: "POST" });
+          // Logout resets the document so authenticated client state cannot persist.
+          // eslint-disable-next-line @next/next/no-location-assign-relative-destination
           window.location.assign("/account/login");
         })
       }

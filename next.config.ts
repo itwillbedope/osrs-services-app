@@ -50,6 +50,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     authInterrupts: true,
+    // Bound build-time workers on memory-limited development and hosting machines.
+    cpus: 2,
   },
 };
 

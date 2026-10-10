@@ -152,3 +152,8 @@
 - Public indexability is intentional; sensitive routes retain noindex. Structured data matches visible facts. No rankings, speed scores, fake customer reviews or trust ratings are promised. Public homepage cache expiry is 30 seconds and chat is deferred/omitted when disabled.
 - The user confirms accounts will be connected later. Stripe hosted Checkout code and signed webhook verification are prepared, while Payoneer/BTC/OSRS GP use explicit support-reviewed methods until real provider details are supplied. Every new method starts disabled. Existing live-site delivery authorization applies, without entering or activating real merchant credentials.
 - The customer requests self-managed staff creation and roles rather than an owner email account provisioned in chat. Users & roles is protected by users.manage, bounded by the actor's capabilities, with session revocation and audit records. No new production owner credential is created or published.
+
+## Runtime security follow-up — 2026-10-10
+
+- Hostinger's successful Minigames deployment exposed dependency advisories. Patch Next.js to stable 16.3.8, its matched lint config, MariaDB to 3.5.4 and compatible transitive security fixes; mirror overrides for npm and pnpm. Prisma schema/runtime remains 7.8.0. Record audit and validation evidence in MINIGAMES-SECURITY-FOLLOWUP.md.
+- Preserve full document reloads on authentication changes so stale session-dependent client state is cleared; narrowly document exceptions to the new navigation lint rule. Limit build workers to two to avoid development/hosting memory exhaustion; request-serving behavior is unchanged.

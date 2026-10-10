@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-10T10:46:05.9292438Z",
+  "pnpmProductionAdvisories": 0,
+  "npmProductionAdvisories": 0,
+  "next": "16.3.8",
+  "mariadb": "3.5.4",
+  "prisma": "7.8.0",
+  "validation": "288 unit tests; 8 desktop/mobile browser tests; runtime check; lint; typecheck; migration/seed and production build passed",
+  "scope": "Known advisory snapshots, not a guarantee against future issues; npm development-only advisories remain",
+  "npmOverrideParity": "package.json overrides mirror pnpm-workspace.yaml overrides"
+}
