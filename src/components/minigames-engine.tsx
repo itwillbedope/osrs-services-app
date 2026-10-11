@@ -29,6 +29,23 @@ export function MinigamesEngine({ service }: { service: Service }) {
     {},
   );
   const [stream, setStream] = useState(false);
+  const streamRates = [
+    ...new Set(
+      service.offerings.flatMap((offering) =>
+        minigameModifiers(offering)
+          .filter((modifier) => modifier.slug === "stream")
+          .map((modifier) => modifier.bps),
+      ),
+    ),
+  ];
+  const streamRateLabel =
+    streamRates.length === 1
+      ? new Intl.NumberFormat("en-US", {
+          style: "percent",
+          maximumFractionDigits: 2,
+          signDisplay: "always",
+        }).format(streamRates[0]! / 10000)
+      : "Rate shown in order summary";
   const [gameMode, setGameMode] = useState(
     service.gameModes[0]?.gameMode ?? "NORMAL",
   );
@@ -163,10 +180,11 @@ export function MinigamesEngine({ service }: { service: Service }) {
         <label className="minigames-remote">
           <input
             type="checkbox"
+            aria-label="Stream option"
             checked={stream}
             onChange={(e) => setStream(e.target.checked)}
           />{" "}
-          Stream option
+          Stream option ({streamRateLabel})
         </label>
         {!groups.length && (
           <p className="store-empty">

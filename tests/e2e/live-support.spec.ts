@@ -76,7 +76,7 @@ test("customer message alerts support, replies arrive automatically, and convers
     const message = `Hello, I need help choosing a minigame. QA ${randomUUID()}`;
     await page.goto("/");
     await page
-      .getByRole("button", { name: "Open support chat", exact: true })
+      .getByRole("button", { name: "Open live chat support", exact: true })
       .click();
     await expect(
       page
@@ -147,17 +147,17 @@ test("customer message alerts support, replies arrive automatically, and convers
       ).status(),
     ).toBe(403);
     await page
-      .getByRole("button", { name: "Close support chat", exact: true })
+      .getByRole("button", { name: "Close live chat support", exact: true })
       .click();
     await page
-      .getByRole("button", { name: "Open support chat", exact: true })
+      .getByRole("button", { name: "Open live chat support", exact: true })
       .click();
     await expect(
       page.getByRole("log", { name: "Chat transcript" }),
     ).toContainText(reply);
     await page.reload();
     await page
-      .getByRole("button", { name: "Open support chat", exact: true })
+      .getByRole("button", { name: "Open live chat support", exact: true })
       .click();
     await expect(
       page.getByRole("log", { name: "Chat transcript" }),
@@ -195,7 +195,7 @@ test("customer message alerts support, replies arrive automatically, and convers
     ).toContainText(retry, { timeout: 20000 });
     const viewport = page.viewportSize()!;
     const closeBounds = await page
-      .getByRole("button", { name: "Close support chat", exact: true })
+      .getByRole("button", { name: "Close live chat support", exact: true })
       .boundingBox();
     const composerBounds = await page
       .getByLabel("Message", { exact: true })
@@ -248,7 +248,7 @@ test("customer message alerts support, replies arrive automatically, and convers
       const checkout = page.locator(".service-mobile-checkout-bar");
       await expect(checkout).toBeVisible();
       const chatButton = page.getByRole("button", {
-        name: "Open support chat",
+        name: "Open live chat support",
         exact: true,
       });
       await expect(chatButton).toBeVisible();
@@ -260,7 +260,7 @@ test("customer message alerts support, replies arrive automatically, and convers
       await chatButton.click();
       expect(
         (await page
-          .getByRole("button", { name: "Close support chat", exact: true })
+          .getByRole("button", { name: "Close live chat support", exact: true })
           .boundingBox())!.y,
       ).toBeGreaterThanOrEqual(0);
     }

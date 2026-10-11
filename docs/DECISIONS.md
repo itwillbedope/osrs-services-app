@@ -177,3 +177,7 @@ The user removes Parsec and requests Stream for Minigames. Remove its stored mod
 ## 2026-10-11 — Admin and support typography
 
 The owner requested a better font for admin and support chat. Use unmodified, self-hosted Inter v4.1 under SIL OFL, scoped to staff sign-in, staff workspaces and public support chat. Replace condensed display headings within those scopes and use semibold controls with comfortable transcript spacing. Keep approved storefront fonts. Retain license/provenance; use font-display swap and no global preload or external font dependency.
+
+## 2026-10-11 — Requested Stream fee and public chat label
+
+The owner replaces the initial zero-fee Minigames Stream assumption with an explicit 2% surcharge. Store 200 basis points in editable catalogue facets; show the configured fee and use existing server quotes/cart snapshots. Apply a new category-targeted migration for the canonical minigames-services offering set, remove legacy Parsec facets and fill missing Stream entries. Preserve historical orders and other modifiers; Infernal/Quiver still exclude Stream. Rename only the public launcher to Live Chat Support. Keep the owner's exact private staff logins; their initialization is pending the required Hostinger credential-entry handoff.

@@ -29,7 +29,7 @@ const faqs = [
   ],
   [
     "Can I choose a stream for my minigame service?",
-    "Yes. Select Stream option when configuring your minigame services. The order summary includes any configured adjustment, and support confirms streaming arrangements before starting. Stream is unavailable for Infernal Cape and Colosseum Quiver services.",
+    "Yes. Select Stream option when configuring your minigame services. The displayed Stream surcharge is included in the order summary, cart and checkout. Support confirms streaming arrangements before starting. Stream is unavailable for Infernal Cape and Colosseum Quiver services.",
   ],
 ];
 export default async function MinigamesPage() {
