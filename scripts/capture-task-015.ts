@@ -305,7 +305,7 @@ async function capturePublic(browser: Browser) {
   await screenshot(page, "public-chat-conversation-1440.png");
 
   await page.goto(`${baseUrl}/`);
-  await page.getByRole("button", { name: "Open support chat" }).click();
+  await page.getByRole("button", { name: "Open live chat support" }).click();
   await page.getByRole("heading", { name: "Support chat" }).last().waitFor();
   await screenshot(page, "public-chat-launcher-1440.png");
   await context.close();

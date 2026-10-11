@@ -697,7 +697,7 @@ export function ChatLauncher() {
               size="sm"
               variant="secondary"
               onClick={() => setOpen(false)}
-              aria-label="Close support chat"
+              aria-label="Close live chat support"
             >
               <X className="size-4" aria-hidden="true" />
               Close
@@ -719,11 +719,11 @@ export function ChatLauncher() {
           setOpen((value) => !value);
         }}
         aria-expanded={open}
-        aria-label="Open support chat"
+        aria-label="Open live chat support"
         className="shadow-[0_16px_40px_rgb(0_0_0_/_0.35)]"
       >
         <MessageCircle className="size-4" aria-hidden="true" />
-        Support chat
+        Live Chat Support
       </Button>
       {!availability.liveEnabled ? (
         <span className="sr-only">Live chat is unavailable.</span>

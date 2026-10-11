@@ -101,7 +101,7 @@ test.describe("Task 015 live chat foundation", () => {
       page.getByText("Chat is unavailable while the feature is disabled"),
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Open support chat" }),
+      page.getByRole("button", { name: "Open live chat support" }),
     ).toHaveCount(0);
   });
 

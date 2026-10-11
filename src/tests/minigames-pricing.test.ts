@@ -22,8 +22,8 @@ const offering: DirectOrderOffering = {
   facets: [
     {
       facetKey: "minigame-modifier",
-      facetValue: "stream-bps-plus-0",
-      label: "Stream",
+      facetValue: "stream-bps-plus-200",
+      label: "Stream (+2%)",
     },
     {
       facetKey: "minigame-modifier",
@@ -38,7 +38,7 @@ const offering: DirectOrderOffering = {
   ],
 };
 describe("minigame server pricing", () => {
-  it("includes the selected Stream option without inventing a surcharge", () => {
+  it("adds the configured 2% Stream fee on top of other selected adjustments", () => {
     const quote = calculateDirectOrderEstimate(
       [offering],
       [
@@ -49,8 +49,20 @@ describe("minigame server pricing", () => {
         },
       ],
     );
-    expect(quote.subtotalCents).toBe(2856);
-    expect(quote.lines[0]?.label).toContain("Stream");
+    expect(quote.subtotalCents).toBe(2913);
+    expect(quote.lines[0]?.label).toContain("Stream (+2%)");
+    expect(
+      calculateDirectOrderEstimate(
+        [offering],
+        [{ slug: offering.slug, modifierSlugs: ["under-60-herblore"] }],
+      ).subtotalCents,
+    ).toBe(2856);
+    expect(
+      calculateDirectOrderEstimate(
+        [offering],
+        [{ slug: offering.slug, quantity: 2, modifierSlugs: ["stream"] }],
+      ).subtotalCents,
+    ).toBe(4162);
   });
   it("rejects fabricated, duplicate and incompatible adjustments", () => {
     for (const modifierSlugs of [

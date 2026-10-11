@@ -81,7 +81,7 @@ export async function seedMinigames(prisma: PrismaClient) {
                 facetValue: group.key,
                 label: group.name,
               },
-              ...[["stream", "Stream", 0], ...group.modifiers].map(
+              ...[["stream", "Stream (+2%)", 200], ...group.modifiers].map(
                 ([key, label, bps]) => ({
                   offeringId: offering.id,
                   facetKey: "minigame-modifier",
