@@ -16,6 +16,8 @@ Public live support is activated for guests and customers. The floating widget r
 
 Minigames replaces Parsec remote access with Stream. The data migration removes Parsec's modifier so old/fabricated selections fail server validation, and adds an editable zero-surcharge Stream facet. No new fee was supplied, so Parsec's 50% is not reused. Base prices and other minigame adjustments are preserved. Stream stays excluded on Infernal and Quiver in UI and server estimates.
 
+The live release review found obsolete Parsec/50% wording in the Minigames FAQ after the control had been replaced. A copy follow-up updates the shared visible FAQ and FAQ structured data to explain Stream and the premium-service exclusions, without hardcoding a future fee.
+
 Staff sign-in, all admin workspaces and customer/staff chat use Inter v4.1, served from the site with its original SIL Open Font License. Headings use a readable sans-serif, buttons use semibold mixed case, transcripts have comfortable line spacing, and dashboard numbers align with tabular numerals. The font loads only when used, with swap behavior and system fallbacks; no external font request or global preload. Public storefront typography remains unchanged. Official source and license provenance are retained in public/fonts/inter/README.md.
 
 ## Database and rollback

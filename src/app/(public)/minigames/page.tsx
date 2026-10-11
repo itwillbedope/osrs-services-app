@@ -28,8 +28,8 @@ const faqs = [
     "Requirements are reviewed before starting. Additional levels, access or preparation may need a separate quote, which support confirms with you.",
   ],
   [
-    "Is Parsec remote access available?",
-    "You can select the Parsec remote access option for a 50% adjustment. Support confirms the setup and scheduling before the service begins.",
+    "Can I choose a stream for my minigame service?",
+    "Yes. Select Stream option when configuring your minigame services. The order summary includes any configured adjustment, and support confirms streaming arrangements before starting. Stream is unavailable for Infernal Cape and Colosseum Quiver services.",
   ],
 ];
 export default async function MinigamesPage() {
