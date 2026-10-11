@@ -312,7 +312,7 @@ test("admin gold overview, rate editor, inventory and history are protected", as
 }) => {
   const market = await goldMarket();
   await page.goto("/admin/gold");
-  await expect(page).toHaveURL(/\/login\?next=%2Fadmin%2Fgold/);
+  await expect(page).toHaveURL(/\/admin(?:\?|$)/);
 
   await signInToGold(page);
   await expect(page.getByRole("link", { name: "Open" }).first()).toBeVisible();

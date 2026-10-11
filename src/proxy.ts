@@ -33,10 +33,14 @@ export function proxy(request: NextRequest) {
   }
 
   if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (request.nextUrl.pathname === "/admin") return NextResponse.next();
     const token = request.cookies.get(staffCookieName)?.value;
     if (!token) {
-      const login = new URL("/login", request.url);
-      login.searchParams.set("next", request.nextUrl.pathname);
+      const login = new URL("/admin", request.url);
+      login.searchParams.set(
+        "next",
+        request.nextUrl.pathname + request.nextUrl.search,
+      );
       return NextResponse.redirect(login);
     }
     return NextResponse.next();

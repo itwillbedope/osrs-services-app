@@ -607,7 +607,7 @@ test.describe("Task 014 customer accounts", () => {
     await addCustomerCookie(customerOnlyContext);
     const customerOnlyPage = await customerOnlyContext.newPage();
     await customerOnlyPage.goto("/admin");
-    await expect(customerOnlyPage).toHaveURL(/\/login/);
+    await expect(customerOnlyPage).toHaveURL(/\/admin(?:\?|$)/);
     await customerOnlyContext.close();
 
     await page.goto("/account/login");

@@ -59,14 +59,21 @@ async function requestJson<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<ApiResult<T>> {
-  const response = await fetch(path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-  return (await response.json()) as ApiResult<T>;
+  try {
+    const response = await fetch(path, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+    return (await response.json()) as ApiResult<T>;
+  } catch {
+    return {
+      ok: false,
+      message: "Connection interrupted. Please retry.",
+    } as ApiResult<T>;
+  }
 }
 
 function idempotencyKey(prefix: string) {
@@ -95,7 +102,7 @@ function ConnectionBadge({
     <Badge
       variant={realtime ? "success" : state === "offline" ? "warning" : "info"}
     >
-      {realtime ? (
+      {realtime || state === "fallback" ? (
         <Wifi className="size-3.5" aria-hidden="true" />
       ) : (
         <WifiOff className="size-3.5" aria-hidden="true" />
@@ -106,7 +113,7 @@ function ConnectionBadge({
           ? "Real-time connected"
           : state === "offline"
             ? "Chat offline"
-            : "HTTP fallback"}
+            : "Messages connected"}
     </Badge>
   );
 }
@@ -114,19 +121,26 @@ function ConnectionBadge({
 function ChatTranscript({
   messages,
   typingLabel,
+  compact = false,
 }: {
   messages: ChatMessage[];
   typingLabel: string | null;
+  compact?: boolean;
 }) {
-  const endRef = useRef<HTMLDivElement>(null);
+  const transcriptRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    if (transcriptRef.current)
+      transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
   }, [messages.length, typingLabel]);
 
   return (
     <div
-      className="border-border bg-background/45 h-[22rem] overflow-y-auto rounded-xl border p-3"
+      ref={transcriptRef}
+      className={cn(
+        "border-border bg-background/45 overflow-y-auto rounded-xl border p-3",
+        compact ? "min-h-0 flex-1" : "h-[22rem]",
+      )}
       role="log"
       aria-live="polite"
       aria-label="Chat transcript"
@@ -154,7 +168,7 @@ function ChatTranscript({
                 <p className="text-text-muted text-[0.68rem] font-bold uppercase">
                   {messageLabel(message.participantType)}
                 </p>
-                <p className="mt-1 whitespace-pre-wrap">
+                <p className="mt-1 break-words whitespace-pre-wrap">
                   {message.redactedAt
                     ? "[Message removed for safety]"
                     : message.body}
@@ -168,7 +182,6 @@ function ChatTranscript({
             {typingLabel}
           </p>
         ) : null}
-        <div ref={endRef} />
       </div>
     </div>
   );
@@ -179,11 +192,13 @@ function Composer({
   maximumLength,
   onSend,
   onTyping,
+  compact = false,
 }: {
   disabled: boolean;
   maximumLength: number;
-  onSend: (body: string) => Promise<void>;
+  onSend: (body: string) => Promise<boolean>;
   onTyping: () => void;
+  compact?: boolean;
 }) {
   const [body, setBody] = useState("");
   const [pending, setPending] = useState(false);
@@ -194,15 +209,14 @@ function Composer({
     if (!value.trim()) return;
     setPending(true);
     try {
-      await onSend(value);
-      setBody("");
+      if (await onSend(value)) setBody("");
     } finally {
       setPending(false);
     }
   }
 
   return (
-    <form action={submit} className="grid gap-2" noValidate>
+    <form action={submit} className="grid shrink-0 gap-2" noValidate>
       <label className="sr-only" htmlFor="chat-message-body">
         Message
       </label>
@@ -216,7 +230,10 @@ function Composer({
           setBody(event.target.value);
           onTyping();
         }}
-        className="border-border-strong/70 bg-background/50 text-text-primary placeholder:text-text-muted focus:border-primary focus:ring-primary/20 min-h-24 w-full resize-y rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2"
+        className={cn(
+          "border-border-strong/70 bg-background/50 text-text-primary placeholder:text-text-muted focus:border-primary focus:ring-primary/20 w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2",
+          compact ? "h-16 resize-none" : "min-h-24 resize-y",
+        )}
         placeholder="Type a plain-text message"
       />
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -250,6 +267,7 @@ export function ChatPanel({
   >("checking");
   const [typingLabel, setTypingLabel] = useState<string | null>(null);
   const [stateMessage, setStateMessage] = useState("");
+  const [startPending, setStartPending] = useState(false);
   const [startForm, setStartForm] = useState({
     displayName: "",
     supportCategory: "",
@@ -269,9 +287,33 @@ export function ChatPanel({
       `/api/chat/conversations/${conversationId}`,
     );
     if (result.ok) {
-      setConversation(result.conversation);
+      setConversation((current) =>
+        !current ||
+        result.conversation.concurrencyVersion >= current.concurrencyVersion
+          ? result.conversation
+          : current,
+      );
+    } else {
+      setStateMessage(
+        result.message ?? "Connection interrupted. Please retry.",
+      );
     }
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    void requestJson<{ conversations: Conversation[] }>(
+      "/api/chat/conversations",
+    ).then(async (result) => {
+      const latest = result.ok ? result.conversations[0] : null;
+      if (!cancelled && latest) await loadConversation(latest.id);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [loadConversation]);
+
+  const conversationId = conversation?.id;
 
   useEffect(() => {
     let cancelled = false;
@@ -289,19 +331,23 @@ export function ChatPanel({
   }, []);
 
   useEffect(() => {
-    if (!availability || !conversation || !canUseChat) return;
+    if (!availability || !conversationId || !canUseChat) return;
     const intervalSeconds = Math.max(
       5,
       availability.pollingFallbackIntervalSeconds,
     );
     const timer = window.setInterval(() => {
-      if (connection !== "realtime") void loadConversation(conversation.id);
+      void loadConversation(conversationId);
     }, intervalSeconds * 1000);
     return () => window.clearInterval(timer);
-  }, [availability, canUseChat, connection, conversation, loadConversation]);
+  }, [availability, canUseChat, conversationId, loadConversation]);
 
   useEffect(() => {
-    if (!availability?.realtimeExpected || !conversation || socketRef.current) {
+    if (
+      !availability?.realtimeExpected ||
+      !conversationId ||
+      socketRef.current
+    ) {
       return;
     }
     const socketUrl = process.env.NEXT_PUBLIC_CHAT_SOCKET_URL;
@@ -319,7 +365,7 @@ export function ChatPanel({
     socket.on("connect", () => {
       socket.emit(
         "chat:join",
-        { conversationId: conversation.id },
+        { conversationId },
         (result: ApiResult<{ conversation: Conversation }>) => {
           if (result.ok) {
             setConnection("realtime");
@@ -335,7 +381,7 @@ export function ChatPanel({
     socket.on(
       "chat:message",
       (payload: { conversationId: string; message: ChatMessage }) => {
-        if (payload.conversationId !== conversation.id) return;
+        if (payload.conversationId !== conversationId) return;
         setConversation((current) => {
           if (!current) return current;
           if (
@@ -355,7 +401,7 @@ export function ChatPanel({
     socket.on(
       "chat:typing",
       (payload: { conversationId: string; typing: boolean; label: string }) => {
-        if (payload.conversationId !== conversation.id) return;
+        if (payload.conversationId !== conversationId) return;
         setTypingLabel(payload.typing ? payload.label : null);
       },
     );
@@ -363,14 +409,16 @@ export function ChatPanel({
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [availability, conversation]);
+  }, [availability?.realtimeExpected, conversationId]);
 
   async function startConversation(formData: FormData) {
+    if (startPending) return;
     setStateMessage("");
     if (formData.get("privacyAcknowledged") !== "on") {
       setStateMessage("Acknowledge the chat safety reminder before starting.");
       return;
     }
+    setStartPending(true);
     const result = await requestJson<{ conversation: Conversation }>(
       "/api/chat/conversations",
       {
@@ -383,6 +431,7 @@ export function ChatPanel({
         }),
       },
     );
+    setStartPending(false);
     if (result.ok) {
       setConversation(result.conversation);
       return;
@@ -391,21 +440,21 @@ export function ChatPanel({
   }
 
   async function send(body: string) {
-    if (!conversation) return;
+    if (!conversation) return false;
+    setStateMessage("");
     const key = idempotencyKey("chat-message");
     if (socketRef.current?.connected && connection === "realtime") {
-      await new Promise<void>((resolve) => {
+      return await new Promise<boolean>((resolve) => {
         socketRef.current?.emit(
           "chat:send",
           { conversationId: conversation.id, body, idempotencyKey: key },
           (result: ApiResult<{ conversation: Conversation }>) => {
             if (result.ok) setConversation(result.conversation);
             else setStateMessage(result.message ?? "Message was not sent.");
-            resolve();
+            resolve(result.ok);
           },
         );
       });
-      return;
     }
     const result = await requestJson<{ conversation: Conversation }>(
       `/api/chat/conversations/${conversation.id}/messages`,
@@ -416,6 +465,7 @@ export function ChatPanel({
     );
     if (result.ok) setConversation(result.conversation);
     else setStateMessage(result.message ?? "Message was not sent.");
+    return result.ok;
   }
 
   function typing() {
@@ -429,29 +479,44 @@ export function ChatPanel({
   const panel = (
     <section
       className={cn(
-        "border-border bg-surface-1 grid gap-4 rounded-xl border p-4 shadow-2xl shadow-black/25",
-        variant === "page" && "mx-auto max-w-4xl p-5 sm:p-6",
+        "support-chat-interface border-border bg-surface-1 gap-4 rounded-xl border p-4 shadow-2xl shadow-black/25",
+        variant === "launcher" &&
+          "support-chat-panel flex flex-col overflow-hidden",
+        variant === "page" && "mx-auto grid max-w-4xl p-5 sm:p-6",
       )}
       aria-label="Support chat"
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
         <div>
-          <Badge variant="info">Task 015</Badge>
-          <h2 className="mt-3 text-xl font-black uppercase">Support chat</h2>
-          <p className="text-text-muted mt-1 text-sm">
-            Never send passwords, recovery answers, bank PINs, authenticator
-            secrets, card data or session cookies.
+          {variant === "page" && <Badge variant="info">Talk to our team</Badge>}
+          <h2
+            className={cn(
+              "text-xl font-black uppercase",
+              variant === "page" && "mt-3",
+            )}
+          >
+            Support chat
+          </h2>
+          <p className="text-text-muted mt-1 text-xs">
+            Never share passwords or payment details.
           </p>
         </div>
         <ConnectionBadge state={connection} />
       </div>
 
       {availability ? (
-        <div className="border-border bg-background/35 rounded-xl border p-3 text-sm">
+        <div className="border-border bg-background/35 shrink-0 rounded-xl border p-3 text-sm">
           <p className="font-semibold capitalize">
             {availability.availabilityMode.toLowerCase()} state
           </p>
-          <p className="text-text-secondary mt-1">{availability.message}</p>
+          <p
+            className={cn(
+              "text-text-secondary mt-1",
+              variant === "launcher" && "line-clamp-2 text-xs",
+            )}
+          >
+            {availability.message}
+          </p>
         </div>
       ) : null}
 
@@ -461,13 +526,17 @@ export function ChatPanel({
             className="text-warning size-5 shrink-0"
             aria-hidden="true"
           />
-          <p>
-            Chat is unavailable while the feature is disabled or awaiting client
-            review.
-          </p>
+          <p>Chat is currently unavailable. Please try again shortly.</p>
         </div>
       ) : !conversation ? (
-        <form action={startConversation} className="grid gap-4" noValidate>
+        <form
+          action={startConversation}
+          className={cn(
+            "grid gap-4",
+            variant === "launcher" && "min-h-0 flex-1 overflow-y-auto",
+          )}
+          noValidate
+        >
           {stateMessage ? (
             <p
               role="alert"
@@ -541,13 +610,18 @@ export function ChatPanel({
               I understand chat is plain text and must not include credentials.
             </span>
           </label>
-          <Button type="submit">
+          <Button type="submit" disabled={startPending}>
             <MessageCircle className="size-4" aria-hidden="true" />
-            Start chat
+            {startPending ? "Connecting…" : "Start chat"}
           </Button>
         </form>
       ) : (
-        <div className="grid gap-4">
+        <div
+          className={cn(
+            "gap-3",
+            variant === "launcher" ? "flex min-h-0 flex-1 flex-col" : "grid",
+          )}
+        >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-text-muted text-xs font-bold uppercase">
@@ -576,10 +650,12 @@ export function ChatPanel({
             </p>
           ) : null}
           <ChatTranscript
+            compact={variant === "launcher"}
             messages={conversation.messages}
             typingLabel={typingLabel}
           />
           <Composer
+            compact={variant === "launcher"}
             disabled={["CLOSED", "ARCHIVED", "SPAM"].includes(
               conversation.status,
             )}
@@ -598,6 +674,7 @@ export function ChatPanel({
 
 export function ChatLauncher() {
   const [open, setOpen] = useState(false);
+  const [opened, setOpened] = useState(false);
   const [availability, setAvailability] = useState<Availability | null>(null);
 
   useEffect(() => {
@@ -611,9 +688,9 @@ export function ChatLauncher() {
   if (!availability?.launcherEnabled) return null;
 
   return (
-    <div className="fixed right-4 bottom-4 z-50 grid max-w-[calc(100vw-2rem)] justify-items-end gap-3">
-      {open ? (
-        <div className="w-[min(26rem,calc(100vw-2rem))]">
+    <div className="support-chat-interface support-chat-launcher fixed right-4 z-50 grid max-w-[calc(100vw-2rem)] justify-items-end gap-3">
+      {opened ? (
+        <div hidden={!open} className="w-[min(26rem,calc(100vw-2rem))]">
           <div className="mb-2 flex justify-end">
             <Button
               type="button"
@@ -637,7 +714,10 @@ export function ChatLauncher() {
       ) : null}
       <Button
         type="button"
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          setOpened(true);
+          setOpen((value) => !value);
+        }}
         aria-expanded={open}
         aria-label="Open support chat"
         className="shadow-[0_16px_40px_rgb(0_0_0_/_0.35)]"

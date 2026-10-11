@@ -22,8 +22,8 @@ const offering: DirectOrderOffering = {
   facets: [
     {
       facetKey: "minigame-modifier",
-      facetValue: "parsec-bps-plus-5000",
-      label: "Parsec",
+      facetValue: "stream-bps-plus-0",
+      label: "Stream",
     },
     {
       facetKey: "minigame-modifier",
@@ -38,24 +38,25 @@ const offering: DirectOrderOffering = {
   ],
 };
 describe("minigame server pricing", () => {
-  it("matches the observed combined price of $42.84", () => {
+  it("includes the selected Stream option without inventing a surcharge", () => {
     const quote = calculateDirectOrderEstimate(
       [offering],
       [
         {
           slug: offering.slug,
           quantity: 1,
-          modifierSlugs: ["parsec", "under-60-herblore"],
+          modifierSlugs: ["stream", "under-60-herblore"],
         },
       ],
     );
-    expect(quote.subtotalCents).toBe(4284);
-    expect(quote.lines[0]?.label).toContain("Parsec");
+    expect(quote.subtotalCents).toBe(2856);
+    expect(quote.lines[0]?.label).toContain("Stream");
   });
   it("rejects fabricated, duplicate and incompatible adjustments", () => {
     for (const modifierSlugs of [
       ["free-service"],
-      ["parsec", "parsec"],
+      ["parsec"],
+      ["stream", "stream"],
       ["under-60-herblore", "under-70-herblore"],
     ])
       expect(() =>

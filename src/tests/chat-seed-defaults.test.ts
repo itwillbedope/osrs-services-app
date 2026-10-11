@@ -12,10 +12,10 @@ const rolePermissions = new Map(
 );
 
 describe("chat seed defaults", () => {
-  it("keeps every Task 015 chat feature flag disabled by default", () => {
-    expect(flagDefaults.get("live_chat_enabled")).toBe(false);
-    expect(flagDefaults.get("guest_live_chat_enabled")).toBe(false);
-    expect(flagDefaults.get("customer_live_chat_enabled")).toBe(false);
+  it("enables human support over HTTP while leaving unconfigured sockets disabled", () => {
+    expect(flagDefaults.get("live_chat_enabled")).toBe(true);
+    expect(flagDefaults.get("guest_live_chat_enabled")).toBe(true);
+    expect(flagDefaults.get("customer_live_chat_enabled")).toBe(true);
     expect(flagDefaults.get("chat_realtime_enabled")).toBe(false);
   });
 

@@ -100,7 +100,7 @@ test("mobile-safe grouped pricing and always-visible gathering amounts", async (
     page.getByRole("heading", { name: "Anglers Outfit", exact: true }),
   ).toHaveCount(0);
   await page
-    .getByRole("checkbox", { name: "Parsec remote access +50%", exact: true })
+    .getByRole("checkbox", { name: "Stream option", exact: true })
     .check();
   await page
     .getByRole("checkbox", { name: "Under 60 Herblore +40%", exact: true })
@@ -112,7 +112,7 @@ test("mobile-safe grouped pricing and always-visible gathering amounts", async (
   await expect(
     page.getByRole("button", { name: "Add to cart", exact: true }),
   ).toBeEnabled();
-  await expect(page.locator(".reference-order-side")).toContainText("$42.84");
+  await expect(page.locator(".reference-order-side")).toContainText("$28.56");
   expect(
     await page.evaluate(
       () =>
@@ -155,7 +155,7 @@ test("premium stream removal and private dashboard protection", async ({
     );
   }
   await page.goto("/admin/users");
-  await expect(page).toHaveURL(/\/login\?/);
+  await expect(page).toHaveURL(/\/admin(?:\?|$)/);
   const file = process.env.MINIGAMES_QA_CREDENTIAL_FILE;
   const credentials = file
     ? JSON.parse(readFileSync(file, "utf8"))
@@ -168,7 +168,7 @@ test("premium stream removal and private dashboard protection", async ({
     "No local/test staff fixture configured.",
   );
   await page
-    .getByLabel("Email address", { exact: true })
+    .getByLabel("Email address or username", { exact: true })
     .fill(credentials.email);
   await page.getByLabel("Password", { exact: true }).fill(credentials.password);
   await page

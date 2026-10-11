@@ -26,7 +26,7 @@ export function LoginForm({ next }: { next: string }) {
           htmlFor="email"
           className="text-text-primary text-sm font-semibold tracking-[0.01em]"
         >
-          Email address
+          Email address or username
         </label>
         <div className="relative">
           <Mail
@@ -36,8 +36,9 @@ export function LoginForm({ next }: { next: string }) {
           <Input
             id="email"
             name="email"
-            type="email"
-            autoComplete="email"
+            type="text"
+            autoComplete="username"
+            maxLength={191}
             required
             className="bg-background/55 pl-11"
             placeholder="admin@example.com"

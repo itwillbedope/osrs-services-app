@@ -49,8 +49,14 @@ export function StaffCreateForm({ roles }: { roles: Role[] }) {
         <Input name="name" required maxLength={120} />
       </label>
       <label>
-        Email
-        <Input name="email" type="email" required maxLength={191} />
+        Email address or username
+        <Input
+          name="email"
+          type="text"
+          autoComplete="username"
+          required
+          maxLength={191}
+        />
       </label>
       <label>
         Initial password
@@ -58,11 +64,11 @@ export function StaffCreateForm({ roles }: { roles: Role[] }) {
           name="password"
           type="password"
           autoComplete="new-password"
-          minLength={12}
+          minLength={8}
           maxLength={128}
           required
         />
-        <small>At least 12 characters. Share privately.</small>
+        <small>At least 8 characters. Share privately.</small>
       </label>
       <label>
         Role

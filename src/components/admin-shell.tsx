@@ -6,6 +6,7 @@ import { logoutAction } from "@/app/actions";
 import { AdminNav } from "@/components/admin-nav";
 import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
+import { StaffChatBell, StaffChatFeed } from "@/components/staff-chat-feed";
 
 export function AdminShell({
   children,
@@ -16,14 +17,15 @@ export function AdminShell({
   user: { name: string | null; email: string };
   capabilities: readonly string[];
 }) {
-  return (
-    <div className="bg-background min-h-screen lg:grid lg:grid-cols-[18rem_1fr]">
+  const content = (
+    <div className="staff-interface bg-background min-h-screen lg:grid lg:grid-cols-[18rem_1fr]">
       <aside className="border-border bg-surface-1/95 border-b shadow-2xl shadow-black/25 backdrop-blur lg:fixed lg:inset-y-0 lg:z-20 lg:flex lg:w-72 lg:flex-col lg:border-r lg:border-b-0">
         <div className="flex h-20 items-center justify-between px-5 lg:h-24 lg:px-6">
           <Link href="/admin" aria-label="Admin overview">
             <BrandLogo priority className="w-40 lg:w-44" />
           </Link>
           <div className="flex items-center gap-2 lg:hidden">
+            {capabilities.includes("chat.view") && <StaffChatBell />}
             <ShieldCheck aria-label="Protected" className="text-gold size-4" />
             <form action={logoutAction}>
               <Button type="submit" variant="ghost" aria-label="Sign out">
@@ -83,13 +85,21 @@ export function AdminShell({
             <span className="text-border-strong">/</span>
             <span className="text-sm font-semibold">Administration</span>
           </div>
-          <span className="border-success/25 bg-success/8 text-success inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold">
-            <span className="bg-success size-1.5 rounded-full shadow-[0_0_10px_var(--success)]" />
-            Secure session
-          </span>
+          <div className="flex items-center gap-3">
+            {capabilities.includes("chat.view") && <StaffChatBell />}
+            <span className="border-success/25 bg-success/8 text-success inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold">
+              <span className="bg-success size-1.5 rounded-full shadow-[0_0_10px_var(--success)]" />
+              Secure session
+            </span>
+          </div>
         </header>
         <div className="admin-atmosphere">{children}</div>
       </div>
     </div>
+  );
+  return capabilities.includes("chat.view") ? (
+    <StaffChatFeed>{content}</StaffChatFeed>
+  ) : (
+    content
   );
 }

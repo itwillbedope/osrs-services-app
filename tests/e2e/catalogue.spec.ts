@@ -350,7 +350,7 @@ test("anonymous catalogue administration redirects to sign in", async ({
   page,
 }) => {
   await page.goto("/admin/catalogue");
-  await expect(page).toHaveURL(/\/login\?next=%2Fadmin/);
+  await expect(page).toHaveURL(/\/admin(?:\?|$)/);
 });
 
 test("catalogue pages avoid horizontal overflow", async ({ page }) => {

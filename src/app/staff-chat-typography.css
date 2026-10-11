@@ -1,0 +1,38 @@
+/* Original Inter v4.1, self-hosted under the SIL Open Font License. */
+@font-face {
+  font-family: InterVariable;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter/InterVariable.woff2") format("woff2");
+}
+
+:is(.staff-interface, .support-chat-interface) {
+  --font-sans: InterVariable, "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-sans);
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+:is(.staff-interface, .support-chat-interface)
+  :is(input, textarea, select, button) {
+  font-family: inherit;
+}
+
+:is(.staff-interface, .support-chat-interface) :is(h1, h2, h3, .display-type) {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-transform: none;
+}
+
+:is(.staff-interface, .support-chat-interface) button {
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+:is(.staff-interface, .support-chat-interface) [role="log"] {
+  line-height: 1.6;
+}

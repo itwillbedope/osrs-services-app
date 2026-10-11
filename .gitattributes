@@ -1,0 +1,2 @@
+# Preserve migration byte checksums on Windows and Linux checkouts.
+*.sql text eol=lf

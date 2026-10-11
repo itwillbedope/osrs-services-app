@@ -10,15 +10,19 @@ export const metadata: Metadata = {
 
 export default function PublicSupportPage() {
   return (
-    <main id="main-content" className="min-h-screen px-5 py-12 sm:px-8">
+    <main
+      id="main-content"
+      className="support-chat-interface min-h-screen px-5 py-12 sm:px-8"
+    >
       <div className="mx-auto max-w-4xl">
         <Badge variant="info">Custom live chat</Badge>
         <h1 className="display-type mt-4 text-4xl font-black uppercase sm:text-5xl">
           Support chat
         </h1>
         <p className="text-text-secondary mt-4 max-w-2xl text-sm leading-6">
-          Start a plain-text support conversation as a guest. Availability is
-          controlled by staff settings and feature flags.
+          Speak with our support team about services, orders or your account.
+          Replies appear here automatically, and your conversation stays
+          available when you return in this browser.
         </p>
         <div className="mt-6">
           <ChatSafetyPanel />

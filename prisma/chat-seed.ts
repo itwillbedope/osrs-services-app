@@ -26,13 +26,13 @@ export async function seedChat(prisma: PrismaClient) {
     where: { stableKey: "chat-default-settings" },
     create: {
       stableKey: "chat-default-settings",
-      availabilityMode: "OFFLINE",
-      publicLauncherEnabled: false,
-      offlineIntakeEnabled: false,
+      availabilityMode: "ONLINE",
+      publicLauncherEnabled: true,
+      offlineIntakeEnabled: true,
       publicOnlineMessage:
-        "Support chat is prepared for client review. Availability must be enabled deliberately by staff.",
+        "Send a message and our support team will reply here. You can keep browsing while you wait.",
       publicOfflineMessage:
-        "Support chat is currently offline. Please use the normal support route until chat is approved.",
+        "Our team is away. Leave a message and return to this chat for a reply.",
       publicMaintenanceMessage:
         "Support chat is in maintenance mode while the team reviews the next safe operating window.",
       maximumMessageLength: 2000,
@@ -42,10 +42,10 @@ export async function seedChat(prisma: PrismaClient) {
       inactivityCloseMinutes: 60 * 24 * 7,
       resolvedToArchiveMinutes: 60 * 24 * 30,
       retentionPolicyDays: 365,
-      pollingFallbackIntervalSeconds: 12,
+      pollingFallbackIntervalSeconds: 5,
       typingIndicatorExpirySeconds: 8,
       realtimeExpected: false,
-      needsClientReview: true,
+      needsClientReview: false,
     },
     update: {},
   });

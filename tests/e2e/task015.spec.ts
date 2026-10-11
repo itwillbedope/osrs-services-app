@@ -133,7 +133,7 @@ test.describe("Task 015 live chat foundation", () => {
     await expect(
       page.getByRole("log", { name: "Chat transcript" }),
     ).toContainText(message);
-    await expect(page.getByText("HTTP fallback")).toBeVisible();
+    await expect(page.getByText("Messages connected")).toBeVisible();
     const visibleCookies = await page.evaluate(() => document.cookie);
     expect(visibleCookies).not.toContain("osrs_chat_guest");
 

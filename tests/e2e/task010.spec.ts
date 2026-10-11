@@ -243,7 +243,7 @@ test("admin account centre supports editing, publication, holds, handover and hi
   test.setTimeout(60_000);
   const listing = await accountListing();
   await page.goto("/admin/accounts");
-  await expect(page).toHaveURL(/\/login\?next=%2Fadmin%2Faccounts/);
+  await expect(page).toHaveURL(/\/admin(?:\?|$)/);
   await signIn(page);
   await expect(
     page.getByRole("heading", { name: "Accounts Centre" }),

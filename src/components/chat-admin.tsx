@@ -14,7 +14,8 @@ import {
   UserMinus,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useStaffChatFeed } from "./staff-chat-feed";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -82,14 +83,21 @@ export type ChatSettings = {
 type ApiResult<T> = T & { ok: boolean; message?: string };
 
 async function requestJson<T>(path: string, options: RequestInit = {}) {
-  const response = await fetch(path, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-  return (await response.json()) as ApiResult<T>;
+  try {
+    const response = await fetch(path, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+    return (await response.json()) as ApiResult<T>;
+  } catch {
+    return {
+      ok: false,
+      message: "Connection interrupted. Your draft is kept; please retry.",
+    } as ApiResult<T>;
+  }
 }
 
 function idempotencyKey(prefix: string) {
@@ -279,21 +287,54 @@ export function ChatSettingsForm({ settings }: { settings: ChatSettings }) {
 
 export function ChatConversationList({
   conversations,
+  filter = "active",
 }: {
   conversations: AdminConversation[];
+  filter?: string;
 }) {
+  const feed = useStaffChatFeed();
+  const [filtered, setFiltered] = useState(conversations);
+  useEffect(() => {
+    if (filter === "active") return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll() {
+      try {
+        const result = await requestJson<{
+          conversations: AdminConversation[];
+        }>(
+          `/api/admin/chat/conversations?filter=${encodeURIComponent(filter)}`,
+        );
+        if (!cancelled && result.ok) setFiltered(result.conversations);
+      } catch {
+        /* Keep the last successful queue on connection loss. */
+      }
+      if (!cancelled) timer = setTimeout(poll, 5000);
+    }
+    void poll();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [filter]);
+  const rows =
+    filter === "active" ? (feed.conversations ?? conversations) : filtered;
   return (
     <div className="grid gap-3">
-      {conversations.length === 0 ? (
+      {feed.error && (
+        <p role="status" className="text-warning text-sm">
+          {feed.error}
+        </p>
+      )}
+      {rows.length === 0 ? (
         <div className="border-border bg-surface-1 rounded-xl border p-6">
           <p className="font-semibold">No conversations in this view.</p>
           <p className="text-text-muted mt-2 text-sm">
-            Chat stays empty until the feature flags and availability settings
-            are deliberately enabled.
+            New customer conversations appear here automatically.
           </p>
         </div>
       ) : (
-        conversations.map((conversation) => (
+        rows.map((conversation) => (
           <article
             key={conversation.id}
             className="border-border bg-surface-1 rounded-xl border p-4"
@@ -302,7 +343,7 @@ export function ChatConversationList({
               <div>
                 <Badge variant="info">{label(conversation.status)}</Badge>
                 <h3 className="mt-2 font-bold">{conversation.reference}</h3>
-                <p className="text-text-muted mt-1 text-sm">
+                <p className="text-text-muted mt-1 text-sm break-words">
                   {conversation.messages[0]?.body ?? "No public messages"}
                 </p>
               </div>
@@ -323,14 +364,45 @@ export function ChatConversationList({
 export function ChatAdminConversationPanel({
   initialConversation,
   staffUserId,
+  canRedact = false,
 }: {
   initialConversation: AdminConversation;
   staffUserId: string;
+  canRedact?: boolean;
 }) {
   const [conversation, setConversation] =
     useState<AdminConversation>(initialConversation);
   const [state, setState] = useState("");
   const [pending, startTransition] = useTransition();
+  const [replyBody, setReplyBody] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll() {
+      try {
+        const result = await requestJson<{ conversation: AdminConversation }>(
+          `/api/admin/chat/conversations/${initialConversation.id}`,
+        );
+        if (!cancelled && result.ok)
+          setConversation((current) =>
+            result.conversation.concurrencyVersion >= current.concurrencyVersion
+              ? result.conversation
+              : current,
+          );
+      } catch {
+        if (!cancelled)
+          setState(
+            "Connection lost. Your draft is saved here; retry when connected.",
+          );
+      }
+      if (!cancelled) timer = setTimeout(poll, 5000);
+    }
+    void poll();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [initialConversation.id]);
 
   function refresh() {
     startTransition(async () => {
@@ -354,8 +426,14 @@ export function ChatAdminConversationPanel({
           }),
         },
       );
-      if (result.ok) setConversation(result.conversation);
-      else setState(result.message ?? "Message was not sent.");
+      if (result.ok) {
+        setConversation(result.conversation);
+        setReplyBody("");
+      } else
+        setState(
+          result.message ??
+            "Message was not sent. Your draft is kept for retry.",
+        );
     });
   }
 
@@ -466,7 +544,12 @@ export function ChatAdminConversationPanel({
           ) : null}
         </div>
 
-        <div className="border-border bg-background/35 grid max-h-[34rem] gap-3 overflow-y-auto rounded-xl border p-4">
+        <div
+          role="log"
+          aria-label="Staff chat transcript"
+          aria-live="polite"
+          className="border-border bg-background/35 grid max-h-[34rem] gap-3 overflow-y-auto rounded-xl border p-4"
+        >
           {conversation.messages.map((message) => (
             <article
               key={message.id}
@@ -483,18 +566,20 @@ export function ChatAdminConversationPanel({
                 <p className="text-text-muted text-xs font-bold uppercase">
                   {actorLabel(message.participantType)} / #{message.sequence}
                 </p>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => redact(message)}
-                  disabled={Boolean(message.redactedAt) || pending}
-                >
-                  <ShieldAlert className="size-4" aria-hidden="true" />
-                  Redact
-                </Button>
+                {canRedact && (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => redact(message)}
+                    disabled={Boolean(message.redactedAt) || pending}
+                  >
+                    <ShieldAlert className="size-4" aria-hidden="true" />
+                    Redact
+                  </Button>
+                )}
               </div>
-              <p className="mt-2 whitespace-pre-wrap">
+              <p className="mt-2 break-words whitespace-pre-wrap">
                 {message.redactedAt
                   ? "[Message removed for safety]"
                   : message.body}
@@ -511,6 +596,9 @@ export function ChatAdminConversationPanel({
             Staff reply
             <textarea
               name="body"
+              value={replyBody}
+              onChange={(event) => setReplyBody(event.target.value)}
+              maxLength={4000}
               required
               className="border-border bg-background/50 focus:ring-primary min-h-28 rounded-xl border p-3 text-sm outline-none focus:ring-2"
             />
