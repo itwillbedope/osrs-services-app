@@ -9,16 +9,9 @@ import {
   checkLoginRateLimit,
 } from "@/lib/auth/rate-limit";
 import { createSession, deleteCurrentSession } from "@/lib/auth/session";
+import { safeStaffDestination } from "@/lib/auth/staff-login";
 
 export type LoginState = { error?: string };
-
-function safeDestination(value: FormDataEntryValue | null) {
-  return typeof value === "string" &&
-    value.startsWith("/") &&
-    !value.startsWith("//")
-    ? value
-    : "/admin";
-}
 
 export async function loginAction(
   _state: LoginState,
@@ -43,7 +36,7 @@ export async function loginAction(
   });
 
   if (!result.ok) {
-    return { error: "Email or password is incorrect." };
+    return { error: "Username or password is incorrect." };
   }
 
   clearLoginRateLimit(rateLimitKey);
@@ -51,10 +44,10 @@ export async function loginAction(
     ipAddress,
     userAgent: headerStore.get("user-agent") ?? undefined,
   });
-  redirect(safeDestination(formData.get("next")));
+  redirect(safeStaffDestination(formData.get("next")));
 }
 
 export async function logoutAction() {
   await deleteCurrentSession();
-  redirect("/login");
+  redirect("/admin");
 }

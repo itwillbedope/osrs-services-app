@@ -15,7 +15,7 @@ const success = (message: string) => ({ message, ok: true });
 const failed = (error: unknown): StaffActionState => ({
   message:
     error instanceof z.ZodError
-      ? "Check the form. Use a valid email and a password of 12–128 characters."
+      ? "Check the form. Use a username or email (3–191 characters) and a password of 8–128 characters."
       : error instanceof Error &&
           error.name === "Error" &&
           [
@@ -26,7 +26,7 @@ const failed = (error: unknown): StaffActionState => ({
             "Choose recognized permissions.",
           ].includes(error.message)
         ? error.message
-        : "Could not save. Check for an existing email or role.",
+        : "Could not save. Check for an existing username, email or role.",
   ok: false,
 });
 export async function createStaffAction(

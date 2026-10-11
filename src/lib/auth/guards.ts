@@ -5,11 +5,12 @@ import { forbidden, redirect } from "next/navigation";
 import { hasCapability } from "@/lib/auth/capabilities";
 import type { PermissionKey } from "@/lib/auth/permissions";
 import { getCurrentSession } from "@/lib/auth/session";
+import { staffLoginHref } from "@/lib/auth/staff-login";
 
 export async function requireUser(returnTo: string) {
   const session = await getCurrentSession();
   if (!session) {
-    redirect(`/login?next=${encodeURIComponent(returnTo)}`);
+    redirect(staffLoginHref(returnTo));
   }
   return session;
 }

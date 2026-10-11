@@ -233,12 +233,12 @@ export const defaultFeatureFlags = [
   ],
   ["customer_registration_enabled", "Optional customer registration", true],
   ["customer_dashboard_enabled", "Private customer dashboard", true],
-  ["live_chat_enabled", "Public and customer live chat availability", false],
-  ["guest_live_chat_enabled", "Guest live chat interactions", false],
+  ["live_chat_enabled", "Public and customer live chat availability", true],
+  ["guest_live_chat_enabled", "Guest live chat interactions", true],
   [
     "customer_live_chat_enabled",
     "Authenticated customer live chat interactions",
-    false,
+    true,
   ],
   ["chat_realtime_enabled", "Socket.IO real-time chat delivery surface", false],
 ] as const;

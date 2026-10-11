@@ -28,7 +28,7 @@ export function MinigamesEngine({ service }: { service: Service }) {
   const [groupOptions, setGroupOptions] = useState<Record<string, string[]>>(
     {},
   );
-  const [remote, setRemote] = useState(false);
+  const [stream, setStream] = useState(false);
   const [gameMode, setGameMode] = useState(
     service.gameModes[0]?.gameMode ?? "NORMAL",
   );
@@ -41,8 +41,8 @@ export function MinigamesEngine({ service }: { service: Service }) {
     quantities[offering.slug] ?? String(offering.minimumQuantity ?? 1);
   const modifiersFor = (offering: DirectOrderOffering) => [
     ...(groupOptions[offering.groupLabel ?? "Other"] ?? []),
-    ...(remote && minigameModifiers(offering).some((m) => m.slug === "parsec")
-      ? ["parsec"]
+    ...(stream && minigameModifiers(offering).some((m) => m.slug === "stream")
+      ? ["stream"]
       : []),
   ];
   const selections: DirectOrderSelection[] = service.offerings
@@ -163,10 +163,10 @@ export function MinigamesEngine({ service }: { service: Service }) {
         <label className="minigames-remote">
           <input
             type="checkbox"
-            checked={remote}
-            onChange={(e) => setRemote(e.target.checked)}
+            checked={stream}
+            onChange={(e) => setStream(e.target.checked)}
           />{" "}
-          Parsec remote access <span>+50%</span>
+          Stream option
         </label>
         {!groups.length && (
           <p className="store-empty">
@@ -176,7 +176,7 @@ export function MinigamesEngine({ service }: { service: Service }) {
         {groups.map(([group, offerings], index) => {
           const key = facetValue(offerings[0]!, "artwork") ?? "misc";
           const modifiers = minigameModifiers(offerings[0]!).filter(
-            (m) => m.slug !== "parsec",
+            (m) => !["parsec", "stream"].includes(m.slug),
           );
           return (
             <details

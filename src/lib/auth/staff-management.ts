@@ -1,11 +1,9 @@
 import { z } from "zod";
+import { staffIdentifierSchema } from "./staff-login";
 export const staffCreateSchema = z.object({
   name: z.string().trim().min(1).max(120),
-  email: z
-    .email()
-    .max(191)
-    .transform((v) => v.toLowerCase()),
-  password: z.string().min(12).max(128),
+  email: staffIdentifierSchema,
+  password: z.string().min(8).max(128),
   roleId: z.string().min(1).max(30),
 });
 export const roleCreateSchema = z.object({

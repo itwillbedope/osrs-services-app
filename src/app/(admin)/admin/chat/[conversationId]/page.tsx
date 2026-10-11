@@ -46,6 +46,7 @@ export default async function AdminChatConversationPage({
       <ChatAdminConversationPanel
         initialConversation={serializable<AdminConversation>(conversation)}
         staffUserId={session.user.id}
+        canRedact={session.capabilities.has("chat.messages.redact")}
       />
     </main>
   );

@@ -1,6 +1,8 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { hash } from "@node-rs/argon2";
 import { z } from "zod";
+import { staffIdentifierSchema } from "../src/lib/auth/staff-login";
+import { parseStaffSeedAccounts, seedRequestedStaff } from "./staff-seed";
 
 import { PrismaClient } from "../src/generated/prisma/client";
 import { seedAccountMarketplace } from "./account-seed";
@@ -28,8 +30,13 @@ const seedEnvironmentSchema = z
     DATABASE_PASSWORD: z.string().min(1),
     DATABASE_NAME: z.string().min(1),
     DATABASE_ALLOW_PUBLIC_KEY_RETRIEVAL: z.stringbool().default(false),
-    ADMIN_SEED_EMAIL: z.string().email().optional().or(z.literal("")),
-    ADMIN_SEED_PASSWORD: z.string().min(12).optional().or(z.literal("")),
+    ADMIN_SEED_EMAIL: staffIdentifierSchema.optional().or(z.literal("")),
+    ADMIN_SEED_PASSWORD: z
+      .string()
+      .min(8)
+      .max(128)
+      .optional()
+      .or(z.literal("")),
     ADMIN_SEED_NAME: z.string().min(1).default("Local Super Admin"),
     ADMIN_SEED_RESET_PASSWORD: z.stringbool().default(false),
   })
@@ -54,6 +61,9 @@ const seedEnvironmentSchema = z
   });
 
 const env = seedEnvironmentSchema.parse(process.env);
+const staffAccounts = parseStaffSeedAccounts(
+  process.env.STAFF_SEED_ACCOUNTS_JSON,
+);
 const adapter = new PrismaMariaDb({
   host: env.DATABASE_HOST,
   port: env.DATABASE_PORT,
@@ -83,6 +93,14 @@ async function main() {
       }),
   );
   await seedCatalogue(prisma as unknown as CatalogueSeedClient);
+  await seedRequestedStaff(prisma, staffAccounts, (password) =>
+    hash(password, {
+      algorithm: ARGON2ID,
+      memoryCost: 19_456,
+      timeCost: 2,
+      parallelism: 1,
+    }),
+  );
   await seedQuiver(prisma);
   await seedMinigames(prisma);
   await seedPricing(prisma);

@@ -12,13 +12,16 @@ for (const role of ["head", "chat", "editor"]) {
   test(`${role} receives only its authorized workspace`, async ({ page }) => {
     test.skip(!fixtures[role], "Local/test staff fixtures are required.");
     const fixture = fixtures[role]!;
-    await page.goto("/login?next=/admin");
-    await page.getByLabel("Email address", { exact: true }).fill(fixture.email);
+    await page.goto("/admin");
+    await page
+      .getByLabel("Email address or username", { exact: true })
+      .fill(fixture.email);
     await page.getByLabel("Password", { exact: true }).fill(fixture.password);
     await page
       .getByRole("button", { name: "Sign in securely", exact: true })
       .click();
     const nav = page.getByRole("navigation", { name: "Admin navigation" });
+    await expect(nav).toHaveCSS("font-family", /InterVariable/);
     if (role === "head") {
       await expect(
         page.getByRole("heading", { name: "Business dashboard", exact: true }),
@@ -115,6 +118,13 @@ for (const role of ["head", "chat", "editor"]) {
       if (role === "editor") {
         const response = await page.request.get(
           "/api/admin/chat/conversations",
+          {
+            headers: {
+              Cookie: (await page.context().cookies())
+                .map((cookie) => `${cookie.name}=${cookie.value}`)
+                .join("; "),
+            },
+          },
         );
         expect([401, 403]).toContain(response.status());
         expect((await response.json()).ok).toBe(false);

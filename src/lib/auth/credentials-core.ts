@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { staffIdentifierSchema } from "./staff-login";
 
 export const credentialsSchema = z.object({
   email: z
@@ -7,6 +8,10 @@ export const credentialsSchema = z.object({
     .email()
     .transform((value) => value.toLowerCase()),
   password: z.string().min(1).max(256),
+});
+
+const staffCredentialsSchema = credentialsSchema.extend({
+  email: staffIdentifierSchema,
 });
 
 export type CredentialUser = {
@@ -30,7 +35,9 @@ export async function authenticateCredentialsWith(
   verify: VerifyPassword,
   expectedAccountType: "STAFF" | "CUSTOMER" = "STAFF",
 ) {
-  const parsed = credentialsSchema.safeParse(input);
+  const parsed = (
+    expectedAccountType === "STAFF" ? staffCredentialsSchema : credentialsSchema
+  ).safeParse(input);
   if (!parsed.success) {
     return { ok: false as const };
   }

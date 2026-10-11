@@ -2289,3 +2289,16 @@
     z-index: 45;
   }
 }
+
+.support-chat-launcher {
+  bottom: var(--support-chat-bottom, 1rem);
+}
+.support-chat-panel {
+  height: min(36rem, calc(100svh - var(--support-chat-space, 10rem)));
+}
+@media (max-width: 1023px) {
+  body:has(.service-mobile-checkout-bar) .support-chat-launcher {
+    --support-chat-bottom: 6.5rem;
+    --support-chat-space: 15.5rem;
+  }
+}

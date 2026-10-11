@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toast";
 
 import "./globals.css";
 import "./reference-storefront.css";
+import "./staff-chat-typography.css";
 
 export const metadata: Metadata = {
   icons: { icon: "/branding/site-icon.svg" },

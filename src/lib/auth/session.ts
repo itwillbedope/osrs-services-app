@@ -112,7 +112,6 @@ export async function getCurrentSession(
         data: { revokedAt: new Date() },
       });
     }
-    cookieStore.delete(cookieName);
     return null;
   }
 

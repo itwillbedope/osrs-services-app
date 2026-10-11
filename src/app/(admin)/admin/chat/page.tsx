@@ -65,8 +65,7 @@ export default async function AdminChatPage({
             Support chat
           </h1>
           <p className="text-text-secondary mt-3 max-w-2xl text-sm leading-6">
-            Queue, assignment, transcript, internal note and availability
-            foundation for custom live chat.
+            Reply to customers, manage your queue and keep private team notes.
           </p>
         </div>
         <span className="border-primary/25 bg-primary-muted/45 text-primary flex size-12 items-center justify-center rounded-xl border">
@@ -115,6 +114,7 @@ export default async function AdminChatPage({
             ))}
           </div>
           <ChatConversationList
+            filter={filter}
             conversations={serializable<AdminConversation[]>(conversations)}
           />
         </div>
