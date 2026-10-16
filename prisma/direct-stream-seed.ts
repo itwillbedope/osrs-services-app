@@ -12,18 +12,27 @@ export async function seedDirectStream(prisma: PrismaClient) {
           ],
         },
       },
+    },
+    select: {
+      id: true,
       facets: {
-        none: {
-          facetKey: "minigame-modifier",
-          facetValue: { startsWith: "stream-bps-" },
-        },
+        where: { facetKey: "minigame-modifier" },
+        select: { facetValue: true },
       },
     },
-    select: { id: true },
   });
-  if (offerings.length)
+  // MariaDB's prepared LIKE parameters can conflict with Hostinger's column
+  // collation. Compare this small, scoped catalogue in JS instead, preserving
+  // any existing Stream configuration without altering database collations.
+  const missingStream = offerings.filter(
+    (offering) =>
+      !offering.facets.some((facet) =>
+        facet.facetValue.startsWith("stream-bps-"),
+      ),
+  );
+  if (missingStream.length)
     await prisma.catalogueOfferingFacet.createMany({
-      data: offerings.map((o) => ({
+      data: missingStream.map((o) => ({
         offeringId: o.id,
         facetKey: "minigame-modifier",
         facetValue: "stream-bps-plus-1000",

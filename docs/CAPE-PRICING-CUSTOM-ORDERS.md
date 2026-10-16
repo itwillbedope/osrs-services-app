@@ -42,6 +42,8 @@ Research used general request/quote patterns from [Manscape's custom-request res
 - [ScamAdviser's FAQ](https://www.scamadviser.com/FAQ) describes external technical, contact/reputation and feedback inputs. A direct score lookup timed out during this work, so no current score or green status is claimed. Verified business identity/contact details, authentic independent reviews and a claimed/reviewed owner profile must come from the actual business. No fake badges, reviews, addresses or ranking guarantees are added.
 - Record measured Lighthouse results separately in the completion report; local lab results are not a guarantee of production field performance or GTmetrix scores.
 
+Deployment compatibility: Hostinger applied both migrations, then its MariaDB driver rejected a prepared `LIKE` prefix parameter because of mixed collations. Direct Stream initialization now fetches only relevant offering IDs/modifier values and checks the prefix in JavaScript. This preserves existing Stream settings and idempotency without altering database collations or migration history.
+
 Local production mobile Lighthouse runs on 16 October 2026:
 
 | Page                       | Performance | Accessibility | Best Practices | SEO |
