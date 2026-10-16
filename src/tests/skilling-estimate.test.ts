@@ -23,7 +23,7 @@ const rule = {
   hardcoreIronmanMultiplierBps: 2000,
   ultimateIronmanMultiplierBps: 3000,
   discordStreamEnabled: true,
-  discordStreamPercentBps: 200,
+  discordStreamPercentBps: 1000,
   standardDeliveryEnabled: true,
   standardDeliveryLabel: "Standard",
   standardDeliveryDescription: null,
@@ -67,7 +67,7 @@ describe("skilling estimate engine", () => {
       method,
       rule,
       gameMode: "IRONMAN",
-      includeSupplies: true,
+      includeSupplies: false,
       includeDiscordStream: true,
       deliverySpeed: "PRIORITY",
     });
@@ -75,11 +75,10 @@ describe("skilling estimate engine", () => {
     expect(estimate.lineItems.map((item) => item.label)).toEqual([
       "Base skilling estimate",
       "Ironman account adjustment",
-      "Supply support",
       "Discord Stream add-on",
       "Priority delivery estimate",
     ]);
-    expect(estimate.estimatedTotalCents).toBe(13_375);
+    expect(estimate.estimatedTotalCents).toBe(14_104);
     expect(estimate.estimatedHours).toBe(20);
   });
 
@@ -131,14 +130,14 @@ describe("skilling estimate engine", () => {
     expect(() =>
       calculateSkillingEstimate({
         progress: calculateLevelProgress({ currentLevel: 1, targetLevel: 10 }),
-        method: { ...method, suppliesEnabled: false },
+        method,
         rule,
         gameMode: "NORMAL",
         includeSupplies: true,
         includeDiscordStream: false,
         deliverySpeed: "STANDARD",
       }),
-    ).toThrow(/Supplies/);
+    ).toThrow(/supplies/);
 
     expect(() =>
       calculateSkillingEstimate({

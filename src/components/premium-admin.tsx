@@ -24,8 +24,9 @@ export function PremiumRuleForm({
   serviceId: string;
   version: number;
   rule:
-    | (Omit<StagedPremiumRule, "statPricingRules"> & {
+    | (Omit<StagedPremiumRule, "statPricingRules" | "capePricingRules"> & {
         statPricingRules?: unknown;
+        capePricingRules?: unknown;
       })
     | null;
   action: (formData: FormData) => Promise<void>;
@@ -33,6 +34,7 @@ export function PremiumRuleForm({
   const current = {
     ...(rule ?? defaultRule()),
     statPricingRules: premiumStatPricingSchema.parse(rule?.statPricingRules),
+    capePricingRules: rule?.capePricingRules,
   };
   return (
     <form action={action} className="grid gap-6">
@@ -122,6 +124,24 @@ export function PremiumRuleForm({
           Optional RSN public-stat checks
         </label>
       </fieldset>
+      <label className={labelClass}>
+        Cape calculation rules (JSON)
+        <textarea
+          className={fieldClass}
+          name="capePricingRules"
+          rows={8}
+          defaultValue={
+            rule?.capePricingRules
+              ? JSON.stringify(rule.capePricingRules, null, 2)
+              : ""
+          }
+        />
+        <span className="text-text-muted text-xs">
+          Infernal/Quiver only. Recommended stat levels and additive percentage
+          adjustments in basis points (1000 = 10%). Package prices are edited
+          separately. Leave empty for other services.
+        </span>
+      </label>
       <div className="grid gap-4 xl:grid-cols-3">
         <label className={`${labelClass} xl:col-span-3`}>
           Stat price adjustments (optional)
@@ -788,7 +808,7 @@ function defaultRule(): StagedPremiumRule {
     hardcoreIronmanMultiplierBps: 2000,
     ultimateIronmanMultiplierBps: 3000,
     discordStreamEnabled: true,
-    discordStreamPercentBps: 200,
+    discordStreamPercentBps: 1000,
     rsnEligibilityEnabled: true,
     supportsManualStatFallback: true,
     standardDeliveryEnabled: true,

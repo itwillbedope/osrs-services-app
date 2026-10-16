@@ -60,11 +60,11 @@ test("quantity precedes selection and Minigames rates reach the cart", async ({
     page.getByRole("button", { name: "Add to cart", exact: true }),
   ).toBeEnabled();
   await expect(page.locator(".reference-order-side")).toContainText("$13.60");
-  await expect(page.locator(".minigames-remote")).toContainText("+2%");
+  await expect(page.locator(".minigames-remote")).toContainText("+10%");
   await page
     .getByRole("checkbox", { name: "Stream option", exact: true })
     .check();
-  await expect(page.locator(".reference-order-side")).toContainText("$13.87");
+  await expect(page.locator(".reference-order-side")).toContainText("$14.96");
   await page
     .getByRole("checkbox", { name: "Stream option", exact: true })
     .uncheck();
@@ -72,7 +72,7 @@ test("quantity precedes selection and Minigames rates reach the cart", async ({
   await page
     .getByRole("checkbox", { name: "Stream option", exact: true })
     .check();
-  await expect(page.locator(".reference-order-side")).toContainText("$13.87");
+  await expect(page.locator(".reference-order-side")).toContainText("$14.96");
   await page.screenshot({
     path: path.join(
       "artifacts/minigames",
@@ -90,14 +90,14 @@ test("quantity precedes selection and Minigames rates reach the cart", async ({
     page.locator("article").filter({
       has: page.getByRole("heading", { name: "OSRS Minigames", exact: true }),
     }),
-  ).toContainText("$13.87");
+  ).toContainText("$14.96");
   await expect(
     page.locator("article").filter({
       has: page.getByRole("heading", { name: "OSRS Minigames", exact: true }),
     }),
-  ).toContainText("Stream (+2%)");
+  ).toContainText("Stream (+10%)");
   await page.getByRole("link", { name: "Checkout", exact: true }).click();
-  await expect(page.getByText("$13.87", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("$14.96", { exact: true }).first()).toBeVisible();
   for (const method of [
     "Stripe · Cards · Coming soon",
     "Payoneer · Coming soon",
@@ -131,7 +131,7 @@ test("mobile-safe grouped pricing and always-visible gathering amounts", async (
   await expect(
     page.getByRole("button", { name: "Add to cart", exact: true }),
   ).toBeEnabled();
-  await expect(page.locator(".reference-order-side")).toContainText("$29.13");
+  await expect(page.locator(".reference-order-side")).toContainText("$31.42");
   expect(
     await page.evaluate(
       () =>

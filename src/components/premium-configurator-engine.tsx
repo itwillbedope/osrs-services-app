@@ -94,6 +94,7 @@ type PremiumRule = {
   configuratorType: string;
   enabled: boolean;
   discordStreamEnabled: boolean;
+  discordStreamPercentBps?: number;
   rsnEligibilityEnabled: boolean;
   supportsManualStatFallback: boolean;
   standardDeliveryEnabled: boolean;
@@ -164,7 +165,7 @@ export function PremiumConfiguratorEngine({
   const [statCheckMode, setStatCheckMode] = useState<StatCheckMode>(
     rule?.configuratorType === "INFERNAL_CAPE" ? "MANUAL" : "NONE",
   );
-  const [customerGearConfirmed, setCustomerGearConfirmed] = useState(false);
+  const customerGearConfirmed = true;
   const [includeDiscordStream, setIncludeDiscordStream] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<
     Array<{ slug: string; quantity: number }>
@@ -187,7 +188,8 @@ export function PremiumConfiguratorEngine({
       selectedPackage
         ? options.filter(
             (option) =>
-              !option.package || option.package.slug === selectedPackage.slug,
+              !["SUPPLIES", "GEAR_SUPPORT"].includes(option.optionType) &&
+              (!option.package || option.package.slug === selectedPackage.slug),
           )
         : [],
     [options, selectedPackage],
@@ -265,7 +267,7 @@ export function PremiumConfiguratorEngine({
     setStatCheckMode(
       rule?.configuratorType === "INFERNAL_CAPE" ? "MANUAL" : "NONE",
     );
-    setCustomerGearConfirmed(false);
+
     setSelectedOptions([]);
     setResult(null);
   }
@@ -605,21 +607,11 @@ export function PremiumConfiguratorEngine({
                 </label>
               </div>
 
+              <p className="text-text-secondary mt-5 text-sm">
+                Customers must provide all required gear, equipment, and
+                supplies for the selected service.
+              </p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {selectedPackage?.customerGearRequired && (
-                  <label className="border-border bg-background/45 flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold">
-                    <input
-                      type="checkbox"
-                      checked={customerGearConfirmed}
-                      onChange={(event) => {
-                        setCustomerGearConfirmed(event.target.checked);
-                        setResult(null);
-                      }}
-                    />
-                    {selectedPackage.customerGearLabel ||
-                      "Customer-provided gear confirmed"}
-                  </label>
-                )}
                 {streamAvailable && (
                   <label className="border-border bg-background/45 flex min-h-12 items-center gap-3 rounded-xl border px-4 text-sm font-semibold">
                     <input
@@ -630,7 +622,8 @@ export function PremiumConfiguratorEngine({
                         setResult(null);
                       }}
                     />
-                    Discord Stream add-on
+                    Discord Stream add-on (+
+                    {(rule.discordStreamPercentBps ?? 1000) / 100}%)
                   </label>
                 )}
               </div>

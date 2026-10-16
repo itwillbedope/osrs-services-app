@@ -611,6 +611,7 @@ export async function publishService(
       if (snapshot.premium) {
         const rule = snapshot.premium.rule ?? {
           statPricingRules: [],
+          capePricingRules: null,
           id: stagedId(),
           configuratorType: "CUSTOM" as const,
           enabled: true,
@@ -619,7 +620,7 @@ export async function publishService(
           hardcoreIronmanMultiplierBps: 2000,
           ultimateIronmanMultiplierBps: 3000,
           discordStreamEnabled: true,
-          discordStreamPercentBps: 200,
+          discordStreamPercentBps: 1000,
           rsnEligibilityEnabled: true,
           supportsManualStatFallback: true,
           standardDeliveryEnabled: true,
@@ -648,6 +649,7 @@ export async function publishService(
         const config = await transaction.premiumServiceConfig.create({
           data: {
             ...rule,
+            capePricingRules: rule.capePricingRules ?? Prisma.JsonNull,
             serviceId: id,
           },
         });
@@ -1418,6 +1420,7 @@ export async function duplicateService(id: string, actorId: string) {
         data: {
           ...config,
           statPricingRules: config.statPricingRules ?? Prisma.JsonNull,
+          capePricingRules: config.capePricingRules ?? Prisma.JsonNull,
           serviceId: duplicate.id,
           needsClientReview: true,
         },

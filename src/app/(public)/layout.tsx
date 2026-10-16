@@ -1,3 +1,4 @@
+import "@/app/cape-configurator.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 

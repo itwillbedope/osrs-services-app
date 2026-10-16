@@ -168,18 +168,10 @@ export function calculateSkillingEstimate(input: SkillingEstimateInput) {
     });
   }
 
-  if (input.includeSupplies) {
-    if (!method.suppliesEnabled) {
-      throw new SkillingValidationError(
-        "Supplies are not configured for this method.",
-      );
-    }
-    subtotal += method.suppliesFeeCents;
-    lineItems.push({
-      label: method.suppliesLabel || "Supplies and materials",
-      amountCents: method.suppliesFeeCents,
-    });
-  }
+  if (input.includeSupplies)
+    throw new SkillingValidationError(
+      "Customers must provide all required gear, equipment, and supplies for the selected service.",
+    );
 
   if (input.includeDiscordStream) {
     if (!rule.discordStreamEnabled) {

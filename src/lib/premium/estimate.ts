@@ -1,3 +1,6 @@
+import { formatCents } from "@/lib/premium/money";
+export { formatCents } from "@/lib/premium/money";
+import { calculateCapePrice } from "@/lib/premium/cape-pricing";
 import { catalogueGameModes, gameModeLabels } from "@/lib/catalogue/constants";
 import { premiumStatPriceLines } from "@/lib/premium/stat-pricing";
 import {
@@ -45,6 +48,7 @@ export type PremiumEstimateOption = {
 export type PremiumEstimateRule = {
   configuratorType?: string;
   statPricingRules?: unknown;
+  capePricingRules?: unknown;
   normalModeMultiplierBps: number;
   ironmanMultiplierBps: number;
   hardcoreIronmanMultiplierBps: number;
@@ -150,13 +154,6 @@ function deliveryRule(rule: PremiumEstimateRule, speed: PremiumDeliverySpeed) {
   };
 }
 
-export function formatCents(amountCents: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amountCents / 100);
-}
-
 function optionPrice(
   option: PremiumEstimateOption,
   quantity: number,
@@ -188,6 +185,72 @@ export function calculatePremiumEstimate(input: PremiumEstimateInput) {
     ["Gear adjustment", selectedPackage.gearUnconfirmedAdjustmentCents],
   ].forEach(([label, value]) => assertMoney(Number(value), String(label)));
 
+  if (
+    rule.capePricingRules != null &&
+    ["INFERNAL_CAPE", "COLOSSEUM"].includes(rule.configuratorType ?? "")
+  ) {
+    if (input.includeDiscordStream)
+      throw new PremiumValidationError(
+        "Stream is not available for this service.",
+      );
+    if (
+      rule.configuratorType === "COLOSSEUM" &&
+      input.gameMode === "HARDCORE_IRONMAN"
+    )
+      throw new PremiumValidationError("Choose a supported account mode.");
+    const delivery = deliveryRule(rule, input.deliverySpeed);
+    if (!delivery.enabled)
+      throw new PremiumValidationError("Choose an available delivery speed.");
+    try {
+      const calculated = calculateCapePrice({
+        configuration: rule.capePricingRules,
+        baseCents: selectedPackage.basePriceCents,
+        stats: input.manualStats,
+        options: input.selectedOptions,
+        infernal: rule.configuratorType === "INFERNAL_CAPE",
+      });
+      // Delivery stays independently configurable, calculated against package base.
+      const deliveryFee =
+        applyBps(selectedPackage.basePriceCents, delivery.multiplierBps) +
+        delivery.fixedFeeCents;
+      const total = calculated.totalCents + deliveryFee;
+      assertMoney(total, "Total price");
+      return {
+        packageName: `${rule.configuratorType === "INFERNAL_CAPE" ? "Infernal Cape" : "Dizana’s Quiver – Full Colosseum Clear"} · ${selectedPackage.name}`,
+        accountMode: gameModeLabels[input.gameMode],
+        customerGearConfirmed: true,
+        includesDiscordStream: false,
+        delivery: {
+          speed: input.deliverySpeed,
+          label: delivery.label,
+          description: delivery.description,
+          estimate: delivery.estimate,
+        },
+        estimatedHours: selectedPackage.estimatedHours,
+        selectedOptions: input.selectedOptions,
+        lineItems: [
+          {
+            label: selectedPackage.name,
+            amountCents: selectedPackage.basePriceCents,
+          },
+          ...calculated.lines,
+          ...(deliveryFee
+            ? [{ label: delivery.label, amountCents: deliveryFee }]
+            : []),
+        ],
+        estimatedTotalCents: total,
+        estimatedTotal: formatCents(total),
+        finalPriceNote:
+          "Customers must provide all required gear, equipment, and supplies for the selected service.",
+      };
+    } catch (error) {
+      throw new PremiumValidationError(
+        error instanceof Error
+          ? error.message
+          : "Check the cape configuration.",
+      );
+    }
+  }
   const lineItems: LineItem[] = [];
   const baseCents = Math.max(
     selectedPackage.basePriceCents,
@@ -225,18 +288,6 @@ export function calculatePremiumEstimate(input: PremiumEstimateInput) {
     });
   }
 
-  if (
-    selectedPackage.customerGearRequired &&
-    !input.customerGearConfirmed &&
-    selectedPackage.gearUnconfirmedAdjustmentCents > 0
-  ) {
-    subtotal += selectedPackage.gearUnconfirmedAdjustmentCents;
-    lineItems.push({
-      label: selectedPackage.customerGearLabel || "Gear support adjustment",
-      amountCents: selectedPackage.gearUnconfirmedAdjustmentCents,
-    });
-  }
-
   const availableOptions = new Map(
     input.availableOptions.map((option) => [option.slug, option]),
   );
@@ -247,7 +298,11 @@ export function calculatePremiumEstimate(input: PremiumEstimateInput) {
     }
     seenOptions.add(selection.slug);
     const option = availableOptions.get(selection.slug);
-    if (!option || !option.enabled) {
+    if (
+      !option ||
+      !option.enabled ||
+      ["SUPPLIES", "GEAR_SUPPORT"].includes(option.optionType)
+    ) {
       throw new PremiumValidationError("Choose an available premium option.");
     }
     const quantity = selection.quantity ?? option.defaultQuantity;

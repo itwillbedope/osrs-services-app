@@ -125,7 +125,7 @@ const option = {
   slug: "supply-support",
   name: "Supply support",
   enabled: true,
-  optionType: "SUPPLIES" as const,
+  optionType: "ADDON" as const,
   pricingMode: "FIXED_FEE" as const,
   fixedPriceCents: 1_000,
   percentBps: 0,

@@ -16,6 +16,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/bossing",
     "/infernal",
     "/quiver",
+    "/corrupted-gauntlet",
+    "/custom-order",
     "/quests",
     "/diaries",
     "/minigames",

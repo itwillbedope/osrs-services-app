@@ -81,7 +81,7 @@ test("customer message alerts support, replies arrive automatically, and convers
     await expect(
       page
         .getByRole("region", { name: "Support chat", exact: true })
-        .getByRole("heading", { name: "Support chat" }),
+        .getByRole("heading", { name: "Live Chat Support" }),
     ).toHaveCSS("font-family", /InterVariable/);
     await expect(
       support.getByRole("heading", { name: "Support chat", exact: true }),

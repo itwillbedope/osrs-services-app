@@ -302,6 +302,18 @@ export default async function Homepage() {
             </div>
           </section>
         )}
+      <section className="custom-order-home-promo">
+        <div>
+          <h2>Your goal, your custom order.</h2>
+          <p>
+            Need a mixed package or a service you can’t find? Share your account
+            setup and let our team prepare a tailored quote.
+          </p>
+        </div>
+        <Link href="/custom-order">
+          Request a Custom Order <ArrowRight size={18} aria-hidden="true" />
+        </Link>
+      </section>
     </main>
   );
 }

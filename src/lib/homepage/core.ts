@@ -176,7 +176,7 @@ const fallbackHomepageRows: ReadonlyArray<
     "FEATURED_SERVICE",
     "Corrupted Gauntlet",
     "Configure a clear Gauntlet service scope for your account.",
-    "/bossing",
+    "/corrupted-gauntlet",
     "View Service",
     "PvM",
   ],

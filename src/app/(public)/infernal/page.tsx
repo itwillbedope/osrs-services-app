@@ -1,3 +1,5 @@
+import { CapeServiceAnswers } from "@/components/cape-service-answers";
+import { CapeConfigurator } from "@/components/cape-configurator";
 import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { Flame } from "lucide-react";
@@ -38,14 +40,29 @@ export default async function InfernalPage() {
         icon={Flame}
         inferno
       />
-      <PremiumConfiguratorEngine
-        service={engine.service}
-        packages={engine.packages}
-        options={engine.options}
-        rule={engine.rule}
-        requestHref={getDiscordHref()}
-        eligibilityEnabled={Boolean(flags.rsn_eligibility_enabled)}
-      />
+      {engine.rule?.capePricingRules ? (
+        <CapeConfigurator
+          service={engine.service}
+          packages={engine.packages}
+          rule={engine.rule}
+        />
+      ) : (
+        <PremiumConfiguratorEngine
+          service={engine.service}
+          packages={engine.packages}
+          options={engine.options}
+          rule={engine.rule}
+          requestHref={getDiscordHref()}
+          eligibilityEnabled={Boolean(flags.rsn_eligibility_enabled)}
+        />
+      )}
+      {engine?.rule?.capePricingRules ? (
+        <CapeServiceAnswers
+          infernal={true}
+          configuration={engine.rule.capePricingRules}
+          packages={engine.packages}
+        />
+      ) : null}
     </main>
   );
 }

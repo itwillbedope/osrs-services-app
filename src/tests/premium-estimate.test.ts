@@ -25,7 +25,7 @@ const rule: PremiumEstimateRule = {
   hardcoreIronmanMultiplierBps: 2_000,
   ultimateIronmanMultiplierBps: 3_000,
   discordStreamEnabled: true,
-  discordStreamPercentBps: 200,
+  discordStreamPercentBps: 1000,
   standardDeliveryEnabled: true,
   standardDeliveryLabel: "Standard",
   standardDeliveryDescription: null,
@@ -51,7 +51,7 @@ const options: PremiumEstimateOption[] = [
     slug: "supply-support",
     name: "Supply support",
     enabled: true,
-    optionType: "SUPPLIES",
+    optionType: "ADDON",
     pricingMode: "FIXED_FEE",
     fixedPriceCents: 1_000,
     percentBps: 0,
@@ -64,7 +64,7 @@ const options: PremiumEstimateOption[] = [
     slug: "gear-gap-review",
     name: "Gear gap support review",
     enabled: true,
-    optionType: "GEAR_SUPPORT",
+    optionType: "ADDON",
     pricingMode: "PERCENT_OF_BASE",
     fixedPriceCents: 0,
     percentBps: 500,
@@ -164,7 +164,7 @@ describe("premium service estimate engine", () => {
     );
   });
 
-  it("applies account, gear, option, Discord Stream and delivery adjustments", () => {
+  it("applies account, option, Discord Stream and delivery adjustments", () => {
     const estimate = calculatePremiumEstimate({
       package: premiumPackage,
       rule,
@@ -184,14 +184,13 @@ describe("premium service estimate engine", () => {
       "Base premium package",
       "Package setup fee",
       "Ironman account adjustment",
-      "Customer-provided gear",
       "Supply support",
       "Gear gap support review",
       "Extra attempt window x 3",
       "Discord Stream add-on",
       "Priority delivery estimate",
     ]);
-    expect(estimate.estimatedTotalCents).toBe(21_320);
+    expect(estimate.estimatedTotalCents).toBe(20_981);
     expect(estimate.estimatedHours).toBe(3);
   });
 
