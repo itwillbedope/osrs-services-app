@@ -391,6 +391,9 @@ function bossingMethodInput(formData: FormData, serviceId: string) {
 
 function premiumRuleInput(formData: FormData, serviceId: string) {
   return premiumRuleInputSchema.parse({
+    capePricingRules: String(formData.get("capePricingRules") ?? "").trim()
+      ? JSON.parse(String(formData.get("capePricingRules")))
+      : null,
     statPricingRules: String(formData.get("statPricingRules") ?? "")
       .split(/\r?\n/)
       .filter((line) => line.trim())

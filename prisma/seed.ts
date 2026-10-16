@@ -1,3 +1,5 @@
+import { seedDirectStream } from "./direct-stream-seed";
+import { seedCapePricing } from "./cape-seed";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { hash } from "@node-rs/argon2";
 import { z } from "zod";
@@ -103,6 +105,8 @@ async function main() {
   );
   await seedQuiver(prisma);
   await seedMinigames(prisma);
+  await seedCapePricing(prisma);
+  await seedDirectStream(prisma);
   await seedPricing(prisma);
   await seedGold(prisma);
   await seedAccountMarketplace(prisma);

@@ -30,7 +30,7 @@ const rule = {
   hardcoreIronmanMultiplierBps: 2000,
   ultimateIronmanMultiplierBps: 3000,
   discordStreamEnabled: true,
-  discordStreamPercentBps: 200,
+  discordStreamPercentBps: 1000,
   standardDeliveryEnabled: true,
   standardDeliveryLabel: "Standard",
   standardDeliveryDescription: null,
@@ -88,7 +88,7 @@ describe("bossing kill-count and estimate engine", () => {
       rule,
       gameMode: "IRONMAN",
       customerGearConfirmed: false,
-      includeSupplies: true,
+      includeSupplies: false,
       includeDiscordStream: true,
       deliverySpeed: "PRIORITY",
     });
@@ -98,12 +98,10 @@ describe("bossing kill-count and estimate engine", () => {
       "Base bossing estimate",
       "Method setup fee",
       "Ironman account adjustment",
-      "Customer-provided gear",
-      "Supply support",
       "Discord Stream add-on",
       "Priority delivery estimate",
     ]);
-    expect(estimate.estimatedTotalCents).toBe(4_472);
+    expect(estimate.estimatedTotalCents).toBe(3_807);
     expect(estimate.estimatedHours).toBe(1.3);
   });
 
@@ -201,7 +199,7 @@ describe("bossing kill-count and estimate engine", () => {
           mode: "DIRECT",
           killQuantity: 10,
         }),
-        method: { ...method, suppliesEnabled: false },
+        method,
         rule,
         gameMode: "NORMAL",
         customerGearConfirmed: true,
@@ -209,7 +207,7 @@ describe("bossing kill-count and estimate engine", () => {
         includeDiscordStream: false,
         deliverySpeed: "STANDARD",
       }),
-    ).toThrow(/Supplies/);
+    ).toThrow(/supplies/);
     expect(() =>
       calculateBossingEstimate({
         progress: calculateBossingKillProgress({

@@ -36,6 +36,7 @@ type Skill = {
 
 type PublicRule = {
   discordStreamEnabled: boolean;
+  discordStreamPercentBps?: number;
   standardDeliveryEnabled: boolean;
   standardDeliveryLabel: string;
   standardDeliveryDescription: string | null;
@@ -149,7 +150,7 @@ export function SkillingCalculatorEngine({
     selectedSkill?.methods[0] ??
     null;
   const [inputMode, setInputMode] = useState<"LEVEL" | "XP">("LEVEL");
-  const [includeSupplies, setIncludeSupplies] = useState(false);
+  const includeSupplies = false;
   const [includeDiscordStream, setIncludeDiscordStream] = useState(false);
   const delivery = useMemo(() => deliveryOptions(rule), [rule]);
   const [deliverySpeed, setDeliverySpeed] = useState<SkillingDeliverySpeed>(
@@ -177,7 +178,7 @@ export function SkillingCalculatorEngine({
     const nextSkill = skills.find((skill) => skill.skillKey === nextSkillKey);
     setSkillKey(nextSkillKey);
     setMethodSlug(nextSkill?.methods[0]?.slug ?? "");
-    setIncludeSupplies(false);
+
     setResult(null);
   }
 
@@ -431,7 +432,6 @@ export function SkillingCalculatorEngine({
                     checked={selectedMethod?.slug === method.slug}
                     onChange={() => {
                       setMethodSlug(method.slug);
-                      setIncludeSupplies(false);
                     }}
                   />
                 </label>
@@ -464,17 +464,11 @@ export function SkillingCalculatorEngine({
                 </select>
               </label>
             </div>
+            <p className="text-text-secondary text-sm">
+              Customers must provide all required gear, equipment, and supplies
+              for the selected service.
+            </p>
             <div className="store-inline-options">
-              {selectedMethod?.suppliesEnabled && (
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={includeSupplies}
-                    onChange={(e) => setIncludeSupplies(e.target.checked)}
-                  />
-                  {selectedMethod.suppliesLabel || "Include supplies"}
-                </label>
-              )}
               {rule.discordStreamEnabled && (
                 <label>
                   <input
@@ -482,7 +476,8 @@ export function SkillingCalculatorEngine({
                     checked={includeDiscordStream}
                     onChange={(e) => setIncludeDiscordStream(e.target.checked)}
                   />
-                  Stream add-on
+                  Stream add-on (+{(rule.discordStreamPercentBps ?? 1000) / 100}
+                  %)
                 </label>
               )}
             </div>

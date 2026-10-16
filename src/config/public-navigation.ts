@@ -9,6 +9,11 @@ export type ServiceNavigationItem = PublicLink & {
 
 export const serviceNavigation = [
   {
+    label: "Custom order",
+    href: "/custom-order",
+    description: "Request a tailored service quote for your own goals.",
+  },
+  {
     label: "Dizana's Quiver",
     href: "/quiver",
     description: "Fortis Colosseum completion and account setup review.",
@@ -89,6 +94,7 @@ export const deferredPrimaryNavigation = [
 
 export const footerNavigation = {
   services: [
+    { label: "Custom order", href: "/custom-order" },
     { label: "All services", href: "/services" },
     { label: "Skills", href: "/skills" },
     { label: "Questing", href: "/quests" },

@@ -16,6 +16,7 @@ const columns = [
       ["Offers", "/services?featured=1"],
       ["About us", "/support"],
       ["Contact", "/support"],
+      ["Custom order", "/custom-order"],
     ],
   },
   {

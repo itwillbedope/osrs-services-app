@@ -1,3 +1,4 @@
+import { capePricingSchema } from "@/lib/premium/cape-schema";
 import { z } from "zod";
 import { premiumStatPricingSchema } from "@/lib/premium/stat-pricing";
 
@@ -766,6 +767,7 @@ export const stagedPremiumOptionSchema = z
 
 export const stagedPremiumRuleSchema = stagedSkillingRuleSchema
   .extend({
+    capePricingRules: capePricingSchema.nullable().optional(),
     statPricingRules: premiumStatPricingSchema,
     configuratorType: z.enum(premiumConfiguratorTypes).default("CUSTOM"),
     enabled: z.boolean().default(true),
@@ -1315,8 +1317,9 @@ type AggregateSource = CatalogueService & {
     }>;
   }>;
   premiumConfig?:
-    | (Omit<StagedPremiumRule, "statPricingRules"> & {
+    | (Omit<StagedPremiumRule, "statPricingRules" | "capePricingRules"> & {
         statPricingRules?: unknown;
+        capePricingRules?: unknown;
       })
     | null;
   premiumPackages?: Array<{

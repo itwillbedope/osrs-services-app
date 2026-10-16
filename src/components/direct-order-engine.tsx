@@ -13,6 +13,7 @@ import { AddEstimateToCart } from "@/components/add-estimate-to-cart";
 import { ReferenceArt } from "@/components/reference-art";
 import {
   calculateDirectOrderEstimate,
+  minigameModifiers,
   diaryPrerequisiteSlugs,
   facetLabel,
   facetValue,
@@ -97,6 +98,23 @@ export function DirectOrderEngine({
   service: DirectOrderService;
 }) {
   const [search, setSearch] = useState("");
+  const [stream, setStream] = useState(false);
+  const streamRates = [
+    ...new Set(
+      service.offerings.flatMap((o) =>
+        minigameModifiers(o)
+          .filter((m) => m.slug === "stream")
+          .map((m) => m.bps),
+      ),
+    ),
+  ];
+  const streamLabel =
+    streamRates.length === 1
+      ? `+${streamRates[0]! / 100}%`
+      : "rate shown per service";
+  const streamAvailable = service.offerings.some((o) =>
+    minigameModifiers(o).some((m) => m.slug === "stream"),
+  );
   const [activeFilter, setActiveFilter] = useState("all");
   const [selected, setSelected] = useState<Record<string, string>>({});
   const [draftQuantities, setDraftQuantities] = useState<
@@ -148,8 +166,9 @@ export function DirectOrderEngine({
       Object.entries(selected).map(([slug, quantity]) => ({
         slug,
         quantity: Number(quantity),
+        modifierSlugs: stream ? ["stream"] : [],
       })),
-    [selected],
+    [selected, stream],
   );
   const calculation = useMemo(() => {
     if (!selections.length) return { estimate: null, error: null };
@@ -370,6 +389,20 @@ export function DirectOrderEngine({
             </select>
           </label>
         </div>
+        {streamAvailable && (
+          <label className="store-inline-options">
+            <input
+              type="checkbox"
+              checked={stream}
+              onChange={(e) => setStream(e.target.checked)}
+            />
+            Stream add-on ({streamLabel})
+          </label>
+        )}
+        <p className="cape-muted">
+          Customers must provide all required gear, equipment, and supplies for
+          the selected service.
+        </p>
         {!visibleOfferings.length && (
           <p className="store-empty">{copy.empty}</p>
         )}

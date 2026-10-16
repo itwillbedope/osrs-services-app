@@ -443,6 +443,7 @@ export async function POST(request: NextRequest) {
       service.premiumConfig.rsnEligibilityEnabled,
     );
     const manualEligibility =
+      service.premiumConfig.capePricingRules != null ||
       rsn.eligibility?.ok === true
         ? null
         : evaluateManualStats(

@@ -5,6 +5,8 @@ import {
   CheckCircle2,
   Loader2,
   MessageCircle,
+  Headset,
+  ArrowUpRight,
   Send,
   ShieldAlert,
   Wifi,
@@ -13,7 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { io, type Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -355,58 +357,73 @@ export function ChatPanel({
       window.setTimeout(() => setConnection("fallback"), 0);
       return;
     }
-    const socket = io(socketUrl, {
-      path: process.env.NEXT_PUBLIC_CHAT_SOCKET_PATH ?? "/socket.io",
-      withCredentials: true,
-      transports: ["websocket", "polling"],
-      auth: {},
-    });
-    socketRef.current = socket;
-    socket.on("connect", () => {
-      socket.emit(
-        "chat:join",
-        { conversationId },
-        (result: ApiResult<{ conversation: Conversation }>) => {
-          if (result.ok) {
-            setConnection("realtime");
-            setConversation(result.conversation);
-          } else {
-            setConnection("fallback");
-          }
-        },
-      );
-    });
-    socket.on("connect_error", () => setConnection("fallback"));
-    socket.on("disconnect", () => setConnection("fallback"));
-    socket.on(
-      "chat:message",
-      (payload: { conversationId: string; message: ChatMessage }) => {
-        if (payload.conversationId !== conversationId) return;
-        setConversation((current) => {
-          if (!current) return current;
-          if (
-            current.messages.some(
-              (message) => message.id === payload.message.id,
-            )
-          ) {
-            return current;
-          }
-          return {
-            ...current,
-            messages: [...current.messages, payload.message],
-          };
+    let disposed = false;
+    let activeSocket: Socket | null = null;
+    void import("socket.io-client")
+      .then(({ io }) => {
+        if (disposed) return;
+        const socket = io(socketUrl, {
+          path: process.env.NEXT_PUBLIC_CHAT_SOCKET_PATH ?? "/socket.io",
+          withCredentials: true,
+          transports: ["websocket", "polling"],
+          auth: {},
         });
-      },
-    );
-    socket.on(
-      "chat:typing",
-      (payload: { conversationId: string; typing: boolean; label: string }) => {
-        if (payload.conversationId !== conversationId) return;
-        setTypingLabel(payload.typing ? payload.label : null);
-      },
-    );
+        socketRef.current = socket;
+        socket.on("connect", () => {
+          socket.emit(
+            "chat:join",
+            { conversationId },
+            (result: ApiResult<{ conversation: Conversation }>) => {
+              if (result.ok) {
+                setConnection("realtime");
+                setConversation(result.conversation);
+              } else {
+                setConnection("fallback");
+              }
+            },
+          );
+        });
+        socket.on("connect_error", () => setConnection("fallback"));
+        socket.on("disconnect", () => setConnection("fallback"));
+        socket.on(
+          "chat:message",
+          (payload: { conversationId: string; message: ChatMessage }) => {
+            if (payload.conversationId !== conversationId) return;
+            setConversation((current) => {
+              if (!current) return current;
+              if (
+                current.messages.some(
+                  (message) => message.id === payload.message.id,
+                )
+              ) {
+                return current;
+              }
+              return {
+                ...current,
+                messages: [...current.messages, payload.message],
+              };
+            });
+          },
+        );
+        socket.on(
+          "chat:typing",
+          (payload: {
+            conversationId: string;
+            typing: boolean;
+            label: string;
+          }) => {
+            if (payload.conversationId !== conversationId) return;
+            setTypingLabel(payload.typing ? payload.label : null);
+          },
+        );
+        activeSocket = socket;
+      })
+      .catch(() => {
+        if (!disposed) setConnection("fallback");
+      });
     return () => {
-      socket.disconnect();
+      disposed = true;
+      activeSocket?.disconnect();
       socketRef.current = null;
     };
   }, [availability?.realtimeExpected, conversationId]);
@@ -486,8 +503,11 @@ export function ChatPanel({
       )}
       aria-label="Support chat"
     >
-      <div className="flex shrink-0 flex-wrap items-start justify-between gap-3">
+      <div className="chat-panel-heading flex shrink-0 flex-wrap items-start justify-between gap-3">
         <div>
+          <span className="chat-agent-emblem" aria-hidden="true">
+            <Headset />
+          </span>
           {variant === "page" && <Badge variant="info">Talk to our team</Badge>}
           <h2
             className={cn(
@@ -495,9 +515,9 @@ export function ChatPanel({
               variant === "page" && "mt-3",
             )}
           >
-            Support chat
+            Live Chat Support
           </h2>
-          <p className="text-text-muted mt-1 text-xs">
+          <p className="chat-heading-caption text-text-muted mt-1 text-xs">
             Never share passwords or payment details.
           </p>
         </div>
@@ -505,9 +525,13 @@ export function ChatPanel({
       </div>
 
       {availability ? (
-        <div className="border-border bg-background/35 shrink-0 rounded-xl border p-3 text-sm">
+        <div className="chat-availability border-border bg-background/35 shrink-0 rounded-xl border p-3 text-sm">
           <p className="font-semibold capitalize">
-            {availability.availabilityMode.toLowerCase()} state
+            {availability.availabilityMode === "ONLINE"
+              ? "Taking support requests"
+              : availability.availabilityMode === "MAINTENANCE"
+                ? "Support maintenance"
+                : "Leave a message for our team"}
           </p>
           <p
             className={cn(
@@ -690,8 +714,11 @@ export function ChatLauncher() {
   return (
     <div className="support-chat-interface support-chat-launcher fixed right-4 z-50 grid max-w-[calc(100vw-2rem)] justify-items-end gap-3">
       {opened ? (
-        <div hidden={!open} className="w-[min(26rem,calc(100vw-2rem))]">
-          <div className="mb-2 flex justify-end">
+        <div
+          hidden={!open}
+          className="chat-launcher-window relative w-[min(26rem,calc(100vw-2rem))]"
+        >
+          <div className="chat-window-close absolute top-3 right-3 z-10 flex justify-end">
             <Button
               type="button"
               size="sm"
@@ -700,7 +727,7 @@ export function ChatLauncher() {
               aria-label="Close live chat support"
             >
               <X className="size-4" aria-hidden="true" />
-              Close
+              <span className="sr-only">Close</span>
             </Button>
           </div>
           <ChatPanel variant="launcher" />
@@ -720,10 +747,16 @@ export function ChatLauncher() {
         }}
         aria-expanded={open}
         aria-label="Open live chat support"
-        className="shadow-[0_16px_40px_rgb(0_0_0_/_0.35)]"
+        className="chat-launch-button"
       >
-        <MessageCircle className="size-4" aria-hidden="true" />
-        Live Chat Support
+        <span className="chat-launch-icon">
+          <Headset aria-hidden="true" />
+        </span>
+        <span className="chat-launch-copy">
+          <strong>Live Chat Support</strong>
+          <small>Let’s talk about your next goal</small>
+        </span>
+        <ArrowUpRight className="chat-launch-arrow" aria-hidden="true" />
       </Button>
       {!availability.liveEnabled ? (
         <span className="sr-only">Live chat is unavailable.</span>

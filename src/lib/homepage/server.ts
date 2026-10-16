@@ -133,7 +133,9 @@ async function resolveHomepageItem(
     imagePath: item.imagePath ?? imagePath,
     imageAltText: item.imageAltText ?? `${item.titleOverride ?? title} artwork`,
     ctaText: item.ctaText ?? "View service",
-    href: safeHomepageHref(item.ctaUrl ?? href),
+    href: /corrupted gauntlet/i.test(item.titleOverride ?? title)
+      ? "/corrupted-gauntlet"
+      : safeHomepageHref(item.ctaUrl ?? href),
     priceLabel: formatHomepagePrice(price),
     oldPriceLabel: formatHomepagePrice(item.oldPriceCents),
     categoryLabel: item.categoryLabel,

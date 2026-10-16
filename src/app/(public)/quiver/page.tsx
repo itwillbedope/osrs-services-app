@@ -1,3 +1,5 @@
+import { CapeServiceAnswers } from "@/components/cape-service-answers";
+import { CapeConfigurator } from "@/components/cape-configurator";
 import { publicPageMetadata } from "@/lib/seo/public";
 import type { Metadata } from "next";
 import { Target } from "lucide-react";
@@ -36,7 +38,10 @@ export default async function QuiverPage() {
         description="Conquer the Fortis Colosseum and face Sol Heredit for Dizana's Quiver. Configure your account and setup below."
         icon={Target}
       />
-      <section className="store-panel reference-quiver-intro">
+      <section
+        className="store-panel reference-quiver-intro"
+        hidden={Boolean(engine?.rule?.capePricingRules)}
+      >
         <span
           className="reference-quiver-art"
           role="img"
@@ -51,14 +56,22 @@ export default async function QuiverPage() {
         </div>
       </section>
       {engine ? (
-        <PremiumConfiguratorEngine
-          service={engine.service}
-          packages={engine.packages}
-          options={engine.options}
-          rule={engine.rule}
-          requestHref={getDiscordHref()}
-          eligibilityEnabled={Boolean(flags.rsn_eligibility_enabled)}
-        />
+        engine.rule?.capePricingRules ? (
+          <CapeConfigurator
+            service={engine.service}
+            packages={engine.packages}
+            rule={engine.rule}
+          />
+        ) : (
+          <PremiumConfiguratorEngine
+            service={engine.service}
+            packages={engine.packages}
+            options={engine.options}
+            rule={engine.rule}
+            requestHref={getDiscordHref()}
+            eligibilityEnabled={Boolean(flags.rsn_eligibility_enabled)}
+          />
+        )
       ) : (
         <section className="store-panel">
           <h2>Request your Quiver quote</h2>
@@ -71,6 +84,13 @@ export default async function QuiverPage() {
           </a>
         </section>
       )}
+      {engine?.rule?.capePricingRules ? (
+        <CapeServiceAnswers
+          infernal={false}
+          configuration={engine.rule.capePricingRules}
+          packages={engine.packages}
+        />
+      ) : null}
     </main>
   );
 }

@@ -63,6 +63,7 @@ type Boss = {
 
 type PublicRule = {
   discordStreamEnabled: boolean;
+  discordStreamPercentBps?: number;
   standardDeliveryEnabled: boolean;
   standardDeliveryLabel: string;
   standardDeliveryDescription: string | null;
@@ -163,6 +164,7 @@ export function BossingCalculatorEngine({
   rule,
   requestHref,
   eligibilityEnabled,
+  initialBossKey,
 }: {
   service: {
     id: string;
@@ -180,8 +182,10 @@ export function BossingCalculatorEngine({
   rule: PublicRule | null;
   requestHref: string;
   eligibilityEnabled: boolean;
+  initialBossKey?: string;
 }) {
   const initialBoss =
+    initialBossKey ??
     bosses.find((b) => b.name === "Zulrah")?.bossKey ??
     bosses[0]?.bossKey ??
     "";
@@ -196,9 +200,9 @@ export function BossingCalculatorEngine({
     selectedBoss?.methods[0] ??
     null;
   const [killMode, setKillMode] = useState<BossingKillMode>("DIRECT");
-  const [includeSupplies, setIncludeSupplies] = useState(false);
+  const includeSupplies = false;
   const [includeDiscordStream, setIncludeDiscordStream] = useState(false);
-  const [customerGearConfirmed, setCustomerGearConfirmed] = useState(false);
+  const customerGearConfirmed = true;
   const delivery = useMemo(() => deliveryOptions(rule), [rule]);
   const [deliverySpeed, setDeliverySpeed] = useState<BossingDeliverySpeed>(
     delivery[0]?.speed ?? "STANDARD",
@@ -238,8 +242,7 @@ export function BossingCalculatorEngine({
     const nextBoss = bosses.find((boss) => boss.bossKey === nextBossKey);
     setBossKey(nextBossKey);
     setMethodSlug(nextBoss?.methods[0]?.slug ?? "");
-    setIncludeSupplies(false);
-    setCustomerGearConfirmed(false);
+
     setResult(null);
   }
 
@@ -396,8 +399,6 @@ export function BossingCalculatorEngine({
                 value={methodSlug}
                 onChange={(e) => {
                   setMethodSlug(e.target.value);
-                  setCustomerGearConfirmed(false);
-                  setIncludeSupplies(false);
                 }}
               >
                 {selectedBoss?.methods.map((method) => (
@@ -481,28 +482,11 @@ export function BossingCalculatorEngine({
               </label>
             </div>
             <h3 className="mt-4">Additional Options</h3>
+            <p className="text-text-secondary mt-3 text-sm">
+              Customers must provide all required gear, equipment, and supplies
+              for the selected service.
+            </p>
             <div className="store-inline-options">
-              {selectedMethod?.customerGearRequired && (
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={customerGearConfirmed}
-                    onChange={(e) => setCustomerGearConfirmed(e.target.checked)}
-                  />
-                  {selectedMethod.customerGearLabel ??
-                    "I confirm I have the required gear"}
-                </label>
-              )}
-              {selectedMethod?.suppliesEnabled && (
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={includeSupplies}
-                    onChange={(e) => setIncludeSupplies(e.target.checked)}
-                  />
-                  {selectedMethod.suppliesLabel ?? "Include supplies"}
-                </label>
-              )}
               {rule.discordStreamEnabled && (
                 <label>
                   <input
@@ -510,7 +494,8 @@ export function BossingCalculatorEngine({
                     checked={includeDiscordStream}
                     onChange={(e) => setIncludeDiscordStream(e.target.checked)}
                   />
-                  Stream add-on
+                  Stream add-on (+{(rule.discordStreamPercentBps ?? 1000) / 100}
+                  %)
                 </label>
               )}
             </div>
@@ -580,7 +565,10 @@ export function BossingCalculatorEngine({
               <summary>Requirements & Information</summary>
               <p>{selectedMethod?.expectedRequirementsSummary}</p>
               <p>{selectedMethod?.gearNotes}</p>
-              <p>{selectedMethod?.supplyNotes}</p>
+              <p>
+                Customers must provide all required gear, equipment, and
+                supplies for the selected service.
+              </p>
               <RequirementPanels method={selectedMethod} />
               {service.requirements.map((r) => (
                 <p key={r.id}>

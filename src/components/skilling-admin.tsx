@@ -495,7 +495,7 @@ function defaultRule(): StagedSkillingRule {
     hardcoreIronmanMultiplierBps: 2000,
     ultimateIronmanMultiplierBps: 3000,
     discordStreamEnabled: true,
-    discordStreamPercentBps: 200,
+    discordStreamPercentBps: 1000,
     standardDeliveryEnabled: true,
     standardDeliveryLabel: "Standard",
     standardDeliveryDescription: "Queued with normal service review.",

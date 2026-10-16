@@ -1,3 +1,4 @@
+import { capePricingSchema } from "@/lib/premium/cape-schema";
 import "server-only";
 
 import { randomUUID } from "node:crypto";
@@ -54,6 +55,7 @@ const bpsSchema = z.coerce.number().int().min(0).max(100_000);
 
 export const premiumRuleInputSchema = z
   .object({
+    capePricingRules: capePricingSchema.nullable().optional(),
     statPricingRules: premiumStatPricingSchema,
     serviceId: z.string().min(1).max(30),
     configuratorType: z.enum(premiumConfiguratorTypes),
@@ -601,8 +603,15 @@ export async function savePremiumRule(
     void _ruleId;
     await transaction.premiumServiceConfig.upsert({
       where: { serviceId: input.serviceId },
-      create: { ...rule, serviceId: input.serviceId },
-      update: ruleUpdate,
+      create: {
+        ...rule,
+        capePricingRules: rule.capePricingRules ?? Prisma.JsonNull,
+        serviceId: input.serviceId,
+      },
+      update: {
+        ...ruleUpdate,
+        capePricingRules: ruleUpdate.capePricingRules ?? Prisma.JsonNull,
+      },
     });
     await transaction.auditLog.create({
       data: {

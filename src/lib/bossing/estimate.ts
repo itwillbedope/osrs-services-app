@@ -269,28 +269,10 @@ export function calculateBossingEstimate(input: BossingEstimateInput) {
     });
   }
 
-  if (method.customerGearRequired && !input.customerGearConfirmed) {
-    if (method.gearAdjustmentCents > 0) {
-      subtotal += method.gearAdjustmentCents;
-      lineItems.push({
-        label: method.customerGearLabel || "Gear support adjustment",
-        amountCents: method.gearAdjustmentCents,
-      });
-    }
-  }
-
-  if (input.includeSupplies) {
-    if (!method.suppliesEnabled) {
-      throw new BossingValidationError(
-        "Supplies are not configured for this method.",
-      );
-    }
-    subtotal += method.suppliesFeeCents;
-    lineItems.push({
-      label: method.suppliesLabel || "Supplies and materials",
-      amountCents: method.suppliesFeeCents,
-    });
-  }
+  if (input.includeSupplies)
+    throw new BossingValidationError(
+      "Customers must provide all required gear, equipment, and supplies for the selected service.",
+    );
 
   if (input.includeDiscordStream) {
     if (!rule.discordStreamEnabled) {
